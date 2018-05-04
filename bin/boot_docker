@@ -1,0 +1,135 @@
+#!/bin/bash
+
+###
+#
+# boot_docker: Main boot script for portal.  Collects and sets environment variables from host to pass to docker container.
+#
+###
+
+# usage error message
+usage=$(
+cat <<EOF
+$0 [OPTION]
+-n VALUE	set the name of the docker container (defaults to 'unity_benchmark')
+-e VALUE	set the environment (defaults to 'development'. Running in 'production' will cause container to spawn headlessly)
+-d VALUE	set the project directory to mount inside Docker container (defaults to current working directory: `pwd`)
+-D VALUE	set the docker image version to use when booting the container (defaults to 'latest')
+-m VALUE	set the DATABASE_HOST variable, used to connect to either local or remote db host (defaults to 'pg')
+-s VALUE	set the SECRET_KEY_BASE variable, used for secure cookies (auto-generates by default)
+-k VALUE	set the SERVICE_ACCOUNT_KEY variable, necessary for making authenticated API calls to FireCloud & GCP (no default)
+-u VALUE	set the DATABASE_USER variable (no default value)
+-p VALUE	set the DATABASE_PASSWORD variable (no default value)
+-h VALUE	set the PROD_HOSTNAME variable (used for callbacks, defaults to 'portals.broadinstitute.org')
+-U VALUE	set the SENDGRID_USERNAME variable (used for emails)
+-P VALUE	set the SENDGRID_PASSWORD variable (used for emails)
+-o VALUE	set the OAUTH_CLIENT_ID variable (for Google OAuth2)
+-S VALUE	set the OAUTH_CLIENT_SECRET variable (for Google OAuth2)
+-v VALUE	set the version of the single_cell_portal Docker image to use (defaults to latest)
+-l				set the LOCAL flag (used for connecting to a local database - will link to the docker container named in DATABASE_HOST, defaults to false)
+-M 				set the MOUNT flag, will govern whether or not local project source is mounted into the container (defaults to false)
+-H COMMAND	print this text
+EOF
+)
+
+# defaults, note there is no default for PROD_DB_PASSWORD, SENDGRID_USERNAME or SENDGRID_PASSWORD
+CONTAINER_NAME="unity_benchmark"
+PROJECT_DIR=`pwd`
+PASSENGER_APP_ENV="development"
+MONGO_HOSTNAME="pg"
+PROD_HOSTNAME="unity.broadinstitute.org"
+SECRET_KEY_BASE=`openssl rand -hex 64`
+GOOGLE_CLOUD_KEYFILE_JSON=$GOOGLE_CLOUD_KEYFILE_JSON
+GOOGLE_PRIVATE_KEY=$GOOGLE_PRIVATE_KEY
+GOOGLE_CLIENT_EMAIL=$GOOGLE_CLIENT_EMAIL
+GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
+GOOGLE_CLOUD_PROJECT=$GOOGLE_CLOUD_PROJECT
+DOCKER_IMAGE_VERSION='latest'
+LOCAL=false
+MOUNT=false
+
+while getopts "n:e:d:D:m:s:k:u:p:h:U:P:H:o:S:lM" OPTION; do
+case $OPTION in
+	n)
+		CONTAINER_NAME="$OPTARG"
+		;;
+	e)
+		PASSENGER_APP_ENV="$OPTARG"
+		;;
+	d)
+		PROJECT_DIR="$OPTARG"
+		;;
+	D)
+		DOCKER_IMAGE_VERSION="$OPTARG"
+		;;
+	m)
+  	DATABASE_HOST="$OPTARG"
+  	;;
+	s)
+		SECRET_KEY_BASE="$OPTARG"
+		;;
+	k)
+		SERVICE_ACCOUNT_KEY="$OPTARG"
+		;;
+	u)
+		DATABASE_USER="$OPTARG"
+		;;
+	p)
+		DATABASE_PASSWORD="$OPTARG"
+		;;
+	h)
+		PROD_HOSTNAME="$OPTARG"
+		;;
+	U)
+		SENDGRID_USERNAME="$OPTARG"
+		;;
+	P)
+		SENDGRID_PASSWORD="$OPTARG"
+		;;
+	o)
+		OAUTH_CLIENT_ID="$OPTARG"
+		;;
+	S)
+		OAUTH_CLIENT_SECRET="$OPTARG"
+		;;
+	l)
+		LOCAL=true
+		;;
+	M)
+		MOUNT=true
+		;;
+	H)
+		echo "$usage"
+		exit 0
+		;;
+	*)
+    echo "unrecognized option"
+    echo "$usage"
+    ;;
+	esac
+done
+
+# begin assembling run command
+COMMAND="docker run --name $CONTAINER_NAME -p 80:80 -p 443:443 -h $PROD_HOSTNAME"
+
+# check if we are linking to a local database or not
+if [ $LOCAL = true ]; then
+	COMMAND=$COMMAND" --link $DATABASE_HOST:$DATABASE_HOST"
+fi
+
+# check if we are mounting local source into the container
+if [ $MOUNT = true ]; then
+	COMMAND=$COMMAND" -v $PROJECT_DIR:/home/app/webapp:rw"
+fi
+
+# detach container in production
+if [ $PASSENGER_APP_ENV = 'production' ]; then
+  COMMAND=$COMMAND" -d"
+else
+	COMMAND=$COMMAND" --rm -it"
+fi
+
+# concatenate rest of parameters
+COMMAND=$COMMAND" -e PASSENGER_APP_ENV=$PASSENGER_APP_ENV -e DATABASE_HOST=$DATABASE_HOST -e DATABASE_USER=$DATABASE_USER -e DATABASE_PASSWORD=$DATABASE_PASSWORD -e SERVICE_ACCOUNT_KEY=$SERVICE_ACCOUNT_KEY -e SENDGRID_USERNAME=$SENDGRID_USERNAME -e SENDGRID_PASSWORD=$SENDGRID_PASSWORD -e SECRET_KEY_BASE=$SECRET_KEY_BASE -e OAUTH_CLIENT_ID=$OAUTH_CLIENT_ID -e OAUTH_CLIENT_SECRET=$OAUTH_CLIENT_SECRET -e GOOGLE_CLOUD_KEYFILE_JSON=\"$GOOGLE_CLOUD_KEYFILE_JSON\" -e GOOGLE_PRIVATE_KEY=\"$GOOGLE_PRIVATE_KEY\" -e GOOGLE_CLIENT_EMAIL=\"$GOOGLE_CLIENT_EMAIL\" -e GOOGLE_CLIENT_ID=\"$GOOGLE_CLIENT_ID\" -e GOOGLE_CLOUD_PROJECT=\"$GOOGLE_CLOUD_PROJECT\" unity_benchmark_docker:$DOCKER_IMAGE_VERSION"
+
+# run docker command
+$COMMAND

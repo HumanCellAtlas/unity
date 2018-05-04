@@ -1,0 +1,31 @@
+<header>
+  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark unity-navbar">
+    <%= link_to "<i class='fas fa-home'></i> Unity Benchmarking Service".html_safe, root_path %>
+    <a class="navbar-brand" href="#"></a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="#">My Pipelines</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Leaderboard</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav ml-auto">
+        <% if user_signed_in? %>
+          <li class="nav-item dropdown dropdown-menu-left">
+            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false"><i class="fas fa-user"></i> <%= current_user.full_name %></a>
+            <div class="dropdown-menu">
+              <%= link_to "<i class='fas fa-sign-out-alt'></i> Sign Out".html_safe, destroy_user_session_path, method: :delete, class: 'dropdown-item' %>
+            </div>
+          </li>
+        <% else %>
+          <li class="nav-item"><%= link_to "<i class='fas fa-sign-in-alt'></i> Sign In".html_safe, user_google_oauth2_omniauth_authorize_path %></li>
+        <% end %>
+      </ul>
+    </div>
+  </nav>
+</header>

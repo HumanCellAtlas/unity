@@ -1,0 +1,7 @@
+{
+  "name": "unity_benchmark_service",
+  "private": true,
+  "dependencies": {
+    "jquery": "^3.3.1"
+  }
+}

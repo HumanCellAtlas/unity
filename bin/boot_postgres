@@ -1,0 +1,50 @@
+#!/bin/bash
+
+###
+#
+# boot_postgres: Main boot script for database.  Collects and sets environment variables from host to pass to docker container.
+#
+###
+
+# usage error message
+usage=$(
+cat <<EOF
+$0 [OPTION]
+-n VALUE	set the name of the docker container (defaults to 'pg')
+-d VALUE	set the data directory to mount inside the postgres Docker container (defaults to $HOME/Documents/Data/docker-postgres)
+-u VALUE	set the USERNAME variable (defaults to 'postgres')
+-p VALUE	set the PASSWORD variable (no default value)
+-H COMMAND	print this text
+EOF
+)
+
+# defaults
+CONTAINER_NAME="pg"
+DATA_DIR="$HOME/Documents/Data/docker-postgres"
+
+while getopts "n:d:u:p:H" OPTION; do
+case $OPTION in
+	n)
+		CONTAINER_NAME="$OPTARG"
+		;;
+	d)
+		DATA_DIR="$OPTARG"
+		;;
+	u)
+		USERNAME="$OPTARG"
+		;;
+	p)
+		PASSWORD="$OPTARG"
+		;;
+	H)
+		echo "$usage"
+		exit 0
+		;;
+	*)
+    echo "unrecognized option"
+    echo "$usage"
+    ;;
+	esac
+done
+
+docker run --name $CONTAINER_NAME -p 5432:5432 -v $DATA_DIR:/var/lib/postgresql/data:rw -e POSTGRES_PASSWORD=$PASSWORD -e POSTGRES_USER=$USERNAME -d postgres
