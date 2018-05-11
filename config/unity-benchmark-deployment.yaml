@@ -7,11 +7,12 @@ metadata:
     status: active
     environment: production
 spec:
-  replicas: 2
+  replicas: 1
   template:
     metadata:
       labels:
         app: unity
+        status: active
         environment: production
     spec:
       containers:
@@ -56,7 +57,7 @@ spec:
         - name: cloudsql-proxy
           image: gcr.io/cloudsql-docker/gce-proxy:1.11
           command: ["/cloud_sql_proxy",
-                    "-instances=${INSTANCE_CONNECTION_NAME}=tcp:5432",
+                    "-instances=unity-benchmark:us-central1:unity-benchmark-postgres-01=tcp:5432",
                     "-credential_file=/secrets/cloudsql/credentials.json"]
           volumeMounts:
             - name: cloudsql-instance-credentials

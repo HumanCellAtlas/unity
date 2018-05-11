@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: unity-benchmark-ingress
   annotations:
-    kubernetes.io/ingress.class: nginx
+    kubernetes.io/ingress.class: 'nginx'
 spec:
   rules:
   - http:

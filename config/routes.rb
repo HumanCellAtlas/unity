@@ -1,5 +1,4 @@
 Rails.application.routes.draw do
-  get 'site/hello_world'
   scope 'unity' do
     devise_for :users, controllers: { omniauth_callbacks: 'users/omniauth_callbacks' }
     get 'hello_world', to: 'site#hello_world'

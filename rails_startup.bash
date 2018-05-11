@@ -7,7 +7,13 @@ echo "*** COMPLETED ***"
 echo "*** CLEARING TMP CACHE ***"
 sudo -E -u app -H bundle exec rake RAILS_ENV=$PASSENGER_APP_ENV tmp:clear
 echo "*** COMPLETED ***"
-
+if [[ $PASSENGER_APP_ENV = "production" ]];
+then
+    echo "*** PRECOMPILING ASSETS ***"
+    sudo -E -u app -H bundle exec rake RAILS_ENV=$PASSENGER_APP_ENV assets:clean
+    sudo -E -u app -H bundle exec rake RAILS_ENV=$PASSENGER_APP_ENV assets:precompile
+    echo "*** COMPLETED ***"
+fi
 echo "*** INITIALIZING & MIGRATING DATABASE ***"
 sudo -E -u app -H bundle exec rake RAILS_ENV=$PASSENGER_APP_ENV db:exists && rake RAILS_ENV=$PASSENGER_APP_ENV db:migrate || rake RAILS_ENV=$PASSENGER_APP_ENV db:setup
 echo "*** COMPLETED ***"
