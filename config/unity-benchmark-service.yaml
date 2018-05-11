@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: unity-benchmark-service
+spec:
+  selector:
+    app: unity
+    status: active
+  ports:
+  - name: https
+    port: 443
+    targetPort: https
+    protocol: TCP
