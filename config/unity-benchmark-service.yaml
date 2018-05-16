@@ -3,6 +3,7 @@ apiVersion: v1
 metadata:
   name: unity-benchmark-service
 spec:
+  type: LoadBalancer
   selector:
     app: unity
     status: active
