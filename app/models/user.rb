@@ -7,7 +7,6 @@ class User < ApplicationRecord
 
 
   def self.from_omniauth(access_token)
-    Rails.logger.info "access_token: #{access_token}"
     data = access_token.info
     provider = access_token.provider
     uid = access_token.uid
