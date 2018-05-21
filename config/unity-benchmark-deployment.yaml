@@ -25,6 +25,8 @@ spec:
           env:
             - name: DATABASE_HOST
               value: 127.0.0.1
+            - name: RAILS_LOG_TO_STDOUT
+              value: 'true'
             # [START cloudsql_secrets]
             - name: DATABASE_USER
               valueFrom:
