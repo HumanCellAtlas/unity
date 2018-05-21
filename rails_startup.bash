@@ -43,3 +43,5 @@ then
 	sudo -E -u app -H mkdir -p /home/app/webapp/tmp/pids
 	echo "*** COMPLETED ***"
 fi
+
+ln -sf /dev/stdout /var/log/nginx/error.log
