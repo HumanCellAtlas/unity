@@ -161,6 +161,6 @@ for more info, then linked by passing <code>-l</code> to <code>bin/boot_docker</
 ### FIRECLOUD INTEGRATION
 
 The Unity Benchmark Service utilizes [FireCloud](https://software.broadinstitute.org/firecloud/) for storing data and launching workflow
-submissions, which in turn store raw files in GCP buckets.  This is all managed through a GCP service account which in turn owns all portal workspaces
+submissions, which in turn store raw files in GCP buckets.  This is all managed through a GCP service account which in turn owns all workspaces
 and manages them on behalf of users.  This is why your service account must be registered as a FireCloud user before the service 
 can function correctly.
