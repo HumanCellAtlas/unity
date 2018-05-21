@@ -68,13 +68,14 @@ portal is configured and ready to use:
   * Google Cloud Billing API
   * Google Cloud Storage JSON API
   * Google+ API
+  * Kubernetes Engine API (if deploying via Kubernetes)
 * <b>Registering your Service Account as a FireCloud user</b>: Once you have configured and booted your instance of the portal, you will need to register your service account as a FireCloud user in order to create a billing project and create studies.  To do so:
   * TBD
 
 ## RUNNING THE CONTAINER
 
 Once the image has successfully built and the database container is running, use the following command to start the container:
-<pre>bin/boot_docker -u (sendgrid username) -P (sendgrid password) -k (service account key path) -o (oauth client id) -S (oauth client secret)</pre>
+<pre>bin/boot_docker -u (sendgrid username) -P (sendgrid password) -k (service account key path) -o (oauth client id) -S (oauth client secret) -l</pre>
 
 This sets up several environment variables in your shell and then runs the following command:
 <pre>docker run --rm -it --name $CONTAINER_NAME --link $DATABASE_HOST:$DATABASE_HOST -p 80:80 -p 443:443 -h localhost -v $PROJECT_DIR:/home/app/webapp:rw -e PASSENGER_APP_ENV=$PASSENGER_APP_ENV -e DATABASE_HOST=$DATABASE_HOST -e DATABASE_USER=$DATABASE_USER -e PROD_DATABASE_PASSWORD=$DATABASE_PASSWORD -e SERVICE_ACCOUNT_KEY=$SERVICE_ACCOUNT_KEY -e SENDGRID_USERNAME=$SENDGRID_USERNAME -e SENDGRID_PASSWORD=$SENDGRID_PASSWORD -e SECRET_KEY_BASE=$SECRET_KEY_BASE -e OAUTH_CLIENT_ID=$OAUTH_CLIENT_ID -e OAUTH_CLIENT_SECRET=$OAUTH_CLIENT_SECRET -e GOOGLE_CLOUD_KEYFILE_JSON="$GOOGLE_CLOUD_KEYFILE_JSON" -e GOOGLE_PRIVATE_KEY="$GOOGLE_PRIVATE_KEY" -e GOOGLE_CLIENT_EMAIL="$GOOGLE_CLIENT_EMAIL" -e GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" -e GOOGLE_CLOUD_PROJECT="$GOOGLE_CLOUD_PROJECT" unity_benchmark_docker:$DOCKER_IMAGE_VERSION</pre>
@@ -127,11 +128,35 @@ The run command explained in its entirety:
 
 TBD
 
-## GOOGLE DEPLOYMENT
+## PRODUCTION DEPLOYMENT
 
-### PRODUCTION
+### KUBERNETES
 
-TBD - will be Kubernetes based.
+Unity is designed to be deployed via [Kubernetes](https://kubernetes.io), although this is not the only way that Unity can be deployed (see below for details). 
+To deploy Unity in Kubernetes, you will need the following prerequisites:
+* A Kubernetes cluster already [created](https://cloud.google.com/kubernetes-engine/docs/quickstart#create_cluster) in your GCP project
+* [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) installed
+* Set your local kubernetes config to [point at your remote cluster](https://cloud.google.com/sdk/gcloud/reference/container/clusters/get-credentials):
+  * <code>gcloud container clusters get-credentials NAME -z ZONE</code>
+  
+Once your cluster is running and <code>kubectl</code> is pointing at your remote cluster:
+1. Navigate to the project directory
+2. Create the deployment: <code>kubectl apply -f config/unity-benchmark-deployment.yaml</code>
+3. Create the service: <code>kubectl apply -f config/unity-benchmark-service.yaml</code>
+4. Once your service is running, get the EXTERNAL-IP address: <code>kubectl get service unity-benchmark-service</code>
+5. You can change the external IP from ephemeral to static inside your VPC Network > [External IP Addresses](https://console.cloud.google.com/networking/addresses/list) console in GCP
+
+Unity will now be available publicly on the above IP address.
+
+### OTHER DEPLOYMENTS
+
+Unity can also be deployed on any infrastructure that will support [Docker](https://www.docker.com).  This could be on 
+Google Cloud Platform, Amazon Web Services, or any other provider/operating system where Docker can be installed.  For instructions 
+on how to deploy, provision a virtual machine, install Docker, and then follow the instructions for 'RUNNING THE CONTAINER', 
+with the difference of adding <code>-e production</code> to <code>bin/boot_docker</code>.
+
+The Unity database can be deployed either as a linked docker container (as in development, see 'BEFORE RUNNING THE CONTAINER IN DEVELOPMENT' 
+for more info, then linked by passing <code>-l</code> to <code>bin/boot_docker</code>) or a as a separate host, via <code>-m [DATABASE HOST]</code>.  
 
 ### FIRECLOUD INTEGRATION
 
