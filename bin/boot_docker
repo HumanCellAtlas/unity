@@ -123,7 +123,7 @@ fi
 
 # detach container in production
 if [ $PASSENGER_APP_ENV = 'production' ]; then
-  COMMAND=$COMMAND" -d"
+  COMMAND=$COMMAND" -d -e RAILS_LOG_TO_STDOUT=true"
 else
 	COMMAND=$COMMAND" --rm -it"
 fi
