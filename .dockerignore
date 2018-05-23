@@ -1,2 +1,6 @@
 cloud_sql_proxy
 public/unity/assets
+.git
+.idea
+log/*.log
+public/unity/assets

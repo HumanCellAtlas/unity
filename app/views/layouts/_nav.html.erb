@@ -8,10 +8,19 @@
     <div class="collapse navbar-collapse" id="navbarCollapse">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item">
-          <a class="nav-link" href="#">My Pipelines</a>
+          <a class="nav-link" id="my-pipelines-nav" href="#">My Pipelines</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">Leaderboard</a>
+          <%= link_to "About Us", about_us_path, class: 'nav-link', id: 'about-us-nav' %>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" id="help-nav" data-toggle="dropdown" role="button" href="#"><i class="fas fa-question-circle"></i> Help</a>
+          <div class="dropdown-menu">
+            <%= link_to "<i class='fas fa-fw fa-balance-scale'></i> Privacy Policy".html_safe, privacy_policy_path, class: 'dropdown-item' %>
+            <%= link_to "<i class='fas fa-fw fa-info-circle'></i> Documentation/Wiki".html_safe, 'https://github.com/HumanCellAtlas/unity/wiki', class: 'dropdown-item', target: :_blank %>
+            <%= link_to "<i class='fas fa-fw fa-exclamation-triangle'></i> Issues".html_safe, 'https://github.com/HumanCellAtlas/unity/issues', class: 'dropdown-item', target: :_blank %>
+            <%= link_to "<i class='fab fa-fw fa-github'></i> Source Code".html_safe, 'https://github.com/HumanCellAtlas/unity', class: 'dropdown-item', target: :_blank %>
+          </div>
         </li>
       </ul>
       <ul class="navbar-nav ml-auto">

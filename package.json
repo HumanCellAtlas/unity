@@ -2,6 +2,7 @@
   "name": "unity_benchmark_service",
   "private": true,
   "dependencies": {
+    "datatables": "^1.10.13",
     "jquery": "^3.3.1"
   }
 }

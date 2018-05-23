@@ -1,0 +1,54 @@
+<div class="jumbotron" id="main-jumbo">
+  <h1 class="text-center">Welcome to Unity</h1>
+</div>
+<div class="row">
+  <div class="col-md">
+    <h3>Leaderboard <i class="fas fa-columns"></i></h3>
+    <table class="table table-striped datatable" id="leaderboard">
+      <thead class="thead-light">
+      <tr>
+        <th>Rank</th>
+        <th>Method</th>
+        <th>Benchmark</th>
+      </tr>
+      </thead>
+      <tbody>
+
+      </tbody>
+    </table>
+  </div>
+  <div class="col-md">
+    <h3>Available Methods <i class="fas fa-flask"></i></h3>
+    <table class="table table-striped datatable" id="methods">
+      <thead class="thead-light">
+        <tr>
+          <th>Method</th>
+          <th>Version</th>
+          <th>Synopsis</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @methods.each do |method| %>
+          <tr>
+            <td><%= method['namespace'] %>/<%= method['name'] %></td>
+            <td><%= method['snapshotId'] %></td>
+            <td><%= method['synopsis'] %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script type="text/javascript">
+
+  $('#leaderboard').DataTable({
+      pagingType: 'full_numbers'
+  });
+
+  $('#methods').DataTable({
+      pagingType: 'full_numbers',
+      order: [[0, 'asc'],[1, 'desc']]
+  });
+
+</script>

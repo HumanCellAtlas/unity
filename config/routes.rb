@@ -1,9 +1,10 @@
 Rails.application.routes.draw do
   scope 'unity' do
-    devise_for :users, controllers: { omniauth_callbacks: 'users/omniauth_callbacks' }
-    get 'hello_world', to: 'site#hello_world'
+    devise_for :users, controllers: { omniauth_callbacks: 'users/omniauth_callbacks', sessions: 'users/sessions' }
 
-    root to: 'site#hello_world'
+    get 'about_us', to: 'site#about_us', as: :about_us
+    get 'privacy_policy', to: 'site#privacy_policy', as: :privacy_policy
+    get '/', to: 'site#index', as: :site
+    root to: 'site#index'
   end
-  # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end

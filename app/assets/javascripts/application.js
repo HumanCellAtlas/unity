@@ -15,6 +15,7 @@
 //= require jquery
 //= require popper
 //= require bootstrap-sprockets
+//= require datatables/media/js/jquery.dataTables.min
 //= require_tree .
 
 function enableDefaultActions() {

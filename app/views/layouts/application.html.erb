@@ -12,8 +12,10 @@
   <body>
     <%= render partial: '/layouts/nav' %>
     <%= render partial: '/layouts/notices' %>
-    <main role="main" class="container-fluid top-pad">
-      <%= yield %>
+    <main role="main" id="wrap" class="container-fluid">
+      <div class="top-pad" id="main-body">
+        <%= yield %>
+      </div>
     </main>
     <%= render partial: '/layouts/footer' %>
   </body>

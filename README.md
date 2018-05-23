@@ -69,9 +69,14 @@ portal is configured and ready to use:
   * Google Cloud Storage JSON API
   * Google+ API
   * Kubernetes Engine API (if deploying via Kubernetes)
-* <b>Registering your Service Account as a FireCloud user</b>: Once you have configured and booted your instance of the portal, you will need to register your service account as a FireCloud user in order to create a billing project and create studies.  To do so:
-  * TBD
-
+* <b>Registering your Service Account as a FireCloud user</b>: Once you have configured and booted your instance of the portal, you will need to register your service account as a FireCloud user in order to interact with the FireCloud API.  To do so:
+  1. Attach to the running instance of Unity (preferably a local instance in development mode, but can be a deployed instance) <pre>docker exec -it unity_benchmark bash</pre>
+  2. Enter the Rails console <pre>bin/rails c [RAILS_ENV of running container]</pre>
+  3. Instantiate the FireCloudClient <pre>client = FireCloudClient.new</pre>
+  4. Open and parse the sample FireCloud profile template <pre>profile = JSON.parse(File.open(Rails.root.join('lib', 'assets', 'firecloud_profile_template.json')).read)</pre>
+  5. Enter your desired values for every entry in the profile.
+  6. Once the profile is completed, send your registration to the server <pre>client.set_profile(profile)</pre>
+  
 ## RUNNING THE CONTAINER
 
 Once the image has successfully built and the database container is running, use the following command to start the container:
