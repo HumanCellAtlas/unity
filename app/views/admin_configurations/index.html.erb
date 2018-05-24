@@ -1,0 +1,39 @@
+<h1>Admin Control Panel</h1>
+
+<div class="row">
+  <div class="col-md">
+    <div class="table-responsive">
+      <table class="table table-striped able-active" id="admin-config">
+        <thead>
+        <tr>
+          <th>Config type</th>
+          <th>Value type</th>
+          <th>Value</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <% @admin_configurations.each do |admin_configuration| %>
+          <tr>
+            <td><%= admin_configuration.config_type %></td>
+            <td><%= admin_configuration.value_type %></td>
+            <td><%= admin_configuration.value %></td>
+            <td><%= link_to 'Edit', edit_admin_configuration_path(admin_configuration), class: 'btn btn-xs btn-primary' %>&nbsp;<%= link_to 'Destroy', admin_configuration, method: :delete, data: { confirm: 'Are you sure you want to delete this configuration?' }, class: 'btn btn-xs btn-danger' %></td>
+          </tr>
+        <% end %>
+        </tbody>
+      </table>
+
+      <p><%= link_to 'New Admin Configuration', new_admin_configuration_path, class: 'btn btn-lg btn-success' %></p>
+
+      <script type="text/javascript">
+
+          $('#admin-config').DataTable({
+              pagingType: 'full_numbers'
+          });
+
+      </script>
+    </div>
+  </div>
+</div>

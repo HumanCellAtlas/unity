@@ -1,0 +1,60 @@
+<%= nested_form_for(@admin_configuration, html: {class: 'form', multipart: true}) do |form| %>
+  <% if @admin_configuration.errors.any? %>
+    <div class="bs-callout bs-callout-danger" id="admin-configuration-errors-block">
+      <h4><%= pluralize(@admin_configuration.errors.count, "error") %> prohibited this configuration option from being saved:</h4>
+
+      <ul>
+      <% @admin_configuration.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="form-group row">
+    <div class="col-sm">
+      <%= form.label :config_type, 'Configuration Type' %>
+      <%= form.select :config_type, options_for_select(AdminConfiguration::CONFIG_TYPES, form.object.config_type), {}, {class: 'form-control'} %>
+    </div>
+    <div class="col-sm">
+      <%= form.label :value_type, 'Configuration Type' %>
+      <%= form.select :value_type, options_for_select(AdminConfiguration::VALUE_TYPES, form.object.value_type), {}, {class: 'form-control'} %>
+    </div>
+    <div class="col-sm" id="value-options">
+      <%= form.label :value %>
+      <%= form.text_field :value, class: 'form-control' %>
+    </div>
+  </div>
+  <div class="form-group row">
+    <div class="col-sm">
+      <%= form.label :options, 'Additional Options (key/value pairs, names must be unique)' %>
+      <%= form.fields_for :configuration_options %>
+    </div>
+  </div>
+  <div class="form-group row">
+    <div class="col-sm">
+      <%= form.link_to_add "<span class='fa fa-plus'></span> Add options".html_safe, :configuration_options, class: 'btn btn-sm btn-primary',
+                        id: 'add-configuration-option' %>
+    </div>
+  </div>
+  <div class="form-group row">
+    <div class="col-sm">
+      <%= form.label :submit, "&nbsp;".html_safe %><br />
+      <%= form.submit 'Save', class: 'btn btn-success' %>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+
+      $('#admin_configuration_value_type').change(function() {
+          var val = $(this).val();
+          if (val == 'Boolean') {
+              $('#admin_configuration_mulitplier').val('');
+              $('#value-options').html("<%= escape_javascript(render partial: 'config_value_select', locals: {form: form}) %>")
+          } else {
+              $('#admin_configuration_mulitplier').val('');
+              $('#value-options').html("<%= escape_javascript(render partial: 'config_value_text', locals: {form: form}) %>")
+          }
+      });
+  </script>
+<% end %>

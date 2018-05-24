@@ -1,0 +1,24 @@
+<div class="form-group row">
+  <% if f.object.errors.any? %>
+    <div class="col-xs">
+      <div class="bs-callout bs-callout-danger">
+        <h4><%= pluralize(f.object.errors.count, "error") %> prohibited this additional option from being saved:</h4>
+
+        <ul>
+          <% f.object.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  <% end %>
+  <div class="col-sm-5">
+    <%= f.text_field :name, class: 'form-control', placeholder: 'Option name...' %>
+  </div>
+  <div class="col-sm-5">
+    <%= f.text_field :value, class: 'form-control', placeholder: 'Option value...' %>
+  </div>
+  <div class="col-sm-1">
+    <%= f.link_to_remove "<span class='btn btn-danger'><span class='fas fa-fw fa-times'></span></span>".html_safe, data: {confirm: 'Are you sure?  This cannot be undone unless you reload the page before saving.'} %>
+  </div>
+</div>

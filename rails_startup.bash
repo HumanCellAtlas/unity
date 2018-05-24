@@ -37,6 +37,10 @@ chmod 400 /home/app/.cron_env
 chown app:app /home/app/.cron_env
 echo "*** COMPLETED ***"
 
+echo "*** ADDING API HEALTH CRONTAB ***"
+echo "*/5 * * * * . /home/app/.cron_env ; cd /home/app/webapp/; /home/app/webapp/bin/rails runner -e $PASSENGER_APP_ENV \"AdminConfiguration.check_api_health\" >> /home/app/webapp/log/cron_out.log 2>&1" | crontab -u app -
+echo "*** COMPLETED ***"
+
 if [[ ! -d /home/app/webapp/tmp/pids ]]
 then
 	echo "*** MAKING TMP DIR ***"

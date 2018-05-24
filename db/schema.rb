@@ -10,17 +10,30 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_05_23_175126) do
+ActiveRecord::Schema.define(version: 2018_05_24_153752) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "hstore"
   enable_extension "plpgsql"
 
+  create_table "admin_configurations", force: :cascade do |t|
+    t.string "config_type"
+    t.string "value_type"
+    t.string "value"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "configuration_options", force: :cascade do |t|
+    t.bigserial "admin_configuration_id", null: false
+    t.string "name"
+    t.string "value"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
-    t.string "encrypted_password", default: "", null: false
-    t.string "reset_password_token"
-    t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
     t.integer "sign_in_count", default: 0, null: false
     t.datetime "current_sign_in_at"
@@ -35,8 +48,9 @@ ActiveRecord::Schema.define(version: 2018_05_23_175126) do
     t.hstore "access_token"
     t.string "encrypted_refresh_token"
     t.string "encrypted_refresh_token_iv"
+    t.boolean "admin", default: false
+    t.boolean "registered_for_firecloud", default: false
     t.index ["email"], name: "index_users_on_email", unique: true
-    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
 end
