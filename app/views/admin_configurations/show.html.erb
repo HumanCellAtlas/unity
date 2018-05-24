@@ -1,0 +1,19 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Config type:</strong>
+  <%= @admin_configuration.config_type %>
+</p>
+
+<p>
+  <strong>Value type:</strong>
+  <%= @admin_configuration.value_type %>
+</p>
+
+<p>
+  <strong>Value:</strong>
+  <%= @admin_configuration.value %>
+</p>
+
+<%= link_to 'Edit', edit_admin_configuration_path(@admin_configuration) %> |
+<%= link_to 'Back', admin_configurations_path %>

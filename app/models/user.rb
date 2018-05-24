@@ -1,10 +1,12 @@
 class User < ApplicationRecord
   attribute :access_token, :hstore
+  attribute :admin, :boolean
+  attribute :full_name, :string
   attr_encrypted :refresh_token, key: ENV['ENCRYPTION_KEY']
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
-  devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, :validatable,
+  devise :registerable, :rememberable, :trackable,
          :omniauthable, :omniauth_providers => [:google_oauth2]
 
 
@@ -12,15 +14,11 @@ class User < ApplicationRecord
     data = access_token.info
     provider = access_token.provider
     uid = access_token.uid
-    # create bogus password, Devise will never use it to authenticate
-    password = Devise.friendly_token[0,20]
     # grab user's full name
     full_name = [data['first_name'], data['last_name']].join(' ')
     user = User.find_by(email: data['email'])
     if user.nil?
       user = User.create(email: data["email"],
-                         password: password,
-                         password_confirmation: password,
                          uid: uid,
                          provider: provider,
                          full_name: full_name)

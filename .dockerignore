@@ -4,3 +4,4 @@ public/unity/assets
 .idea
 log/*.log
 public/unity/assets
+config/*.json

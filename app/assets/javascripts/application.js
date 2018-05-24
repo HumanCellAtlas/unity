@@ -16,6 +16,7 @@
 //= require popper
 //= require bootstrap-sprockets
 //= require datatables/media/js/jquery.dataTables.min
+//= require jquery_nested_form
 //= require_tree .
 
 function enableDefaultActions() {
