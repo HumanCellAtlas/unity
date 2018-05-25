@@ -37,6 +37,24 @@ class AdminConfiguration < ApplicationRecord
     end
   end
 
+  def self.current_firecloud_access
+    status = AdminConfiguration.find_by(config_type: AdminConfiguration::FIRECLOUD_ACCESS_NAME)
+    if status.nil?
+      'on'
+    else
+      status.value
+    end
+  end
+
+  def self.firecloud_access_enabled?
+    status = AdminConfiguration.find_by(config_type: AdminConfiguration::FIRECLOUD_ACCESS_NAME)
+    if status.nil?
+      true
+    else
+      status.value == 'on'
+    end
+  end
+
   # method to be called from cron to check the health status of the FireCloud API and set access if an outage is detected
   def self.check_api_health
     notifier_config = AdminConfiguration.find_or_create_by(config_type: AdminConfiguration::API_NOTIFIER_NAME, value_type: 'Boolean')
