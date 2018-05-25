@@ -57,6 +57,10 @@ portal is configured and ready to use:
   * For 'Authorized Javascript Origins', enter <code>https://(your hostname)/unity</code>
   * For 'Authorized redirect URIs', enter <code>https://(your hostname)/unity/omniauth/google_oauth2/callback</code>
   * Save the client id
+* <b>Whitelisting your OAuth Audience</b>
+	* Once you have exported your OAuth credentials, you will need to have your client id whitelisted to allow it to make
+	  authenticated requests into the FireCloud API as per [OpenID Connect 1.0](http://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation)
+	* Send an email to <b>dsp-devops@broadinstitute.org</b> with your OAuth2 client ID so it can be added to the whitelist
 * <b>GCP Service Account keys</b>: Regardless of where the portal is deployed, it requires a Google Cloud Platform Service Account in order to make authenticated calls into FireCloud and Google Cloud Storage.  Therefore, you must export the default service account key.  See https://developers.google.com/identity/protocols/OAuth2ServiceAccount for more information about service accounts.  To export the credentials:
   * Log into your new GCP project
   * Click the navigation menu in the top left and select 'IAM & Admin	' > 'Service Accounts'
