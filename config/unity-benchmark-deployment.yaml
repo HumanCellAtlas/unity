@@ -22,6 +22,9 @@ spec:
             - containerPort: 443
           # The following environment variables will contain the database host,
           # user and password to connect to the PostgreSQL instance.
+          volumeMounts:
+          - mountPath: /etc/service-account
+            name: google-project-service-account
           env:
             - name: DATABASE_HOST
               value: 127.0.0.1
@@ -50,6 +53,13 @@ spec:
                 secretKeyRef:
                   name: oauth-client-credentials
                   key: client_secret
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: encryption-key
+                  key: encryption-key
+            - name: SERVICE_ACCOUNT_KEY
+              value: /etc/service-account/unity-benchmark-service-account.json
             # [END cloudsql_secrets]
         # Change <INSTANCE_CONNECTION_NAME> here to include your GCP
         # project, the region of your Cloud SQL instance and the name
@@ -77,4 +87,7 @@ spec:
         - name: cloudsql-instance-credentials
           secret:
             secretName: cloudsql-instance-credentials
+        - name: google-project-service-account
+          secret:
+            secretName: unity-service-account
       # [END volumes]

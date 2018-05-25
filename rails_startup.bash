@@ -19,26 +19,24 @@ sudo -E -u app -H bundle exec rake RAILS_ENV=$PASSENGER_APP_ENV db:exists && rak
 echo "*** COMPLETED ***"
 
 echo "*** CREATING CRON ENV FILES ***"
-echo "export SENDGRID_USERNAME=$SENDGRID_USERNAME" >> /home/app/.cron_env
-echo "export SENDGRID_PASSWORD=$SENDGRID_PASSWORD" >> /home/app/.cron_env
-echo "export DATABASE_HOST=$DATABASE_HOST" >> /home/app/.cron_env
-echo "export DATABASE_USER=$DATABASE_USER" >> /home/app/.cron_env
-echo "export DATABASE_PASSWORD=$DATABASE_PASSWORD" >> /home/app/.cron_env
+echo "export SENDGRID_USERNAME=$SENDGRID_USERNAME" >> /home/app/webapp/.cron_env
+echo "export SENDGRID_PASSWORD=$SENDGRID_PASSWORD" >> /home/app/webapp/.cron_env
+echo "export DATABASE_HOST=$DATABASE_HOST" >> /home/app/webapp/.cron_env
+echo "export DATABASE_USER=$DATABASE_USER" >> /home/app/webapp/.cron_env
+echo "export DATABASE_PASSWORD=$DATABASE_PASSWORD" >> /home/app/webapp/.cron_env
 if [[ -z $SERVICE_ACCOUNT_KEY ]]; then
-	echo $GOOGLE_CLOUD_KEYFILE_JSON >| /home/app/.google_service_account.json
-	chmod 400 /home/app/.google_service_account.json
-	chown app:app /home/app/.google_service_account.json
-	echo "export SERVICE_ACCOUNT_KEY=/home/app/.google_service_account.json" >> /home/app/.cron_env
+	echo "export GOOGLE_CLOUD_KEYFILE_JSON=$GOOGLE_CLOUD_KEYFILE_JSON" >> /home/app/webapp/.cron_env
+	echo "export GOOGLE_CLOUD_PROJECT=$GOOGLE_CLOUD_PROJECT" >> /home/app/webapp/.cron_env
 else
-	echo "export SERVICE_ACCOUNT_KEY=$SERVICE_ACCOUNT_KEY" >> /home/app/.cron_env
+	echo "export SERVICE_ACCOUNT_KEY=$SERVICE_ACCOUNT_KEY" >> /home/app/webapp/.cron_env
 fi
 
-chmod 400 /home/app/.cron_env
-chown app:app /home/app/.cron_env
+chmod 400 /home/app/webapp/.cron_env
+chown app:app /home/app/webapp/.cron_env
 echo "*** COMPLETED ***"
 
 echo "*** ADDING API HEALTH CRONTAB ***"
-echo "*/5 * * * * . /home/app/.cron_env ; cd /home/app/webapp/; /home/app/webapp/bin/rails runner -e $PASSENGER_APP_ENV \"AdminConfiguration.check_api_health\" >> /home/app/webapp/log/cron_out.log 2>&1" | crontab -u app -
+echo "*/5 * * * * . /home/app/webapp/.cron_env ; cd /home/app/webapp/; /home/app/webapp/bin/rails runner -e $PASSENGER_APP_ENV \"AdminConfiguration.check_api_health\" >> /home/app/webapp/log/cron_out.log 2>&1" | crontab -u app -
 echo "*** COMPLETED ***"
 
 if [[ ! -d /home/app/webapp/tmp/pids ]]

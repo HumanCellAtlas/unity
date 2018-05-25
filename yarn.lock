@@ -2,12 +2,6 @@
 # yarn lockfile v1
 
 
-datatables@^1.10.13:
-  version "1.10.13"
-  resolved "https://registry.yarnpkg.com/datatables/-/datatables-1.10.13.tgz#9bb2dec6f7dcf02049a00e4f0e7d3fe009c39346"
-  dependencies:
-    jquery ">=1.7"
-
-jquery@>=1.7, jquery@^3.3.1:
+jquery@^3.3.1:
   version "3.3.1"
   resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.3.1.tgz#958ce29e81c9790f31be7792df5d4d95fc57fbca"

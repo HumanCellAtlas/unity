@@ -18,7 +18,7 @@
           <tr>
             <td><%= admin_configuration.config_type %></td>
             <td><%= admin_configuration.value_type %></td>
-            <td><%= admin_configuration.value %></td>
+            <td><%= admin_configuration.convert_value_by_type %></td>
             <td><%= link_to 'Edit', edit_admin_configuration_path(admin_configuration), class: 'btn btn-xs btn-primary' %>&nbsp;<%= link_to 'Destroy', admin_configuration, method: :delete, data: { confirm: 'Are you sure you want to delete this configuration?' }, class: 'btn btn-xs btn-danger' %></td>
           </tr>
         <% end %>
