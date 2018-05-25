@@ -5,3 +5,4 @@ public/unity/assets
 log/*.log
 public/unity/assets
 config/*.json
+.cron_env
