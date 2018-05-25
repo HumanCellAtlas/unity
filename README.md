@@ -147,8 +147,27 @@ To deploy Unity in Kubernetes, you will need the following prerequisites:
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) installed
 * Set your local kubernetes config to [point at your remote cluster](https://cloud.google.com/sdk/gcloud/reference/container/clusters/get-credentials):
   * <code>gcloud container clusters get-credentials NAME -z ZONE</code>
+
+Before created your deployment (but after your cluster is created), you will need to create the necessary secrets in Kubernetes to load 
+into your deployment.  These secrets must be created with the following key/value pairs:
+
+1. cloudsql-db-credentials
+    1. username: database username
+    1. password: database password
+2. oauth-client-credentials
+    1. client_id: OAuth client ID
+    1. client_secret: OAuth client secret
+3. encryption-key
+    1. encryption-key: 32-byte encryption key string
+4. unity-service-account
+    1. unity-benchmark-service-account.json: JSON contents of Unity project service account credentials (must be project owner/editor)
+5. cloudsql-instance-credentials
+    1. credentials.json: JSON contents of CloudSQL service account credentials (must have CloudSQL access)
+6. google-site-verification
+    1. verification-code: google-site-verification meta header value (for verifying site ownership in Google search console, 
+       required for OAuth verification)
   
-Once your cluster is running and <code>kubectl</code> is pointing at your remote cluster:
+Once your secrets are loaded and <code>kubectl</code> is pointing at your remote cluster:
 1. Navigate to the project directory
 2. Create the deployment: <code>kubectl apply -f config/unity-benchmark-deployment.yaml</code>
 3. Create the service: <code>kubectl apply -f config/unity-benchmark-service.yaml</code>
@@ -156,6 +175,10 @@ Once your cluster is running and <code>kubectl</code> is pointing at your remote
 5. You can change the external IP from ephemeral to static inside your VPC Network > [External IP Addresses](https://console.cloud.google.com/networking/addresses/list) console in GCP
 
 Unity will now be available publicly on the above IP address.
+
+TODO: Update Kubernetes deployment instructions on how to configure CloudSQL
+
+TODO: Update deployment to load CloudSQL instance connection details from environment variables
 
 ### OTHER DEPLOYMENTS
 
