@@ -11,7 +11,8 @@ Rails.application.routes.draw do
 
     resources :admin_configurations, path: 'admin'
 
-    get 'profile/:uid', to: 'site#profile', as: :profile
+    get 'profile', to: 'site#profile', as: :profile
+    post 'profile', to: 'site#update_user_profile', as: :update_user_profile
     get 'about_us', to: 'site#about_us', as: :about_us
     get 'privacy_policy', to: 'site#privacy_policy', as: :privacy_policy
     get '/', to: 'site#index', as: :site

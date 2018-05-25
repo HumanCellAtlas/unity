@@ -32,7 +32,7 @@
               <%= link_to "<i class='fas fa-fw fa-lock'></i> Admin".html_safe, admin_configurations_path, class: 'dropdown-item' %>
               <div class="dropdown-divider"></div>
             <% end %>
-
+              <%= link_to "<i class='fas fa-fw fa-user'></i> My Profile".html_safe, profile_path, class: 'dropdown-item' %>
               <%= link_to "<i class='fas fa-fw fa-sign-out-alt'></i> Sign Out".html_safe, destroy_user_session_path, method: :delete, class: 'dropdown-item' %>
             </div>
           </li>

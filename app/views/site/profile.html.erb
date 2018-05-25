@@ -1,0 +1,95 @@
+<%= form_for(:firecloud_profile, url: update_user_profile_path, html: {class: 'form', id: 'firecloud-profile', data: {remote: true}}) do |f| %>
+  <%= f.hidden_field :email, value: @profile_info['email'] %>
+  <div class="bs-callout bs-callout-primary">
+    <p class="text-primary">Use this form to register or update your user profile for Unity. <span class="text-danger"><i class="fa fa-fw fa-exclamation-triangle"></i> All fields are required.</span></p>
+  </div>
+  <div class="form-group">
+    <h4>User Info</h4>
+    <div class="row">
+      <div class="col-md">
+        <%= f.label :firstName, 'First Name' %><br />
+        <%= f.text_field :firstName, value: profile_info['firstName'], class: 'form-control' %>
+      </div>
+      <div class="col-md">
+        <%= f.label :lastName, 'Last Name' %><br />
+        <%= f.text_field :lastName, value: profile_info['lastName'], class: 'form-control' %>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md">
+        <%= f.label :title %><br />
+        <%= f.text_field :title, value: profile_info['title'], class: 'form-control' %>
+      </div>
+      <div class="col-md">
+        <%= f.label :contactEmail, 'Contact Email for Notifications' %><br />
+        <%= f.text_field :contactEmail, value: profile_info['contactEmail'], class: 'form-control' %>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md">
+        <%= f.label :institute %><br />
+        <%= f.text_field :institute, value: profile_info['institute'], class: 'form-control' %>
+      </div>
+      <div class="col-md">
+        <%= f.label :institutionalProgram, 'Institutional Program' %><br />
+        <%= f.text_field :institutionalProgram, value: profile_info['institutionalProgram'], class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+  <div class="form-group">
+    <h4>Program Info</h4>
+    <div class="row">
+      <div class="col-md">
+        <%= f.label :nonProfitStatus, 'Non-Profit Status' %><br />
+        <%= f.select :nonProfitStatus, options_for_select([['Non-Profit', 'true'], ['For-Profit', 'false']], profile_info['nonProfitStatus']), {}, class: 'form-control' %>
+      </div>
+      <div class="col-md">
+        <%= f.label :pi, 'Principal Investigator' %><br />
+        <%= f.text_field :pi, value: profile_info['pi'], class: 'form-control' %>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md">
+        <%= f.label :programLocationCity, 'City' %><br />
+        <%= f.text_field :programLocationCity, value: profile_info['programLocationCity'], class: 'form-control' %>
+      </div>
+      <div class="col-md">
+        <%= f.label :programLocationState, 'State/Province' %><br />
+        <%= f.text_field :programLocationState, value: profile_info['programLocationState'], class: 'form-control' %>
+      </div>
+      <div class="col-md">
+        <%= f.label :programLocationCountry, 'Country' %><br />
+        <%= f.text_field :programLocationCountry, value: profile_info['programLocationCountry'], class: 'form-control' %>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <div class="col-xs text-center">
+        <br />
+        <%= link_to 'Update Profile', 'javascript:;', class: 'btn btn-lg btn-success', id: 'update-user-firecloud-profile', data: {'saving-text' => 'Saving Profile...'} %>
+      </div>
+    </div>
+  </div>
+
+<% end %>
+
+<script type="text/javascript">
+    $('#update-user-firecloud-profile').click(function(event) {
+        var formElements = $('#firecloud-profile .form-control');
+        var valid = true;
+        formElements.each(function(index, el) {
+            if ($(el).val() === '' ) {
+                valid = false;
+                return valid;
+            }
+        });
+        if (!valid) {
+            setErrorOnBlank(formElements);
+            alert('You have not filled out all required fields.');
+        } else {
+            var btn = $('#update-user-firecloud-profile');
+            btn.button('saving');
+            $('#firecloud-profile').submit();
+        }
+    });
+</script>
