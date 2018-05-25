@@ -30,6 +30,11 @@ spec:
               value: 127.0.0.1
             - name: RAILS_LOG_TO_STDOUT
               value: 'true'
+            - name: GOOGLE_SITE_VERIFICATION_CODE
+              valueFrom:
+                secretKeyRef:
+                  name: google-site-verification
+                  key: verification-code
             # [START cloudsql_secrets]
             - name: DATABASE_USER
               valueFrom:
