@@ -166,7 +166,11 @@ into your deployment.  These secrets must be created with the following key/valu
 6. google-site-verification
     1. verification-code: google-site-verification meta header value (for verifying site ownership in Google search console, 
        required for OAuth verification)
-  
+7. ssl-certificate
+    1. localhost.crt: a valid SSL certificate for your domain (filename of localhost does not affect certificate)
+8. ssl-keyfile
+    1. localhost.key: keyfile for your SSL certificate (filename of localhost does not affect certificate)
+
 Once your secrets are loaded and <code>kubectl</code> is pointing at your remote cluster:
 1. Navigate to the project directory
 2. Create the deployment: <code>kubectl apply -f config/unity-benchmark-deployment.yaml</code>
@@ -196,3 +200,15 @@ The Unity Benchmark Service utilizes [FireCloud](https://software.broadinstitute
 submissions, which in turn store raw files in GCP buckets.  This is all managed through a GCP service account which in turn owns all workspaces
 and manages them on behalf of users.  This is why your service account must be registered as a FireCloud user before the service 
 can function correctly.
+
+### OAUTH VERIFICATION
+
+Once you obtain a URL and a valid SSL certificate, you may go ahead and have your application verified for OAuth to remove 
+unverified application warnings.  Please refer to [this form](https://https://support.google.com/code/contact/oauth_app_verification) 
+for more information on the OAuth verification process.  The following scopes must be provided as part of the verification 
+process (with the following justifications):
+
+* https://www.googleapis.com/auth/userinfo.profile (to allow users to authenticate using their Google account)
+* https://www.googleapis.com/auth/userinfo.email (to allow users to authenticate using their Google account)
+* https://www.googleapis.com/auth/cloud-billing.readonly (to allow Unity to see available billing accounts to create projects on behalf of users)
+* https://www.googleapis.com/auth/cloud-platform.read-only (to allow Unity to stream user-owned GCS objects back to the client)

@@ -25,6 +25,10 @@ spec:
           volumeMounts:
           - mountPath: /etc/service-account
             name: google-project-service-account
+          - mountPath: /etc/pki/tls/certs
+            name: ssl-cert
+          - mountPath: /etc/pki/tls/private
+            name: ssl-key
           env:
             - name: DATABASE_HOST
               value: 127.0.0.1
@@ -95,4 +99,10 @@ spec:
         - name: google-project-service-account
           secret:
             secretName: unity-service-account
+        - name: ssl-cert
+          secret:
+            secretName: ssl-certificate
+        - name: ssl-key
+          secret:
+            secretName: ssl-keyfile
       # [END volumes]
