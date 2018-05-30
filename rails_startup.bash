@@ -19,6 +19,9 @@ sudo -E -u app -H bundle exec rake RAILS_ENV=$PASSENGER_APP_ENV db:exists && rak
 echo "*** COMPLETED ***"
 
 echo "*** CREATING CRON ENV FILES ***"
+if [[ -f /home/app/webapp/.cron_env ]]; then
+		sudo -E -u app -H rm -f /home/app/webapp/.cron_env
+fi
 echo "export SENDGRID_USERNAME=$SENDGRID_USERNAME" >> /home/app/webapp/.cron_env
 echo "export SENDGRID_PASSWORD=$SENDGRID_PASSWORD" >> /home/app/webapp/.cron_env
 echo "export DATABASE_HOST=$DATABASE_HOST" >> /home/app/webapp/.cron_env
