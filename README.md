@@ -205,8 +205,10 @@ can function correctly.
 
 Once you obtain a URL and a valid SSL certificate, you may go ahead and have your application verified for OAuth to remove 
 unverified application warnings.  Please refer to [this form](https://https://support.google.com/code/contact/oauth_app_verification) 
-for more information on the OAuth verification process.  The following scopes must be provided as part of the verification 
-process (with the following justifications):
+for more information on the OAuth verification process.  You must also generate a separate OAuth client to use in production 
+that does not contain localhost URLs, as this will cause your request to be rejected.
+
+The following scopes must be provided as part of the verification process (with the following justifications):
 
 * https://www.googleapis.com/auth/userinfo.profile (to allow users to authenticate using their Google account)
 * https://www.googleapis.com/auth/userinfo.email (to allow users to authenticate using their Google account)
