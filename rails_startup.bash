@@ -22,16 +22,21 @@ echo "*** CREATING CRON ENV FILES ***"
 if [[ -f /home/app/webapp/.cron_env ]]; then
 		sudo -E -u app -H rm -f /home/app/webapp/.cron_env
 fi
+if [[ -f /home/app/webapp/.google_service_account.json ]]; then
+		sudo -E -u app -H rm -f /home/app/webapp/.google_service_account.json
+fi
 echo "export SENDGRID_USERNAME=$SENDGRID_USERNAME" >> /home/app/webapp/.cron_env
 echo "export SENDGRID_PASSWORD=$SENDGRID_PASSWORD" >> /home/app/webapp/.cron_env
 echo "export DATABASE_HOST=$DATABASE_HOST" >> /home/app/webapp/.cron_env
 echo "export DATABASE_USER=$DATABASE_USER" >> /home/app/webapp/.cron_env
 echo "export DATABASE_PASSWORD=$DATABASE_PASSWORD" >> /home/app/webapp/.cron_env
 if [[ -z $SERVICE_ACCOUNT_KEY ]]; then
-	echo "export GOOGLE_CLOUD_KEYFILE_JSON=$GOOGLE_CLOUD_KEYFILE_JSON" >> /home/app/webapp/.cron_env
-	echo "export GOOGLE_CLOUD_PROJECT=$GOOGLE_CLOUD_PROJECT" >> /home/app/webapp/.cron_env
+	echo $GOOGLE_CLOUD_KEYFILE_JSON >| /home/app/webapp/.google_service_account.json
+	chmod 400 /home/app/webapp/.google_service_account.json
+	chown app:app /home/app/webapp/.google_service_account.json
+	echo "export SERVICE_ACCOUNT_KEY=/home/app/webapp/.google_service_account.json" >> /home/app/webapp/.cron_env
 else
-	echo "export SERVICE_ACCOUNT_KEY=$SERVICE_ACCOUNT_KEY" >> /home/app/webapp/.cron_env
+	echo "export SERVICE_ACCOUNT_KEY=$SERVICE_ACCOUNT_KEY" >> /home/app/webapp.cron_env
 fi
 
 chmod 400 /home/app/webapp/.cron_env

@@ -11,6 +11,8 @@ Rails.application.routes.draw do
 
     resources :admin_configurations, path: 'admin'
 
+    get 'pipelines/:namespace/:name/:snapshot', to: 'site#view_pipeline_wdl', as: :view_pipeline_wdl
+
     get 'profile', to: 'site#profile', as: :profile
     post 'profile', to: 'site#update_user_profile', as: :update_user_profile
     get 'about_us', to: 'site#about_us', as: :about_us

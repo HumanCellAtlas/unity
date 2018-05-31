@@ -1,0 +1,19 @@
+<div class="modal fade" id="wdl-content-modal" tabindex="-1" role="dialog" aria-labelledby="wdl-content-modal" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header" style="display: block;">
+        <h4 class="text-center"><%= @pipeline_name %> WDL</h4>
+      </div>
+      <div class="modal-body" id="wdl-contents">
+        <pre>
+        <%= @pipeline_wdl %>
+      </pre>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,54 +1,32 @@
 <div class="jumbotron" id="main-jumbo">
   <h1 class="text-center">Welcome to Unity</h1>
 </div>
-<div class="row">
-  <div class="col-md">
-    <h3>Leaderboard <i class="fas fa-columns"></i></h3>
-    <table class="table table-active table-striped datatable" id="leaderboard">
-      <thead class="thead-light">
-      <tr>
-        <th>Rank</th>
-        <th>Method</th>
-        <th>Benchmark</th>
-      </tr>
-      </thead>
-      <tbody>
+<ul class="nav nav-tabs" role="tablist">
+  <li class="nav-item">
+    <a class="nav-link <%= @user_workspaces.empty? ? nil : 'active' %>" href="#my-workspaces" role="tab" data-toggle="tab">My Workspaces <i class="fas fa-fw fa-folder-open"></i></a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link <%= @user_workspaces.empty? ? 'active' : nil %>" href="#reference-workspaces" role="tab" data-toggle="tab">Reference Workspaces <i class="fas fa-fw fa-folder"></i></a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#reference-pipelines" role="tab" data-toggle="tab">Reference Pipelines <i class="fas fa-fw fa-flask"></i></a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#leaderboard" role="tab" data-toggle="tab">Leaderboard <i class="fas fa-fw fa-columns"></i></a>
+  </li>
+</ul>
 
-      </tbody>
-    </table>
+<div class="tab-content top-pad-small">
+  <div role="tabpanel" class="tab-pane fade <%= @user_workspaces.empty? ? nil : 'show active' %>" id="my-workspaces">
+    <%= render partial: 'my_workspaces' %>
   </div>
-  <div class="col-md">
-    <h3>Available Methods <i class="fas fa-flask"></i></h3>
-    <table class="table table-active table-striped datatable" id="methods">
-      <thead class="thead-light">
-        <tr>
-          <th>Method</th>
-          <th>Version</th>
-          <th>Synopsis</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @methods.each do |method| %>
-          <tr>
-            <td><%= method['namespace'] %>/<%= method['name'] %></td>
-            <td><%= method['snapshotId'] %></td>
-            <td><%= method['synopsis'] %></td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+  <div role="tabpanel" class="tab-pane fade <%= @user_workspaces.empty? ? 'show active' : nil %>" id="reference-workspaces">
+    <%= render partial: 'reference_workspaces' %>
+  </div>
+  <div role="tabpanel" class="tab-pane fade" id="reference-pipelines">
+    <%= render partial: 'reference_pipelines' %>
+  </div>
+  <div role="tabpanel" class="tab-pane fade" id="leaderboard">
+    <%= render partial: 'leaderboard' %>
   </div>
 </div>
-
-<script type="text/javascript">
-
-  $('#leaderboard').DataTable({
-      pagingType: 'full_numbers'
-  });
-
-  $('#methods').DataTable({
-      pagingType: 'full_numbers',
-      order: [[0, 'asc'],[1, 'desc']]
-  });
-
-</script>

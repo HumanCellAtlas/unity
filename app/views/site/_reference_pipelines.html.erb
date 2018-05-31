@@ -1,0 +1,52 @@
+<div class="row">
+  <div class="col-md">
+    <h3>Reference Pipelines <i class="fas fa-flask"></i></h3>
+    <table class="table table-active table-striped datatable" id="methods-table">
+      <thead class="thead-light">
+      <tr>
+        <th>Method</th>
+        <th>Version</th>
+        <th>Synopsis</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <% @methods.each do |method| %>
+        <tr>
+          <td><%= method['namespace'] %>/<%= method['name'] %></td>
+          <td><%= method['snapshotId'] %></td>
+          <td><%= method['synopsis'] %></td>
+          <td>
+            <%= link_to "View WDL <i class='fa fa-fw fa-code'></i>".html_safe,
+                          view_pipeline_wdl_path(namespace: method['namespace'],
+                                                 name: method['name'],
+                                                 snapshot: method['snapshotId']),
+                          class: 'btn btn-outline-primary btn-sm view-pipeline-wdl',
+                          data: {remote: true,
+                                 id: "#{method['namespace']}-#{method['name']}-#{method['snapshotId']}"
+                          } %>
+          </td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="wdl-content-target">
+
+  </div>
+
+  <script type="text/javascript">
+
+      $('#methods-table').DataTable({
+          pagingType: 'full_numbers',
+          order: [[0, 'asc'],[1, 'desc']]
+      });
+
+      $('#methods-table').on('click', '.view-pipeline-wdl', function (e) {
+          var btn = e.target;
+          $(btn).addClass('disabled');
+      });
+
+  </script>
+</div>

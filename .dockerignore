@@ -6,3 +6,4 @@ log/*.log
 public/unity/assets
 config/*.json
 .cron_env
+.google_service_account.json

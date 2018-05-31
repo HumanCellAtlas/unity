@@ -1,7 +1,7 @@
 class AdminConfiguration < ApplicationRecord
 
   attribute :config_type, :string
-  attribute :value_type, :string
+  attribute :value_type, :string, default: 'String'
   attribute :value, :string
   has_many :configuration_options, dependent: :destroy
 
@@ -14,7 +14,7 @@ class AdminConfiguration < ApplicationRecord
 
   API_NOTIFIER_NAME = 'API Health Check Notifier'
   FIRECLOUD_ACCESS_NAME = 'FireCloud Access'
-  CONFIG_TYPES = ['Workflow Name', 'Unity FireCloud User Group', 'Reference Data Workspace', API_NOTIFIER_NAME]
+  CONFIG_TYPES = ['Workflow Name', 'Unity FireCloud User Group', 'Reference Data Workspace', 'Unity FireCloud Project', API_NOTIFIER_NAME]
   VALUE_TYPES = %w(Numeric Boolean String)
 
   # display name for use in notices/alerts

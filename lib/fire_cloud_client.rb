@@ -17,7 +17,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
 	# base url for all API calls
 	BASE_URL = 'https://api.firecloud.org'
 	# default auth scopes
-	GOOGLE_SCOPES = %w(https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/cloud-billing.readonly https://www.googleapis.com/auth/cloud-platform.read-only)
+	GOOGLE_SCOPES = %w(https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/cloud-billing.readonly https://www.googleapis.com/auth/devstorage.read_only)
 	# constant used for retry loops in process_firecloud_request and execute_gcloud_method
 	MAX_RETRY_COUNT = 3
 	# default namespace used for all FireCloud workspaces owned by the 'portal'
@@ -32,9 +32,6 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
 	BILLING_PROJECT_ROLES = %w(user owner)
   # List of available FireCloud 'operations' for updating FireCloud workspace entities or attributes
   AVAILABLE_OPS = %w(AddUpdateAttribute RemoveAttribute AddListMember RemoveListMember)
-  # List of projects where computes are not permitted (sets canCompute to false for all users by default, can only be overridden
-  # by PROJECT_OWNER)
-  COMPUTE_BLACKLIST = %w(single-cell-portal)
 
   # initialize is called after instantiating with FireCloudClient.new
 	# will set the access token, FireCloud api url root and GCP storage driver instance
@@ -99,7 +96,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
 	def self.generate_access_token
 		# if no keyfile present, use environment variables
 		creds_attr = {scope: GOOGLE_SCOPES}
-		if !ENV['SERVICE_ACCOUNT_KEY'].blank?
+		if ENV['SERVICE_ACCOUNT_KEY'].present?
 			creds_attr.merge!(json_key_io: File.open(SERVICE_ACCOUNT_KEY))
 		end
 		creds = Google::Auth::ServiceAccountCredentials.make_creds(creds_attr)

@@ -67,4 +67,6 @@ Rails.application.configure do
   config.action_mailer.raise_delivery_errors = true
 
   config.disable_admin_notifications = false
+
+  config.web_console.whitelisted_ips = '172.17.0.1'
 end

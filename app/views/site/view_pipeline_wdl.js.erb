@@ -1,0 +1,6 @@
+$('#wdl-content-target').html("<%= escape_javascript(render partial: 'wdl_content') %>");
+
+$('#wdl-content-modal').modal('show');
+
+var clickedBtn = $('*[data-id="<%= @pipeline_id %>"]');
+clickedBtn.removeClass('disabled');

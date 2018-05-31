@@ -1,0 +1,25 @@
+<div class="row">
+  <div class="col-md">
+    <h3>Leaderboard <i class="fas fa-columns"></i></h3>
+    <table class="table table-active table-striped datatable" id="leaderboard-table">
+      <thead class="thead-light">
+      <tr>
+        <th>Rank</th>
+        <th>Method</th>
+        <th>Benchmark</th>
+      </tr>
+      </thead>
+      <tbody>
+
+      </tbody>
+    </table>
+  </div>
+
+  <script type="text/javascript">
+
+      $('#leaderboard-table').DataTable({
+          pagingType: 'full_numbers'
+      });
+
+  </script>
+</div>

@@ -1,0 +1,32 @@
+<div class="row">
+  <div class="col-md">
+    <h3>My Workspaces <i class="fas fa-folder-open"></i></h3>
+    <table class="table table-active table-striped datatable" id="user-workspaces-table">
+      <thead class="thead-light">
+      <tr>
+        <th width="66%">Name</th>
+        <th width="33%">Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <% @user_workspaces.each do |workspace| %>
+        <tr>
+          <td><%= workspace['workspace']['namespace'] %>/<%= workspace['workspace']['name'] %></td>
+          <td>
+            <%= link_to "Clone <i class='fas fa-fw fa-copy'></i>".html_safe, '#', class: 'btn btn-outline-primary btn-sm' %>
+            <%= link_to "Info <i class='fas fa-fw fa-info-circle'></i>".html_safe, '#', class: 'btn btn-outline-secondary btn-sm' %>
+          </td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <script type="text/javascript">
+
+      $('#user-workspaces-table').DataTable({
+          pagingType: 'full_numbers'
+      });
+
+  </script>
+</div>
