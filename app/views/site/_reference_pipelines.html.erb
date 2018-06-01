@@ -1,6 +1,6 @@
 <div class="row">
   <div class="col-md">
-    <h3>Reference Pipelines <i class="fas fa-flask"></i></h3>
+    <h3>Reference Pipelines</h3>
     <table class="table table-active table-striped datatable" id="methods-table">
       <thead class="thead-light">
       <tr>
@@ -13,18 +13,24 @@
       <tbody>
       <% @methods.each do |method| %>
         <tr>
-          <td><%= method['namespace'] %>/<%= method['name'] %></td>
-          <td><%= method['snapshotId'] %></td>
-          <td><%= method['synopsis'] %></td>
+          <td><%= method[:namespace] %>/<%= method[:name] %></td>
+          <td><%= method[:snapshot] %></td>
+          <td><%= method[:synopsis] %></td>
           <td>
             <%= link_to "View WDL <i class='fa fa-fw fa-code'></i>".html_safe,
-                          view_pipeline_wdl_path(namespace: method['namespace'],
-                                                 name: method['name'],
-                                                 snapshot: method['snapshotId']),
+                          view_pipeline_wdl_path(namespace: method[:namespace],
+                                                 name: method[:name],
+                                                 snapshot: method[:snapshot]),
                           class: 'btn btn-outline-primary btn-sm view-pipeline-wdl',
                           data: {remote: true,
-                                 id: "#{method['namespace']}-#{method['name']}-#{method['snapshotId']}"
+                                 id: "#{method[:identifier]}"
                           } %>
+            <% if method[:reference_workspace].present? %>
+              <%= link_to "Benchmark <i class='fas fa-fw fa-project-diagram'></i>".html_safe, firecloud_link_for(method[:reference_workspace]), class: 'btn btn-outline-dark btn-sm' %>
+            <% end %>
+            <% if method[:documentation_link].present? %>
+              <%= link_to "Info <i class='fas fa-fw fa-info-circle'></i>".html_safe, method[:documentation_link], class: 'btn btn-outline-secondary btn-sm', target: :_blank %>
+            <% end %>
           </td>
         </tr>
       <% end %>

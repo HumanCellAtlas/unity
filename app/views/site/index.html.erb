@@ -3,13 +3,10 @@
 </div>
 <ul class="nav nav-tabs" role="tablist">
   <li class="nav-item">
-    <a class="nav-link <%= @user_workspaces.empty? ? nil : 'active' %>" href="#my-workspaces" role="tab" data-toggle="tab">My Workspaces <i class="fas fa-fw fa-folder-open"></i></a>
+    <a class="nav-link <%= @user_workspaces.empty? ? nil : 'active' %>" href="#my-benchmarks" role="tab" data-toggle="tab">My Benchmarks <i class="fas fa-fw fa-project-diagram"></i></a>
   </li>
   <li class="nav-item">
-    <a class="nav-link <%= @user_workspaces.empty? ? 'active' : nil %>" href="#reference-workspaces" role="tab" data-toggle="tab">Reference Workspaces <i class="fas fa-fw fa-folder"></i></a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="#reference-pipelines" role="tab" data-toggle="tab">Reference Pipelines <i class="fas fa-fw fa-flask"></i></a>
+    <a class="nav-link <%= @user_workspaces.empty? ? 'active' : nil %>" href="#reference-pipelines" role="tab" data-toggle="tab">Reference Pipelines <i class="fas fa-fw fa-flask"></i></a>
   </li>
   <li class="nav-item">
     <a class="nav-link" href="#leaderboard" role="tab" data-toggle="tab">Leaderboard <i class="fas fa-fw fa-columns"></i></a>
@@ -17,13 +14,10 @@
 </ul>
 
 <div class="tab-content top-pad-small">
-  <div role="tabpanel" class="tab-pane fade <%= @user_workspaces.empty? ? nil : 'show active' %>" id="my-workspaces">
+  <div role="tabpanel" class="tab-pane fade <%= @user_workspaces.empty? ? nil : 'show active' %>" id="my-benchmarks">
     <%= render partial: 'my_workspaces' %>
   </div>
-  <div role="tabpanel" class="tab-pane fade <%= @user_workspaces.empty? ? 'show active' : nil %>" id="reference-workspaces">
-    <%= render partial: 'reference_workspaces' %>
-  </div>
-  <div role="tabpanel" class="tab-pane fade" id="reference-pipelines">
+  <div role="tabpanel" class="tab-pane fade <%= @user_workspaces.empty? ? 'show active' : nil %>" id="reference-pipelines">
     <%= render partial: 'reference_pipelines' %>
   </div>
   <div role="tabpanel" class="tab-pane fade" id="leaderboard">

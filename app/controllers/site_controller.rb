@@ -2,6 +2,7 @@ class SiteController < ApplicationController
 
   before_action :check_firecloud_registration
   before_action :authenticate_user!, only: :profile
+  before_action :get_user_fire_cloud_client
 
   def index
     # load available 'blessed' workflows
@@ -10,15 +11,21 @@ class SiteController < ApplicationController
     if workflow_configs.present?
       workflow_configs.each do |config|
         workflow_namespace, workflow_name, workflow_snapshot = config.value.split('/')
-        @methods += fire_cloud_client.get_methods(namespace: workflow_namespace, name: workflow_name, snapshotId: workflow_snapshot)
+        methods = fire_cloud_client.get_methods(namespace: workflow_namespace, name: workflow_name, snapshotId: workflow_snapshot)
+        methods.each do |method|
+          @methods << {
+              namespace: method['namespace'],
+              name: method['name'],
+              snapshot: method['snapshotId'],
+              synopsis: method['synopsis'],
+              identifier: "#{method['namespace']}-#{method['name']}-#{method['snapshotId']}",
+              reference_workspace: config.options[:reference_workspace],
+              documentation_link: config.options[:documentation_link]
+          }
+        end
       end
     end
-    project_config = AdminConfiguration.find_by_config_type('Unity FireCloud Project')
-    @workspaces = []
-    if project_config.present?
-      project_name = project_config.value
-      @workspaces = fire_cloud_client.workspaces(project_name)
-    end
+
     @user_workspaces = []
   end
 
@@ -66,9 +73,6 @@ class SiteController < ApplicationController
     begin
       pipeline_attr = [params[:namespace], params[:name], params[:snapshot]]
       @pipeline_wdl = fire_cloud_client.get_method(params[:namespace], params[:name], params[:snapshot], true)
-      if @pipeline_wdl.is_a?(Hash)
-        @pipeline_wdl = @pipeline_wdl['payload']
-      end
       @pipeline_name = pipeline_attr.join('/')
       @pipeline_id = pipeline_attr.join('-')
     rescue => e
@@ -100,6 +104,13 @@ class SiteController < ApplicationController
           redirect_to profile_path, notice: 'You must register before continuing' && return
         end
       end
+    end
+  end
+
+  # create and return a user-scoped FireCloudClient
+  def get_user_fire_cloud_client
+    if user_signed_in?
+      @user_client = FireCloudClient.new(current_user, FireCloudClient::PORTAL_NAMESPACE)
     end
   end
 end

@@ -7,6 +7,7 @@ class AdminConfigurationsController < ApplicationController
   # GET /admin_configurations.json
   def index
     @admin_configurations = AdminConfiguration.where.not(config_type: AdminConfiguration::FIRECLOUD_ACCESS_NAME)
+    @firecloud_access = AdminConfiguration.current_firecloud_access
   end
 
   # GET /admin_configurations/1

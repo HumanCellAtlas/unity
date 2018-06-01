@@ -21,7 +21,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
 	# constant used for retry loops in process_firecloud_request and execute_gcloud_method
 	MAX_RETRY_COUNT = 3
 	# default namespace used for all FireCloud workspaces owned by the 'portal'
-	PORTAL_NAMESPACE = 'single-cell-portal'
+	PORTAL_NAMESPACE = 'unity-benchmark-development'
 	# location of Google service account JSON (must be absolute path to file)
 	SERVICE_ACCOUNT_KEY = !ENV['SERVICE_ACCOUNT_KEY'].blank? ? File.absolute_path(ENV['SERVICE_ACCOUNT_KEY']) : ''
 	# Permission values allowed for FireCloud workspace ACLs
@@ -323,7 +323,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
 	#
 	# * *return*
 	#   - +Array+ of +Hash+ objects detailing workspaces
-	def workspaces(workspace_namespace)
+	def workspaces(workspace_namespace=nil)
 		path = self.api_root + '/api/workspaces'
 		workspaces = process_firecloud_request(:get, path)
 		workspaces.keep_if {|ws| ws['workspace']['namespace'] == workspace_namespace}
@@ -1077,12 +1077,21 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
 		process_firecloud_request(:post, path, profile_contents.to_json)
 	end
 
-	# get a user's profile status
+	# get a user's profile information
 	#
   # * *return*
   #   - +Hash+ of key/value pairs of information stored in a user's FireCloud profile
   def get_profile
 		path = self.api_root + '/register/profile'
+		process_firecloud_request(:get, path)
+	end
+
+	# get a user's Google profile
+	#
+	# * *return*
+	#   - +Hash+ of key/value pairs of information stored in a user's FireCloud profile
+	def get_user_info
+		path = self.api_root + '/register/userinfo'
 		process_firecloud_request(:get, path)
 	end
 
