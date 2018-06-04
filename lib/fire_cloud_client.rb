@@ -17,7 +17,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
 	# base url for all API calls
 	BASE_URL = 'https://api.firecloud.org'
 	# default auth scopes
-	GOOGLE_SCOPES = %w(https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/cloud-billing.readonly https://www.googleapis.com/auth/devstorage.read_only)
+	GOOGLE_SCOPES = %w(https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/cloud-billing.readonly https://www.googleapis.com/auth/cloud-platform.read-only)
 	# constant used for retry loops in process_firecloud_request and execute_gcloud_method
 	MAX_RETRY_COUNT = 3
 	# default namespace used for all FireCloud workspaces owned by the 'portal'
