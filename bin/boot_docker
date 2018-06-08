@@ -118,6 +118,8 @@ PARAMETERS=" --name $CONTAINER_NAME -p 80:80 -p 443:443 -p 587:587 -h $PROD_HOST
 # check if we are linking to a local database or not
 if [ $LOCAL = true ]; then
 	PARAMETERS=$PARAMETERS" --link $DATABASE_HOST:$DATABASE_HOST"
+	# restart local docker database host
+	docker restart $DATABASE_HOST
 fi
 
 # check if we are mounting local source into the container

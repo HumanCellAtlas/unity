@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_05_24_153752) do
+ActiveRecord::Schema.define(version: 2018_06_08_195116) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "hstore"
@@ -28,6 +28,22 @@ ActiveRecord::Schema.define(version: 2018_05_24_153752) do
     t.bigserial "admin_configuration_id", null: false
     t.string "name"
     t.string "value"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "projects", force: :cascade do |t|
+    t.bigserial "user_id", null: false
+    t.string "namespace"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "user_role"
+  end
+
+  create_table "user_workspaces", force: :cascade do |t|
+    t.string "name"
+    t.bigserial "project_id", null: false
+    t.bigserial "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

@@ -1,0 +1,38 @@
+<h1>Create a New Project</h1>
+<div class="bs-callout bs-callout-primary">
+  <p>Use this form to create a new billing project from an existing billing account. For more information on creating billing accounts,
+  please refer to the <%= link_to 'instructions on creating Google billing accounts', 'https://software.broadinstitute.org/firecloud/documentation/article?id=9762', target: :_blank %>.</p>
+</div>
+
+<%= form_with(model: @project, local: true, url: create_project_from_scratch_path, html: {class: 'form'}) do |form| %>
+  <% if @project.errors.any? %>
+    <div class="bs-callout bs-callout-danger" id="project-errors-block">
+      <h2><%= pluralize(@project.errors.count, "error") %> prohibited this project from being saved:</h2>
+
+      <ul>
+        <% @project.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <%= form.hidden_field :user_id %>
+
+  <div class="form-group row">
+    <div class="col-sm-4">
+      <%= form.label :namespace, 'Project Namespace' %>
+      <%= form.text_field :namespace, class: 'form-control' %>
+    </div>
+    <div class="col-sm-4">
+      <%= label_tag :billing_account, 'Billing Account' %>
+      <%= select_tag :billing_account, options_for_select(@available_billing), {class: 'form-control', include_blank: 'Please select a billing account...'} %>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <%= form.submit 'Create Project', class: 'btn btn-lg btn-success' %>
+  </div>
+<% end %>
+
+
+<p><%= link_to "<i class='fas fa-fw fa-chevron-left'></i> Back".html_safe, projects_path, class: 'btn btn-sm btn-warning' %></p>

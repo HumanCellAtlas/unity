@@ -1,0 +1,59 @@
+<h1>Workspaces in <%= @project.namespace %></h1>
+
+<div class="well well-lg">
+  <table class="table table-striped table-responsive-md" id="workspaces">
+    <thead>
+    <tr>
+      <th>Workspace Name</th>
+      <th>Compute Permissions <i class="fas fa-fw fa-question-circle" data-toggle="tooltip" title="Only non-owner users are shown here.  You cannot revoke compute permission from workspace- or project-level owners."></i> </th>
+      <th>Active Submissions</th>
+      <th>Created At</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% @workspaces.each do |workspace| %>
+      <% workspace_name = workspace['workspace']['name'] %>
+      <tr id="<%= workspace_name %>" class="project-workspace">
+        <td class="workspace-name">
+          <%= workspace_name %>
+        </td>
+        <td class="compute-permissions">
+          <% @computes[workspace_name].each do |compute| %>
+            <% compute.each do |user, permissions| %>
+              <% if !permissions[:access_level].include?('OWNER') %>
+                <span style="white-space: nowrap"><%= permissions[:can_compute] ? "<i class='fa fa-fw fa-check text-success'></i>".html_safe : "<i class='fa fa-fw fa-times text-danger'></i>".html_safe %><%= user %></span><br />
+              <% end %>
+            <% end %>
+          <% end %>
+        </td>
+        <td>
+          <%= workspace['workspaceSubmissionStats']['runningSubmissionsCount'] %>
+        </td>
+        <td>
+          <%= local_timestamp(workspace['workspace']['createdDate']) %>
+        </td>
+        <td class="actions">
+          <%= link_to "<i class='fas fa-fw fa-search'></i> Workspace".html_safe, firecloud_link_for("#{@project.namespace}/#{workspace['workspace']['name']}"), class: 'btn btn-sm btn-primary view-workspace', target: :_blank %>
+          <%= link_to "<i class='fas fa-fw fa-archive'></i> Bucket".html_safe, "https://console.cloud.google.com/storage/browser/#{workspace['workspace']['bucketName']}", class: 'btn btn-sm btn-secondary view-bucket', target: :_blank %>
+        </td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+</div>
+<p>
+  <%= link_to "<span class='fas fa-fw fa-chevron-left'></span> Back".html_safe, projects_path, class: 'btn btn-warning' %>
+
+</p>
+
+<script type="text/javascript">
+    var workspacesTable = $('#workspaces').DataTable({
+        pagingType: "full_numbers",
+        order: [[0, 'asc']],
+        language: {
+            search: "Filter Results By: "
+        }
+    });
+
+</script>

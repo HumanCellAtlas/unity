@@ -2,6 +2,7 @@ class User < ApplicationRecord
   attribute :access_token, :hstore
   attribute :admin, :boolean
   attribute :full_name, :string
+  attribute :registered_for_firecloud, :boolean, default: false
   attr_encrypted :refresh_token, key: ENV['ENCRYPTION_KEY']
 
   # Include default devise modules. Others available are:
@@ -9,6 +10,8 @@ class User < ApplicationRecord
   devise :registerable, :rememberable, :trackable,
          :omniauthable, :omniauth_providers => [:google_oauth2]
 
+  # Associations
+  has_many :projects, dependent: :delete_all
 
   def self.from_omniauth(access_token)
     data = access_token.info
@@ -62,7 +65,7 @@ class User < ApplicationRecord
 
   # check timestamp on user access token expiry
   def access_token_expired?
-    self.access_token.nil? ? true : Time.at(DateTime.parse(self.access_token['expires_at'])) < Time.now
+    self.access_token.blank? ? true : Time.at(DateTime.parse(self.access_token['expires_at'])) < Time.now
   end
 
   # return an valid access token (will renew if expired)

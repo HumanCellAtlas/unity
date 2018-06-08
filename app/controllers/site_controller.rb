@@ -1,8 +1,7 @@
 class SiteController < ApplicationController
 
-  before_action :check_firecloud_registration
-  before_action :authenticate_user!, only: :profile
-  before_action :get_user_fire_cloud_client
+  before_action :check_firecloud_registration, except: [:profile, :update_user_profile]
+  before_action :authenticate_user!, except: [:index, :view_pipeline_wdl]
 
   def index
     # load available 'blessed' workflows
@@ -31,12 +30,13 @@ class SiteController < ApplicationController
 
   def profile
     begin
-      user_client = FireCloudClient.new(current_user, FireCloudClient::PORTAL_NAMESPACE)
+      user_client = user_fire_cloud_client(current_user)
       profile = user_client.get_profile
+      @profile_info = {}
       profile['keyValuePairs'].each do |attribute|
         @profile_info[attribute['key']] = attribute['value']
       end
-    rescue => e
+    rescue RuntimeError => e
       logger.info "#{Time.now}: unable to retrieve FireCloud profile for #{current_user.email}: #{e.message}"
       redirect_to site_path, alert: "We are unable to load your profile at the moment - please try again later."
     end
@@ -44,7 +44,7 @@ class SiteController < ApplicationController
 
   def update_user_profile
     begin
-      user_client = FireCloudClient.new(current_user, FireCloudClient::PORTAL_NAMESPACE)
+      user_client = user_fire_cloud_client(current_user)
       user_client.set_profile(profile_params)
       # log that user has registered so we can use this elsewhere
       if !current_user.registered_for_firecloud
@@ -62,7 +62,7 @@ class SiteController < ApplicationController
           logger.info "#{Time.now}: user group registration complete"
         end
       end
-    rescue => e
+    rescue RuntimeError => e
       logger.info "#{Time.now}: unable to update FireCloud profile for #{current_user.email}: #{e.message}"
       @alert = "An error occurred when trying to update your FireCloud profile: #{e.message}"
     end
@@ -75,7 +75,7 @@ class SiteController < ApplicationController
       @pipeline_wdl = fire_cloud_client.get_method(params[:namespace], params[:name], params[:snapshot], true)
       @pipeline_name = pipeline_attr.join('/')
       @pipeline_id = pipeline_attr.join('-')
-    rescue => e
+    rescue RuntimeError => e
       @pipeline_wdl = "We're sorry, but we could not load the requested workflow object.  Please try again later.\n\nError: #{e.message}"
       logger.error "#{Time.now}: unable to load WDL for #{params[:namespace]}:#{params[:name]}:#{params[:snapshot]}; #{e.message}"
     end
@@ -89,28 +89,19 @@ class SiteController < ApplicationController
                                               :programLocationCountry, :title)
   end
 
-  # check if a signed-in user is a FireCloud user
+  # check if a signed-in user is a FireCloud user and redirect if not
   def check_firecloud_registration
     if user_signed_in?
       if current_user.registered_for_firecloud?
         true # do nothing as we're ok
       else
-        client = FireCloudClient.new(current_user, 'foo') # project name doesn't matter in this instance
-        if client.registered?
-          logger.info "Updating #{current_user.email} registration status to true"
+        if user_fire_cloud_client(current_user).registered?
           current_user.update(registered_for_firecloud: true)
           true
         else
-          redirect_to profile_path, notice: 'You must register before continuing' && return
+          redirect_to profile_path, notice: 'You must register before using Unity - please fill out the profile form and submit.' and return
         end
       end
-    end
-  end
-
-  # create and return a user-scoped FireCloudClient
-  def get_user_fire_cloud_client
-    if user_signed_in?
-      @user_client = FireCloudClient.new(current_user, FireCloudClient::PORTAL_NAMESPACE)
     end
   end
 end

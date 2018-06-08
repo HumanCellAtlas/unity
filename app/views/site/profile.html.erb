@@ -8,31 +8,31 @@
     <div class="row">
       <div class="col-md">
         <%= f.label :firstName, 'First Name' %><br />
-        <%= f.text_field :firstName, value: profile_info['firstName'], class: 'form-control' %>
+        <%= f.text_field :firstName, value: @profile_info['firstName'], class: 'form-control' %>
       </div>
       <div class="col-md">
         <%= f.label :lastName, 'Last Name' %><br />
-        <%= f.text_field :lastName, value: profile_info['lastName'], class: 'form-control' %>
+        <%= f.text_field :lastName, value: @profile_info['lastName'], class: 'form-control' %>
       </div>
     </div>
     <div class="row">
       <div class="col-md">
         <%= f.label :title %><br />
-        <%= f.text_field :title, value: profile_info['title'], class: 'form-control' %>
+        <%= f.text_field :title, value: @profile_info['title'], class: 'form-control' %>
       </div>
       <div class="col-md">
         <%= f.label :contactEmail, 'Contact Email for Notifications' %><br />
-        <%= f.text_field :contactEmail, value: profile_info['contactEmail'], class: 'form-control' %>
+        <%= f.text_field :contactEmail, value: @profile_info['contactEmail'], class: 'form-control' %>
       </div>
     </div>
     <div class="row">
       <div class="col-md">
         <%= f.label :institute %><br />
-        <%= f.text_field :institute, value: profile_info['institute'], class: 'form-control' %>
+        <%= f.text_field :institute, value: @profile_info['institute'], class: 'form-control' %>
       </div>
       <div class="col-md">
         <%= f.label :institutionalProgram, 'Institutional Program' %><br />
-        <%= f.text_field :institutionalProgram, value: profile_info['institutionalProgram'], class: 'form-control' %>
+        <%= f.text_field :institutionalProgram, value: @profile_info['institutionalProgram'], class: 'form-control' %>
       </div>
     </div>
   </div>
@@ -41,33 +41,37 @@
     <div class="row">
       <div class="col-md">
         <%= f.label :nonProfitStatus, 'Non-Profit Status' %><br />
-        <%= f.select :nonProfitStatus, options_for_select([['Non-Profit', 'true'], ['For-Profit', 'false']], profile_info['nonProfitStatus']), {}, class: 'form-control' %>
+        <%= f.select :nonProfitStatus, options_for_select([['Non-Profit', 'true'], ['For-Profit', 'false']], @profile_info['nonProfitStatus']), {}, class: 'form-control' %>
       </div>
       <div class="col-md">
         <%= f.label :pi, 'Principal Investigator' %><br />
-        <%= f.text_field :pi, value: profile_info['pi'], class: 'form-control' %>
+        <%= f.text_field :pi, value: @profile_info['pi'], class: 'form-control' %>
       </div>
     </div>
     <div class="row">
       <div class="col-md">
         <%= f.label :programLocationCity, 'City' %><br />
-        <%= f.text_field :programLocationCity, value: profile_info['programLocationCity'], class: 'form-control' %>
+        <%= f.text_field :programLocationCity, value: @profile_info['programLocationCity'], class: 'form-control' %>
       </div>
       <div class="col-md">
         <%= f.label :programLocationState, 'State/Province' %><br />
-        <%= f.text_field :programLocationState, value: profile_info['programLocationState'], class: 'form-control' %>
+        <%= f.text_field :programLocationState, value: @profile_info['programLocationState'], class: 'form-control' %>
       </div>
       <div class="col-md">
         <%= f.label :programLocationCountry, 'Country' %><br />
-        <%= f.text_field :programLocationCountry, value: profile_info['programLocationCountry'], class: 'form-control' %>
+        <%= f.text_field :programLocationCountry, value: @profile_info['programLocationCountry'], class: 'form-control' %>
       </div>
     </div>
-
-    <div class="form-group row">
-      <div class="col-xs text-center">
-        <br />
-        <%= link_to 'Update Profile', 'javascript:;', class: 'btn btn-lg btn-success', id: 'update-user-firecloud-profile', data: {'saving-text' => 'Saving Profile...'} %>
-      </div>
+  </div>
+  <div class="row">
+    <div class="col-sm">
+      <p class="text-muted">By registering for Unity, you are creating an account on <%= link_to 'FireCloud', 'https://firecloud.org' %>. You will receive an email from help@firecloud.org confirming your account.</p>
+    </div>
+  </div>
+  <div class="form-group row">
+    <div class="col-sm text-center">
+      <br />
+      <%= link_to 'Update Profile', 'javascript:;', class: 'btn btn-lg btn-success', id: 'update-user-firecloud-profile', data: {'saving-text' => 'Saving Profile...'} %>
     </div>
   </div>
 

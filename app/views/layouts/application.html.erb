@@ -4,10 +4,12 @@
     <title>Unity Benchmark Service</title>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="google-site-verification" content="<%= ENV['GOOGLE_SITE_VERIFICATION_CODE'] %>" />
 
     <%= stylesheet_link_tag    'application', media: 'all' %>
     <%= javascript_include_tag 'application' %>
+    <script src="//cdn.plot.ly/plotly-1.37.1.min.js"></script>
   </head>
 
   <body>

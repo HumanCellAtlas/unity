@@ -1,0 +1,27 @@
+<h1>Project Details for '<%= @project.namespace %>'</h1>
+<dl class="row">
+  <dt class="col-sm-3">Namespace</dt>
+  <dd class="col-sm-9"><%= @project.namespace %></dd>
+  <dt class="col-sm-3">User role</dt>
+  <dd class="col-sm-9"><%= @project.user_role %></dd>
+</dl>
+
+<h4>All Members <i class="fas fa-fw fa-users"></i></h4>
+<table class="table table-active table-responsive-sm">
+  <thead>
+    <tr>
+      <th>User</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @project_members.each do |member| %>
+      <tr>
+        <td><%= member['email'] %></td>
+        <td><%= member['role'] %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<p><%= link_to "<i class='fas fa-fw fa-chevron-left'></i> Back".html_safe, projects_path, class: 'btn btn-sm btn-warning' %></p>
