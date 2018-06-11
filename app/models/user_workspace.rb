@@ -5,8 +5,8 @@ class UserWorkspace < ApplicationRecord
   attribute :name, :string
 
   validates :name, format: ValidationTools::ALPHANUMERIC_AND_DASH,
-                   presence: true,
-                   uniqueness: true, scope: :project_id
+                   presence: true
+  validates_uniqueness_of :name, scope: :project_id
 
   def namespace
     self.project.namespace
