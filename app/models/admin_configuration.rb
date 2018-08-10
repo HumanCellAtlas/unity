@@ -9,6 +9,9 @@ class AdminConfiguration < ApplicationRecord
 
   validates_presence_of :config_type, :value_type, :value
   validates_uniqueness_of :value, scope: [:config_type, :value_type]
+  validates_uniqueness_of :config_type,
+                          message: ": '%{value}' has already been set.  Please edit the corresponding entry to update.",
+                          unless: proc {|attributes| ['Reference Data Workspace', 'Workflow Name'].include?(attributes['config_type'])}
 
   validate :validate_value_by_type
 
@@ -73,6 +76,11 @@ class AdminConfiguration < ApplicationRecord
       opts.merge!({option.name.to_sym => option.value})
     end
     opts
+  end
+
+  # get the default FireCloud project for this instance.  will source reference benchmark workspaces from here
+  def self.project_namespace
+
   end
 
   private
