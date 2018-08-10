@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: bistline/unity_benchmark_docker:latest
+          image: unitybenchmark/unity_benchmark_docker:latest
           ports:
             - containerPort: 443
           # The following environment variables will contain the database host,
