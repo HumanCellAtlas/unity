@@ -119,7 +119,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
       self.access_token = new_token
       self.expires_at = new_token['expires_at']
     end
-    self.expires_at
+    new_token
   end
 
   # check if an access_token is expired
@@ -312,6 +312,31 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
     rescue RestClient::ExceptionWithResponse => e
       Rails.logger.error "#{Time.now}: FireCloud status error: #{e.message}"
       e.response
+    end
+  end
+
+  # get health check on individual FireCloud services by name from FireCloudClient#api_status
+  # Should not be used to assess overall API health, but rather a quick thumbs up/down on a specific service
+  #
+  # * *params*
+  #   #   - +services+ (Array) => array of service names (from api_status['systems']), passed with splat operator, so should not be an actual array
+  # * *return*
+  #   - +Boolean+ indication of availability of requested FireCloud service
+  def services_available?(*services)
+    api_status = self.api_status
+    if api_status.is_a?(Hash)
+      api_ok = true
+      services.each do |service|
+        if api_status['systems'].present? && api_status['systems'][service].present? && api_status['systems'][service]['ok']
+          next
+        else
+          api_ok = false
+          break
+        end
+      end
+      api_ok
+    else
+      false
     end
   end
 
@@ -1080,7 +1105,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
     process_firecloud_request(:post, path, profile_contents.to_json)
   end
 
-  # get a user's profile information
+  # get a user's profile status
   #
   # * *return*
   #   - +Hash+ of key/value pairs of information stored in a user's FireCloud profile
@@ -1209,7 +1234,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   ## GOOGLE CLOUD STORAGE METHODS
   ##
   ## All methods are convenience wrappers around google-cloud-storage methods
-  ## see https://googlecloudplatform.github.io/google-cloud-ruby/#/docs/google-cloud-storage/v0.23.2 for more detail
+  ## see https://googlecloudplatform.github.io/google-cloud-ruby/#/docs/google-cloud-storage/v1.9.0 for more detail
   ##
   #######
 
@@ -1260,7 +1285,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   #   - +workspace_namespace+ (String) => namespace of workspace
   #   - +workspace_name+ (String) => name of workspace
   #   - +opts+ (Hash) => hash of optional parameters, see
-  #     https://googlecloudplatform.github.io/google-cloud-ruby/#/docs/google-cloud-storage/v0.23.2/google/cloud/storage/bucket?method=files-instance
+  #     https://googlecloudplatform.github.io/google-cloud-ruby/#/docs/google-cloud-storage/v1.9.0/google/cloud/storage/bucket?method=files-instance
   #
   # * *return*
   #   - +Google::Cloud::Storage::File::List+
@@ -1291,7 +1316,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   #   - +filepath+ (String) => path to file
   #   - +filename+ (String) => name of file
   #   - +opts+ (Hash) => extra options for create_file, see
-  #     https://googlecloudplatform.github.io/google-cloud-ruby/#/docs/google-cloud-storage/v0.23.2/google/cloud/storage/bucket?method=create_file-instance
+  #     https://googlecloudplatform.github.io/google-cloud-ruby/#/docs/google-cloud-storage/v1.9.0/google/cloud/storage/bucket?method=create_file-instance
   #
   # * *return*
   #   - +Google::Cloud::Storage::File+
@@ -1308,7 +1333,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   #   - +filename+ (String) => name of target file
   #   - +destination_name+ (String) => destination of new file
   #   - +opts+ (Hash) => extra options for create_file, see
-  #     https://googlecloudplatform.github.io/google-cloud-ruby/#/docs/google-cloud-storage/v0.23.2/google/cloud/storage/bucket?method=create_file-instance
+  #     https://googlecloudplatform.github.io/google-cloud-ruby/#/docs/google-cloud-storage/v1.9.0/google/cloud/storage/bucket?method=create_file-instance
   #
   # * *return*
   #   - +Google::Cloud::Storage::File+
@@ -1331,12 +1356,13 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
     begin
       file.delete
     rescue => e
-      logger.info("#{Time.now}: failed to delete workspace file #{filename} with error #{e.message}")
+      Rails.logger.info("#{Time.now}: failed to delete workspace file #{filename} with error #{e.message}")
       false
     end
   end
 
-  # retrieve single file in a GCP bucket of a workspace and download locally to portal (likely for parsing)
+  # retrieve single file in a GCP bucket of a workspace and download locally to portal.  will perform a chunked download
+  # on files larger that 100 MB
   #
   # * *params*
   #   - +workspace_namespace+ (String) => namespace of workspace
@@ -1359,7 +1385,23 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
       directory = File.join(destination, path_parts)
       FileUtils.mkdir_p directory
     end
-    file.download end_path, opts
+    # determine if a chunked download is needed
+    if file.size > 100.megabytes
+      size_range = 0..file.size
+      local = File.new(end_path, 'a+')
+      size_range.each_slice(10000000) do |range|
+        range_req = range.first..range.last
+        merged_opts = opts.merge(range: range_req)
+        buffer = file.download merged_opts
+        buffer.rewind
+        local.write buffer.read
+        Rails.logger.info "Downloaded #{range_req.last} of #{file.size} bytes (#{(range_req.last / file.size.to_f * 100).round(2)}%) for #{filename} from #{workspace_namespace}/#{workspace_name}"
+      end
+      # return newly-opened file
+      File.open end_path
+    else
+      file.download end_path, opts
+    end
   end
 
   # generate a signed url to download a file that isn't public (set at study level)
@@ -1369,13 +1411,31 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   #   - +workspace_name+ (String) => name of workspace
   #   - +filename+ (String) => name of file
   #   - +opts+ (Hash) => extra options for signed_url, see
-  #     https://googlecloudplatform.github.io/google-cloud-ruby/#/docs/google-cloud-storage/v0.23.2/google/cloud/storage/file?method=signed_url-instance
+  #     https://googlecloudplatform.github.io/google-cloud-ruby/#/docs/google-cloud-storage/v1.9.0/google/cloud/storage/file?method=signed_url-instance
   #
   # * *return*
   #   - +String+ signed URL
   def generate_signed_url(workspace_namespace, workspace_name, filename, opts={})
     file = self.get_workspace_file(workspace_namespace, workspace_name, filename)
     file.signed_url(opts)
+  end
+
+  # generate an api url to directly load a file from GCS via client-side JavaScript
+  #
+  # * *params*
+  #   - +workspace_namespace+ (String) => namespace of workspace
+  #   - +workspace_name+ (String) => name of workspace
+  #   - +filename+ (String) => name of file
+  #
+  # * *return*
+  #   - +String+ signed URL
+  def generate_api_url(workspace_namespace, workspace_name, filename)
+    file = self.get_workspace_file(workspace_namespace, workspace_name, filename)
+    if file
+      file.api_url
+    else
+      ''
+    end
   end
 
   # retrieve all files in a GCP directory
@@ -1385,7 +1445,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   #   - +workspace_name+ (String) => name of workspace
   #   - +directory+ (String) => name of directory in bucket
   #   - +opts+ (Hash) => hash of optional parameters, see
-  #     https://googlecloudplatform.github.io/google-cloud-ruby/#/docs/google-cloud-storage/v0.23.2/google/cloud/storage/bucket?method=files-instance
+  #     https://googlecloudplatform.github.io/google-cloud-ruby/#/docs/google-cloud-storage/v1.9.0/google/cloud/storage/bucket?method=files-instance
   #
   # * *return*
   #   - +Google::Cloud::Storage::File::List+

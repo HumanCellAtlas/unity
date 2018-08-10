@@ -1,5 +1,6 @@
 class SiteController < ApplicationController
 
+  before_action :check_profile_status, only: [:profile, :update_user_profile]
   before_action :check_firecloud_registration, except: [:profile, :update_user_profile]
   before_action :authenticate_user!, except: [:index, :view_pipeline_wdl]
 
@@ -102,6 +103,12 @@ class SiteController < ApplicationController
           redirect_to profile_path, notice: 'You must register before using Unity - please fill out the profile form and submit.' and return
         end
       end
+    end
+  end
+
+  def check_profile_status
+    unless ApplicationController.fire_cloud_client.services_available?('Thurloe')
+      redirect_to site_path, alert: "User profiles are currently unavailable.  Please try again later." and return
     end
   end
 end

@@ -1,6 +1,9 @@
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  config.action_controller.default_url_options = {host: "#{ENV['PROD_HOSTNAME']}"}
+  config.action_controller.asset_host = "#{ENV['PROD_HOSTNAME']}"
+
   # Code is not reloaded between requests.
   config.cache_classes = true
 
