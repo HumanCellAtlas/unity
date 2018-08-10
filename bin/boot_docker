@@ -112,6 +112,9 @@ case $OPTION in
 	esac
 done
 
+# rebuild the docker image if necessary
+docker build -t unitybenchmark/unity_benchmark_docker:$DOCKER_IMAGE_VERSION -f Dockerfile .
+
 # begin assembling run command
 PARAMETERS=" --name $CONTAINER_NAME -p 80:80 -p 443:443 -p 587:587 -h $PROD_HOSTNAME"
 
