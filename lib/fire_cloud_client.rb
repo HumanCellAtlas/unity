@@ -20,8 +20,8 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   GOOGLE_SCOPES = %w(https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/cloud-billing.readonly https://www.googleapis.com/auth/cloud-platform.read-only)
   # constant used for retry loops in process_firecloud_request and execute_gcloud_method
   MAX_RETRY_COUNT = 3
-  # default namespace used for all FireCloud workspaces owned by the 'portal'
-  PROJECT_NAMESPACE = 'unity-benchmark-development'
+  # default namespace containing reference workspaces for Unity
+  PROJECT_NAMESPACE = AdminConfiguration.project_namespace
   # location of Google service account JSON (must be absolute path to file)
   SERVICE_ACCOUNT_KEY = !ENV['SERVICE_ACCOUNT_KEY'].blank? ? File.absolute_path(ENV['SERVICE_ACCOUNT_KEY']) : ''
   # Permission values allowed for FireCloud workspace ACLs

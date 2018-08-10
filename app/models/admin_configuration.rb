@@ -80,7 +80,8 @@ class AdminConfiguration < ApplicationRecord
 
   # get the default FireCloud project for this instance.  will source reference benchmark workspaces from here
   def self.project_namespace
-
+    project = AdminConfiguration.find_by(config_type: 'Unity FireCloud Project')
+    project.present? ? project.value : 'unity-benchmark-development' # default value
   end
 
   private
