@@ -15,9 +15,9 @@
           <tr>
             <td><%= project.namespace %></td>
             <td>
-              <%= link_to 'Details', project, class: 'btn btn-xs btn-primary' %>
-              <%= link_to 'Workspaces', workspaces_project_path(project), class: 'btn btn-xs btn-secondary' %>
-              <%= link_to 'Remove', project, method: :delete, data: { confirm: "Are you sure you want to remove '#{project.namespace}'?  You will not be able to use it with Unity unless you re-register it." }, class: 'btn btn-xs btn-danger' %>
+              <%= link_to 'Details', project, class: 'btn btn-sm btn-primary' %>
+              <%= link_to 'Workspaces', workspaces_project_path(project), class: 'btn btn-sm btn-secondary' %>
+              <%= link_to 'Remove', project, method: :delete, data: { confirm: "Are you sure you want to remove '#{project.namespace}'?  You will not be able to use it with Unity unless you re-register it." }, class: 'btn btn-sm btn-danger' %>
             </td>
           </tr>
         <% end %>

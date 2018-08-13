@@ -13,11 +13,11 @@ class AdminConfiguration < ApplicationRecord
                           message: ": '%{value}' has already been set.  Please edit the corresponding entry to update.",
                           unless: proc {|attributes| ['Reference Data Workspace', 'Workflow Name'].include?(attributes['config_type'])}
 
-  validate :validate_value_by_type
+  validates_format_of :value, with: OBJECT_LABELS, message: OBJECT_LABELS_MESSAGE
 
   API_NOTIFIER_NAME = 'API Health Check Notifier'
   FIRECLOUD_ACCESS_NAME = 'FireCloud Access'
-  CONFIG_TYPES = ['Workflow Name', 'Unity FireCloud User Group', 'Reference Data Workspace', 'Unity FireCloud Project', API_NOTIFIER_NAME]
+  CONFIG_TYPES = ['Unity FireCloud User Group', 'Reference Data Workspace', 'Unity FireCloud Project', API_NOTIFIER_NAME]
   VALUE_TYPES = %w(Numeric Boolean String)
 
   # display name for use in notices/alerts

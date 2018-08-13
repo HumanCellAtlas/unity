@@ -1,7 +1,7 @@
 <%= form_with(model: project, local: true, html: {class: 'form'}) do |form| %>
   <% if project.errors.any? %>
     <div class="bs-callout bs-callout-danger" id="project-errors-block">
-      <h2><%= pluralize(project.errors.count, "error") %> prohibited this project from being saved:</h2>
+      <h4><%= pluralize(project.errors.count, "error") %> prohibited this project from being saved:</h4>
 
       <ul>
       <% project.errors.full_messages.each do |message| %>

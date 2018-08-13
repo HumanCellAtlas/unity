@@ -1,0 +1,47 @@
+<h2><%= @reference_analysis.display_name %></h2>
+<h3>WDLs</h3>
+<dl class="row">
+  <dt class="col-sm-3">Reference Analysis WDL</dt>
+  <dd class="col-sm-9"><%= link_to @reference_analysis.analysis_wdl, @reference_analysis.wdl_view_url(:analysis_wdl) %></dd>
+  <dt class="col-sm-3">Benchmark WDL</dt>
+  <dd class="col-sm-9"><%= link_to @reference_analysis.benchmark_wdl, @reference_analysis.wdl_view_url(:benchmark_wdl) %></dd>
+  <dt class="col-sm-3">Orchestration</dt>
+  <dd class="col-sm-9"><%= link_to @reference_analysis.orchestration_wdl, @reference_analysis.wdl_view_url(:orchestration_wdl) %></dd>
+</dl>
+<h3>Reference Data</h3>
+<p class="text-muted">This is a list of reference input/output data that is not included in the default configuration.</p>
+<% if @reference_analysis.reference_analysis_data.where(data_type: 'input').any? %>
+  <h4>Inputs (<%= @reference_analysis.config_setting_count('input') %>)</h4>
+  <dl class="row">
+    <% @reference_analysis.reference_analysis_data.where(data_type: 'input').each do |input| %>
+      <dt class="col-sm-3"><%= input.call_name %>.<%= input.parameter_name %></dt>
+      <dd class="col-sm-9"><%= input.gs_url %></dd>
+    <% end %>
+  </dl>
+<% end %>
+
+<% if @reference_analysis.reference_analysis_data.where(data_type: 'output').any? %>
+  <h4>Outputs (<%= @reference_analysis.config_setting_count('output') %>)</h4>
+  <dl class="row">
+    <% @reference_analysis.reference_analysis_data.where(data_type: 'output').each do |output| %>
+      <dt class="col-sm-3"><%= output.call_name %>.<%= output.parameter_name %></dt>
+      <dd class="col-sm-9"><%= output.gs_url %></dd>
+    <% end %>
+  </dl>
+<% end %>
+
+<h3>Options</h3>
+<% if @reference_analysis.options.any? %>
+  <dl class="row">
+    <% @reference_analysis.options.each do |name, value| %>
+        <dt class="col-sm-3"><%= name %></dt>
+        <dd class="col-sm-9"><%= value %></dd>
+    <% end %>
+  </dl>
+<% end %>
+
+<p>
+  <%= link_to "<i class='fas fa-fw fa-edit'></i> Edit".html_safe, edit_reference_analysis_path(@reference_analysis), class: 'btn btn-sm btn-primary' %>
+  <%= link_to "<i class='fas fa-fw fa-chevron-left'></i> Back".html_safe, reference_analyses_path, class: 'btn btn-sm btn-warning' %>
+</p>
+

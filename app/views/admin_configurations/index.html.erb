@@ -6,7 +6,7 @@
       <table class="table table-striped table-active" id="admin-config">
         <thead>
         <tr>
-          <th>Config type</th>
+          <th>Config Type</th>
           <th>Value</th>
           <th>Options</th>
           <th>Actions</th>
@@ -23,7 +23,10 @@
                 <span class="badge badge-dark"><%= name %></span>&nbsp;<span class="badge badge-secondary"><%= val %></span><br />
               <% end %>
             </td>
-            <td><%= link_to 'Edit', edit_admin_configuration_path(admin_configuration), class: 'btn btn-xs btn-primary' %>&nbsp;<%= link_to 'Destroy', admin_configuration, method: :delete, data: { confirm: 'Are you sure you want to delete this configuration?' }, class: 'btn btn-xs btn-danger' %></td>
+            <td class="actions">
+              <%= link_to 'Edit', edit_admin_configuration_path(admin_configuration), class: 'btn btn-sm btn-primary' %>&nbsp;
+              <%= link_to 'Destroy', admin_configuration, method: :delete, data: { confirm: 'Are you sure you want to delete this configuration?' }, class: 'btn btn-sm btn-danger' %>
+            </td>
           </tr>
         <% end %>
         </tbody>

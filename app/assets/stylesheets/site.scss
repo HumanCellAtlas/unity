@@ -15,7 +15,7 @@ html, body {
   min-height: 100%;
 }
 
-.top-pad {
+.top-pad-60 {
   padding-top: 60px;
 }
 
@@ -41,19 +41,31 @@ html, body {
   padding-top: 15px;
 }
 
+.actions {
+  white-space: nowrap;
+}
+
+.bottom-margin-10 {
+  margin-bottom: 10px;
+}
+
+.top-margin-10 {
+  margin-top: 10px;
+}
+
 /* bs-callout classes */
 
-.bs-callout{
+.bs-callout {
   margin:20px 0;
   padding:20px 15px 15px 20px;
   border-left:3px solid #eee
 }
 
-.bs-callout p:last-child{
+.bs-callout p:last-child {
   margin-bottom:0;
 }
 
-.bs-callout code{
+.bs-callout code {
   background-color:#fff;
   border-radius:3px
 }
@@ -64,38 +76,38 @@ html, body {
   margin-bottom:5px
 }
 
-.bs-callout ul{
+.bs-callout ul {
   padding-left: 20px;
   color: inherit;
 }
 
-.bs-callout-danger{
+.bs-callout-danger {
   background-color:#fdf7f7;
   border-left: 5px solid #d9534f;
   color: #d9534f
 }
 
-.bs-callout-danger ul{
+.bs-callout-danger ul {
   color: #d9534f;
 }
 
-.bs-callout-warning{
+.bs-callout-warning {
   background-color:#fcf8f2;
   border-left: 5px solid #f0ad4e;
   color: #f0ad4e
 }
 
-.bs-callout-warning ul{
+.bs-callout-warning ul {
   color: #f0ad4e;
 }
 
-.bs-callout-info{
+.bs-callout-info {
   background-color:#f4f8fa;
   border-left: 5px solid #5bc0de;
   color: #5bc0de
 }
 
-.bs-callout-info ul{
+.bs-callout-info ul {
   color: #5bc0de;
 }
 
@@ -105,7 +117,7 @@ html, body {
   color: #777
 }
 
-.bs-callout-default ul{
+.bs-callout-default ul {
   color: #777;
 }
 
@@ -115,7 +127,7 @@ html, body {
   color: #428bca
 }
 
-.bs-callout-primary ul{
+.bs-callout-primary ul {
   color: #428bca;
 }
 

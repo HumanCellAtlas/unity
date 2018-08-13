@@ -1,10 +1,10 @@
-<%= nested_form_for(@admin_configuration, html: {class: 'form', multipart: true}) do |form| %>
-  <% if @admin_configuration.errors.any? %>
+<%= nested_form_for(admin_configuration, html: {class: 'form', multipart: true}) do |form| %>
+  <% if admin_configuration.errors.any? %>
     <div class="bs-callout bs-callout-danger" id="admin-configuration-errors-block">
-      <h4><%= pluralize(@admin_configuration.errors.count, "error") %> prohibited this configuration option from being saved:</h4>
+      <h4><%= pluralize(admin_configuration.errors.count, "error") %> prohibited this configuration option from being saved:</h4>
 
       <ul>
-      <% @admin_configuration.errors.full_messages.each do |message| %>
+      <% admin_configuration.errors.full_messages.each do |message| %>
         <li><%= message %></li>
       <% end %>
       </ul>

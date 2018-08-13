@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
 
+  resources :reference_analyses
   scope 'unity' do
 
     devise_for :users, controllers: { omniauth_callbacks: 'users/omniauth_callbacks', sessions: 'users/sessions' }

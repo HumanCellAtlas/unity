@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  firecloud_project: MyString
+  firecloud_workspace: MyString
+  analysis_wdl: MyString
+  benchmark_wdl: MyString
+  orchestration_wdl: MyString
+
+two:
+  firecloud_project: MyString
+  firecloud_workspace: MyString
+  analysis_wdl: MyString
+  benchmark_wdl: MyString
+  orchestration_wdl: MyString

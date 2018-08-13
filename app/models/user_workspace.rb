@@ -4,8 +4,8 @@ class UserWorkspace < ApplicationRecord
 
   attribute :name, :string
 
-  validates :name, format: ValidationTools::ALPHANUMERIC_AND_DASH,
-                   presence: true
+  validates_format_of :name, with: ALPHANUMERIC_EXTENDED, message: ALPHANUMERIC_EXTENDED_MESSAGE
+  validates_presence_of :name
   validates_uniqueness_of :name, scope: :project_id
 
   def namespace

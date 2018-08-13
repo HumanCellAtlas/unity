@@ -4,9 +4,9 @@ class Project < ApplicationRecord
   attribute :namespace, :string
   attribute :user_role, :string
 
-  validates :namespace, format: ValidationTools::ALPHANUMERIC_AND_DASH,
-            uniqueness: true,
-            presence: true
+  validates_uniqueness_of :namespace, scope: [:user_id]
+  validates_presence_of :namespace, :user_role
+  validates_format_of :namespace, with: ALPHANUMERIC_EXTENDED, message: ALPHANUMERIC_EXTENDED_MESSAGE
   validate :verify_project_membership
   validates :user_role, inclusion: {in: %w(Member Owner)}
 

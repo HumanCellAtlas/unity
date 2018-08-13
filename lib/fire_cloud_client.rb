@@ -214,7 +214,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   #   - +http_method+ (String, Symbol) => valid http method
   #   - +path+ (String) => FireCloud REST API path
   #   - +payload+ (Hash) => HTTP POST/PATCH/PUT body for creates/updates, defaults to nil
-  #		- +opts+ (Hash) => Hash of extra options (defaults are file_upload=false, max_attemps=MAX_RETRY_COUNT)
+  #   - +opts+ (Hash) => Hash of extra options (defaults are file_upload=false, max_attemps=MAX_RETRY_COUNT)
   #
   # * *return*
   #   - +Hash+, +Boolean+ depending on response body
@@ -845,6 +845,53 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   def update_method_namespace_permissions(config_namespace, permissions)
     path = self.api_root + "/api/methods/#{config_namespace}/permissions"
     process_firecloud_request(:post, path, permissions.to_json)
+  end
+
+  ##
+  ## GA4GH TOOL REGISTRY METHODS
+  ##
+
+  # get list of available GA4GH tools
+  #
+  # * *return*
+  #   - +Array+ of tools
+  def get_tools
+    path = self.api_root + '/ga4gh/v1/tools'
+    process_firecloud_request(:get, path)
+  end
+
+  # get a GA4GH tool registry object
+  #
+  # * *params*
+  #   - +namespace+ (String) => namespace of tool
+  #   - +tool_name+ (String) => name of tool
+  #   - +version+ (Integer) => version number of tool
+  #
+  # * *return*
+  #   - +Hash+ tool object
+  def get_tool(namespace, tool_name, version)
+    path = self.api_root + "/ga4gh/v1/tools/#{namespace}:#{tool_name}/versions/#{version}"
+    process_firecloud_request(:get, path)
+  end
+
+  # get a GA4GH tool registry descriptor
+  #
+  # * *params*
+  #   - +namespace+ (String) => namespace of tool
+  #   - +tool_name+ (String) => name of tool
+  #   - +version+ (Integer) => version number of tool
+  #   - +descriptor_type+ (String) => type of descriptor, either WDL or plain-WDL
+  #
+  # * *return*
+  #   - +Hash+ tool object (for WDL descriptor_type), +String+ WDL payload (for plain-WDL descriptor_type)
+  def get_tool_descriptor(namespace, tool_name, version, descriptor_type)
+    descriptors = %(WDL plain-WDL)
+    if descriptors.include?(descriptor_type)
+      path = self.api_root + "/ga4gh/v1/tools/#{namespace}:#{tool_name}/versions/#{version}/#{descriptor_type}/descriptor"
+      process_firecloud_request(:get, path)
+    else
+      raise RuntimeError.new("Invalid descriptor type: #{descriptor_type}; must be one of '#{descriptors.join(', ')}'")
+    end
   end
 
   ##

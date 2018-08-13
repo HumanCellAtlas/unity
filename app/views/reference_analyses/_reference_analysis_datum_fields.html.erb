@@ -1,0 +1,41 @@
+<div class="card bottom-margin-10">
+  <% if f.object.errors.any? %>
+    <div class="form-group row">
+      <div class="col-sm">
+        <div class="bs-callout bs-callout-danger">
+          <h4><%= pluralize(f.object.errors.count, "error") %> prohibited this additional option from being saved:</h4>
+
+          <ul>
+            <% f.object.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  <% end %>
+  <div class="card-body bg-light">
+    <div class="form-group row">
+      <div class="col-sm-1">
+        <span class="text-secondary bg-light form-control">Type</span>
+      </div>
+      <div class="col-sm-4">
+        <%= f.select :data_type, options_for_select(ReferenceAnalysisDatum::DATA_TYPES, selected: f.object.data_type), {}, class: 'form-control' %>
+      </div>
+      <div class="col-sm-7">
+        <%= f.text_field :call_name, class: 'form-control', placeholder: 'WDL Call/Task Name' %>
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-sm-5">
+        <%= f.text_field :parameter_name, class: 'form-control', placeholder: 'Parameter Name (from WDL/Configuration)' %>
+      </div>
+      <div class="col-sm-5">
+        <%= f.text_field :gs_url, class: 'form-control', placeholder: 'GS URL to file' %>
+      </div>
+      <div class="col-sm-2">
+        <%= f.link_to_remove "<span class='btn btn-danger'><span class='fas fa-fw fa-times'></span></span>".html_safe, data: {confirm: 'Are you sure?  This cannot be undone unless you reload the page before saving.'} %>
+      </div>
+    </div>
+  </div>
+</div>

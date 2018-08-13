@@ -22,11 +22,12 @@
       </ul>
       <ul class="navbar-nav ml-auto">
         <% if user_signed_in? %>
-          <li class="nav-item dropdown dropdown-menu-left">
+          <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false"><i class="fas fa-user"></i> <%= current_user.full_name %></a>
-            <div class="dropdown-menu">
+            <div class="dropdown-menu dropdown-menu-right">
             <% if current_user.admin? %>
-              <%= link_to "<i class='fas fa-fw fa-lock'></i> Admin".html_safe, admin_configurations_path, class: 'dropdown-item' %>
+              <%= link_to "<i class='fas fa-fw fa-lock'></i> Admin Control Panel".html_safe, admin_configurations_path, class: 'dropdown-item' %>
+              <%= link_to "<i class='fas fa-fw fa-flask'></i> Reference Analyses".html_safe, reference_analyses_path, class: 'dropdown-item' %>
               <div class="dropdown-divider"></div>
             <% end %>
               <%= link_to "<i class='fas fa-fw fa-user'></i> My Profile".html_safe, profile_path, class: 'dropdown-item' %>

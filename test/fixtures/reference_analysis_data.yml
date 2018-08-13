@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  reference_analysis_id: 
+  output_name: MyString
+  output_gs_url: MyString
+
+two:
+  reference_analysis_id: 
+  output_name: MyString
+  output_gs_url: MyString
