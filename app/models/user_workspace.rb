@@ -27,11 +27,9 @@ class UserWorkspace < ApplicationRecord
     end
   end
 
-  # set a default name based off of reference analysis name on initialization
-  after_initialize do |user_workspace|
-    if self.reference_analysis.present?
-      user_workspace.name = reference_analysis.extract_wdl_keys(:analysis_wdl).join('-')
-    end
+  # generate a default name based off of reference analysis name on initialization
+  def default_name
+    self.reference_analysis.extract_wdl_keys(:analysis_wdl).join('-')
   end
 
   private

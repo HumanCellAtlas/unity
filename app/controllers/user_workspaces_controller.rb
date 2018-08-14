@@ -25,6 +25,7 @@ class UserWorkspacesController < ApplicationController
   # GET /user_workspaces/new
   def new
     @user_workspace = UserWorkspace.new(user_id: current_user.id, reference_analysis_id: @reference_analysis.id)
+    @user_workspace.name = @user_workspace.default_name
   end
 
   # POST /user_workspaces
