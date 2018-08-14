@@ -31,11 +31,17 @@ class SiteController < ApplicationController
 
   def profile
     begin
-      user_client = user_fire_cloud_client(current_user)
-      profile = user_client.get_profile
-      @profile_info = {}
-      profile['keyValuePairs'].each do |attribute|
-        @profile_info[attribute['key']] = attribute['value']
+      @fire_cloud_profile = FireCloudProfile.new
+      begin
+        user_client = user_fire_cloud_client(current_user)
+        profile = user_client.get_profile
+        profile['keyValuePairs'].each do |attribute|
+          if @fire_cloud_profile.respond_to?("#{attribute['key']}=")
+            @fire_cloud_profile.send("#{attribute['key']}=", attribute['value'])
+          end
+        end
+      rescue => e
+        logger.info "#{Time.now}: unable to retrieve FireCloud profile for #{current_user.email}: #{e.message}"
       end
     rescue RuntimeError => e
       logger.info "#{Time.now}: unable to retrieve FireCloud profile for #{current_user.email}: #{e.message}"
@@ -45,27 +51,28 @@ class SiteController < ApplicationController
 
   def update_user_profile
     begin
-      user_client = user_fire_cloud_client(current_user)
-      user_client.set_profile(profile_params)
-      # log that user has registered so we can use this elsewhere
-      if !current_user.registered_for_firecloud
-        current_user.update(registered_for_firecloud: true)
-      end
-      @notice = "Your FireCloud profile has been successfully updated."
-      # now check if user is part of 'all-portal' user group
-      user_group_config = AdminConfiguration.find_by(config_type: 'Portal FireCloud User Group')
-      if user_group_config.present?
-        group_name = user_group_config.value
-        user_group = Study.firecloud_client.get_user_group(group_name)
-        unless user_group['membersEmails'].include?(current_user.email)
-          logger.info "#{Time.now}: adding #{current_user.email} to #{group_name} user group"
-          Study.firecloud_client.add_user_to_group(group_name, 'member', current_user.email)
-          logger.info "#{Time.now}: user group registration complete"
+      @fire_cloud_profile = FireCloudProfile.new(profile_params)
+      if @fire_cloud_profile.valid?
+        user_client = user_fire_cloud_client(current_user)
+        user_client.set_profile(profile_params)
+        # log that user has registered so we can use this elsewhere
+        if !current_user.registered_for_firecloud
+          current_user.update(registered_for_firecloud: true)
+        end
+        @notice = "Your FireCloud profile has been successfully updated."
+        # now check if user is part of Unity user group
+        current_user.add_to_unity_user_group
+        redirect_to profile_path, notice: 'Your FireCloud profile has been successfully updated.' and return
+      else
+        logger.info "#{Time.now}: error in updating FireCloud profile for #{current_user.email}: #{@fire_cloud_profile.errors.full_messages}"
+        respond_to do |format|
+          format.html { render :profile, status: :unprocessable_entity}
+          format.json { render @fire_cloud_profile.errors, status: :unprocessable_entity}
         end
       end
     rescue RuntimeError => e
       logger.info "#{Time.now}: unable to update FireCloud profile for #{current_user.email}: #{e.message}"
-      @alert = "An error occurred when trying to update your FireCloud profile: #{e.message}"
+      redirect_to profile_path, alert: "An error occurred when trying to update your FireCloud profile: #{e.message}" and return
     end
   end
 
@@ -85,7 +92,7 @@ class SiteController < ApplicationController
   private
 
   def profile_params
-    params.require(:firecloud_profile).permit(:contactEmail, :email, :firstName, :lastName, :institute, :institutionalProgram,
+    params.require(:fire_cloud_profile).permit(:contactEmail, :email, :firstName, :lastName, :institute, :institutionalProgram,
                                               :nonProfitStatus, :pi, :programLocationCity, :programLocationState,
                                               :programLocationCountry, :title)
   end
