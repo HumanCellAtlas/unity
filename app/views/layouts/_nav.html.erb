@@ -31,7 +31,8 @@
               <div class="dropdown-divider"></div>
             <% end %>
               <%= link_to "<i class='fas fa-fw fa-user'></i> My Profile".html_safe, profile_path, class: 'dropdown-item' %>
-              <%= link_to "<i class='fas fa-fw fa-folder'></i> My Projects".html_safe, projects_path, class: 'dropdown-item' %>
+              <%= link_to "<i class='fas fa-fw fa-folder'></i> My Billing Projects".html_safe, projects_path, class: 'dropdown-item' %>
+              <%= link_to "<i class='fas fa-fw fa-project-diagram'></i> My Benchmarks".html_safe, user_workspaces_path, class: 'dropdown-item' %>
               <%= link_to "<i class='fas fa-fw fa-sign-out-alt'></i> Sign Out".html_safe, destroy_user_session_path, method: :delete, class: 'dropdown-item' %>
             </div>
           </li>

@@ -15,7 +15,6 @@
 //= require jquery
 //= require popper
 //= require bootstrap-sprockets
-//= require dataTables/jquery.dataTables
 //= require jquery_nested_form
 //= require helpers
 //= require_tree .

@@ -104,7 +104,7 @@ class ProjectsController < ApplicationController
     namespace = @project.namespace
     @project.destroy
     respond_to do |format|
-      format.html { redirect_to projects_url, notice: "'#{namespace}' was successfully removed from Unity.  The source project in FireCloud has not been changed." }
+      format.html { redirect_to projects_path, notice: "'#{namespace}' was successfully removed from Unity.  The source project in FireCloud has not been changed." }
       format.json { head :no_content }
     end
   end
