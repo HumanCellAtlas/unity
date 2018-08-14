@@ -253,7 +253,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
           @retry_count = 0
           return true
         else
-          Rails.logger.info "#{Time.now}: Unexpected response #{@obj.code}, not sure what to do here..."
+          Rails.logger.info "Unexpected response #{@obj.code}, not sure what to do here..."
           @obj.message
         end
       rescue RestClient::Exception => e
@@ -266,7 +266,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
     else
       @retry_count = 0
       error_message = parse_error_message(@error)
-      Rails.logger.error "#{Time.now}: Retry count exceeded - #{error_message}"
+      Rails.logger.error "Retry count exceeded - #{error_message}"
       raise RuntimeError.new(error_message)
     end
   end
@@ -310,7 +310,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
       response = RestClient::Request.execute(method: :get, url: path, headers: headers)
       JSON.parse(response.body)
     rescue RestClient::ExceptionWithResponse => e
-      Rails.logger.error "#{Time.now}: FireCloud status error: #{e.message}"
+      Rails.logger.error "FireCloud status error: #{e.message}"
       e.response
     end
   end
@@ -357,11 +357,12 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
     workspaces.keep_if {|ws| ws['workspace']['namespace'] == workspace_namespace}
   end
 
-  # create a workspace, prepending WORKSPACE_NAME_PREFIX as necessary
+  # create a workspace
   #
   # * *params*
   #   - +workspace_namespace+ (String) => namespace of workspace
   #   - +workspace_name+ (String) => name of workspace
+  #   - +authorization_domains+ (Array) => authorization domains to restrict workspace access (passed with splat)
   #
   # * *return*
   #   - +Hash+ object of workspace instance
@@ -372,6 +373,35 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
         namespace: workspace_namespace,
         name: workspace_name,
         attributes: {},
+        authorizationDomain: []
+    }
+    # add authorization domains to new workspace
+    authorization_domains.each do |domain|
+      payload[:authorizationDomain] << {membersGroupName: domain}
+    end
+    process_firecloud_request(:post, path, payload.to_json)
+  end
+
+  # clone a workspace into a new workspace (will clone workspace attributes, configurations, and entities)
+  #
+  # * *params*
+  #   - +workspace_namespace+ (String) => namespace of workspace
+  #   - +workspace_name+ (String) => name of workspace
+  #   - +clone_namespace+ (String) => name of workspace
+  #   - +clone_name+ (String) => name of workspace
+  #   - +authorization_domains+ (Array) => authorization domains to restrict workspace access (passed with splat)
+  #
+  # * *return*
+  #   - +Hash+ object of cloned workspace instance
+  def clone_workspace(workspace_namespace, workspace_name, clone_namespace, clone_name, *authorization_domains)
+    path = self.api_root + "/api/workspaces/#{workspace_namespace}/#{workspace_name}/clone"
+    existing_workspace = get_workspace(workspace_namespace, workspace_name)
+    attributes = existing_workspace['workspace']['attributes']
+    # construct payload for POST
+    payload = {
+        namespace: clone_namespace,
+        name: clone_name,
+        attributes: attributes,
         authorizationDomain: []
     }
     # add authorization domains to new workspace
@@ -1302,12 +1332,12 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
         self.send(method_name, *params)
       rescue => e
         @error = e.message
-        Rails.logger.info "#{Time.now}: error calling #{method_name} with #{params.join(', ')}; #{e.message} -- retry ##{@retries}"
+        Rails.logger.info "Error calling #{method_name} with #{params.join(', ')}; #{e.message} -- retry ##{@retries}"
         @retries += 1
         execute_gcloud_method(method_name, *params)
       end
     else
-      Rails.logger.info "#{Time.now}: Retry count exceeded: #{@error}"
+      Rails.logger.info "Retry count exceeded: #{@error}"
       raise RuntimeError.new "#{@error}"
     end
   end
@@ -1403,7 +1433,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
     begin
       file.delete
     rescue => e
-      Rails.logger.info("#{Time.now}: failed to delete workspace file #{filename} with error #{e.message}")
+      Rails.logger.info("Failed to delete workspace file #{filename} with error #{e.message}")
       false
     end
   end
