@@ -184,6 +184,14 @@ TODO: Update Kubernetes deployment instructions on how to configure CloudSQL
 
 TODO: Update deployment to load CloudSQL instance connection details from environment variables
 
+#### PATCHING DEPLOYMENTS
+
+If an update does not require incrementing a Docker image version number, you can force a restart by calling <code>bin/patch_deployment</code>.
+This will 'patch' the current deployment by updating an annotation on the deployment (specifically, the date) and force 
+a full restart, including a <code>docker pull</code>.
+
+NOTE: You must push an update to your docker image first via <code>docker push</code>.
+
 ### OTHER DEPLOYMENTS
 
 Unity can also be deployed on any infrastructure that will support [Docker](https://www.docker.com).  This could be on 
