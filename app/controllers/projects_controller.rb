@@ -19,7 +19,7 @@ class ProjectsController < ApplicationController
       begin
         @project_members = user_fire_cloud_client(current_user, @project.namespace).get_billing_project_members(@project.namespace)
       rescue RuntimeError => e
-        logger.error "#{Time.now} - error retrieving project members for #{@project.namespace}: #{e.message}"
+        logger.error "Error retrieving project members for #{@project.namespace}: #{e.message}"
       end
     end
   end
@@ -62,7 +62,7 @@ class ProjectsController < ApplicationController
         client = user_fire_cloud_client(current_user, @project.namespace)
         client.create_billing_project(@project.namespace, params[:billing_account])
       rescue RuntimeError => e
-        logger.error "#{Time.now} - error in creating new billing project #{@project.namespace}: #{e.message}"
+        logger.error "Error in creating new billing project #{@project.namespace}: #{e.message}"
         @project.errors.add(:base, "Unable to create project #{@project.namespace}: #{e.message}")
         # immediately exit and do not attempt to save project
         logger.info 'in first block'

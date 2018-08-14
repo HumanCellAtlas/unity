@@ -1,6 +1,5 @@
 Rails.application.routes.draw do
 
-  resources :reference_analyses
   scope 'unity' do
 
     devise_for :users, controllers: { omniauth_callbacks: 'users/omniauth_callbacks', sessions: 'users/sessions' }
@@ -10,7 +9,9 @@ Rails.application.routes.draw do
       match 'sign_out', :to => 'users/sessions#destroy', :as => :destroy_user_session, via: :delete
     end
 
+    # admin & reference_analysis routes
     resources :admin_configurations, path: 'admin'
+    resources :reference_analyses
 
     # project routes
     resources :projects, only: [:index, :new, :show, :create, :destroy] do
@@ -18,6 +19,16 @@ Rails.application.routes.draw do
         get 'workspaces', to: 'projects#workspaces', as: 'workspaces'
       end
     end
+
+    # user_workspaces routes (benchmarking workspaces)
+    get 'my-benchmarks', to: 'user_workspaces#index', as: :user_workspaces
+    post 'my-benchmarks', to: 'user_workspaces#create', as: :create_user_workspace
+    get 'my-benchmarks/new', to: 'user_workspaces#new', as: :new_user_workspace
+    get 'my-benchmarks/:project/:name', to: 'user_workspaces#show', as: :user_workspace
+    get 'my-benchmarks/:id', to: 'user_workspaces#show' # fallback route
+    delete 'my-benchmarks/:project/:name', to: 'user_workspaces#destroy', as: :destroy_user_workspace
+    delete 'my-benchmarks/:id', to: 'user_workspaces#destroy' # fallback route
+
     get 'projects/new/from_scratch', to: 'projects#new_from_scratch', as: :new_project_from_scratch
     post 'projects/new/from_scratch', to: 'projects#create_from_scratch', as: :create_project_from_scratch
 

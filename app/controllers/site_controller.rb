@@ -6,27 +6,27 @@ class SiteController < ApplicationController
 
   def index
     # load available 'blessed' workflows
-    workflow_configs = AdminConfiguration.where(config_type: 'Workflow Name')
+    reference_analyses = ReferenceAnalysis.all
     @methods = []
-    if workflow_configs.present?
-      workflow_configs.each do |config|
-        workflow_namespace, workflow_name, workflow_snapshot = config.value.split('/')
-        methods = fire_cloud_client.get_methods(namespace: workflow_namespace, name: workflow_name, snapshotId: workflow_snapshot)
-        methods.each do |method|
-          @methods << {
-              namespace: method['namespace'],
-              name: method['name'],
-              snapshot: method['snapshotId'],
-              synopsis: method['synopsis'],
-              identifier: "#{method['namespace']}-#{method['name']}-#{method['snapshotId']}",
-              reference_workspace: config.options[:reference_workspace],
-              documentation_link: config.options[:documentation_link]
-          }
-        end
+
+    reference_analyses.each do |analysis|
+      workflow_namespace, workflow_name, workflow_snapshot = analysis.extract_wdl_keys(:analysis_wdl)
+      methods = fire_cloud_client.get_methods(namespace: workflow_namespace, name: workflow_name, snapshotId: workflow_snapshot)
+      methods.each do |method|
+        @methods << {
+            reference_analysis_id: analysis.id,
+            namespace: method['namespace'],
+            name: method['name'],
+            snapshot: method['snapshotId'],
+            synopsis: method['synopsis'],
+            identifier: "#{method['namespace']}-#{method['name']}-#{method['snapshotId']}",
+            reference_workspace: analysis.display_name,
+            documentation_link: analysis.options[:documentation_link]
+        }
       end
     end
 
-    @user_workspaces = []
+    @user_workspaces = UserWorkspace.owned_by(current_user)
   end
 
   def profile
@@ -41,10 +41,10 @@ class SiteController < ApplicationController
           end
         end
       rescue => e
-        logger.info "#{Time.now}: unable to retrieve FireCloud profile for #{current_user.email}: #{e.message}"
+        logger.info "Unable to retrieve FireCloud profile for #{current_user.email}: #{e.message}"
       end
     rescue RuntimeError => e
-      logger.info "#{Time.now}: unable to retrieve FireCloud profile for #{current_user.email}: #{e.message}"
+      logger.info "Unable to retrieve FireCloud profile for #{current_user.email}: #{e.message}"
       redirect_to site_path, alert: "We are unable to load your profile at the moment - please try again later."
     end
   end
@@ -64,14 +64,14 @@ class SiteController < ApplicationController
         current_user.add_to_unity_user_group
         redirect_to profile_path, notice: 'Your FireCloud profile has been successfully updated.' and return
       else
-        logger.info "#{Time.now}: error in updating FireCloud profile for #{current_user.email}: #{@fire_cloud_profile.errors.full_messages}"
+        logger.info "Error in updating FireCloud profile for #{current_user.email}: #{@fire_cloud_profile.errors.full_messages}"
         respond_to do |format|
           format.html { render :profile, status: :unprocessable_entity}
           format.json { render @fire_cloud_profile.errors, status: :unprocessable_entity}
         end
       end
     rescue RuntimeError => e
-      logger.info "#{Time.now}: unable to update FireCloud profile for #{current_user.email}: #{e.message}"
+      logger.info "Unable to update FireCloud profile for #{current_user.email}: #{e.message}"
       redirect_to profile_path, alert: "An error occurred when trying to update your FireCloud profile: #{e.message}" and return
     end
   end
@@ -85,7 +85,7 @@ class SiteController < ApplicationController
       @pipeline_id = pipeline_attr.join('-')
     rescue RuntimeError => e
       @pipeline_wdl = "We're sorry, but we could not load the requested workflow object.  Please try again later.\n\nError: #{e.message}"
-      logger.error "#{Time.now}: unable to load WDL for #{params[:namespace]}:#{params[:name]}:#{params[:snapshot]}; #{e.message}"
+      logger.error "Unable to load WDL for #{params[:namespace]}:#{params[:name]}:#{params[:snapshot]}; #{e.message}"
     end
   end
 

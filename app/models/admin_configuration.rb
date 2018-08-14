@@ -64,7 +64,7 @@ class AdminConfiguration < ApplicationRecord
 
     if !api_ok
       current_status = ApplicationController.fire_cloud_client.api_available?
-      Rails.logger.error "#{Time.now}: ALERT: FIRECLOUD API SERVICE INTERRUPTION -- current status: #{current_status}"
+      Rails.logger.error "ALERT: FIRECLOUD API SERVICE INTERRUPTION -- current status: #{current_status}"
       UnityMailer.firecloud_api_notification(current_status).deliver_now
     end
   end

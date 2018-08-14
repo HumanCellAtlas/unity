@@ -15,15 +15,14 @@ class ReferenceAnalysis < ApplicationRecord
   has_many :reference_analysis_data, dependent: :delete_all
   has_many :reference_analysis_options, dependent: :delete_all
 
+  has_many :user_workspaces
+
   accepts_nested_attributes_for :reference_analysis_data, allow_destroy: true
   accepts_nested_attributes_for :reference_analysis_options, allow_destroy: true
 
+  # combine firecloud_project & firecloud_workspace for use in generating URLs (via firecloud_link_for)
   def display_name
     "#{firecloud_project}/#{firecloud_workspace}"
-  end
-
-  def firecloud_url
-    "https://portal.firecloud.org/#workspaces/#{self.firecloud_project}/#{self.firecloud_workspace}"
   end
 
   # get the number of input/output settings by type

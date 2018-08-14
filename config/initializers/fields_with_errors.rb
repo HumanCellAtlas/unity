@@ -16,7 +16,6 @@ ActionView::Base.field_error_proc = Proc.new do |html_tag, instance|
     elsif form_fields.include? e.node_name
       e['class'] += ' is-invalid'
       e['data-toggle'] = 'tooltip'
-      Rails.logger.info instance.inspect
       if instance.error_message.kind_of?(Array)
         e['title'] = instance.error_message.uniq.join(', ')
       else

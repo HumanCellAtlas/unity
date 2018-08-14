@@ -1,4 +1,4 @@
-<%= nested_form_for(reference_analysis, html: {class: 'form', multipart: true}) do |form| %>
+<%= nested_form_for(reference_analysis, html: {class: 'form', id: 'reference-analysis-form', multipart: true}) do |form| %>
   <% if reference_analysis.errors.any? %>
     <div class="bs-callout bs-callout-danger" id="reference-analysis-errors-block">
       <h4><%= pluralize(reference_analysis.errors.count, "error") %> prohibited this reference analysis from being saved:</h4>
@@ -62,8 +62,6 @@
                            id: 'add-reference-analysis-options' %>
     </div>
   </div>
-
-
 
   <div class="form-group row">
     <div class="col-sm">

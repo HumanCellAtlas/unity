@@ -26,7 +26,7 @@
                                  id: "#{method[:identifier]}"
                           } %>
             <% if method[:reference_workspace].present? %>
-              <%= link_to "Benchmark <i class='fas fa-fw fa-project-diagram'></i>".html_safe, firecloud_link_for(method[:reference_workspace]), class: 'btn btn-outline-dark btn-sm' %>
+              <%= link_to "Benchmark <i class='fas fa-fw fa-project-diagram'></i>".html_safe, new_user_workspace_path(reference_analysis_id: method[:reference_analysis_id]), class: 'btn btn-outline-dark btn-sm' %>
             <% end %>
             <% if method[:documentation_link].present? %>
               <%= link_to "Info <i class='fas fa-fw fa-info-circle'></i>".html_safe, method[:documentation_link], class: 'btn btn-outline-secondary btn-sm', target: :_blank %>

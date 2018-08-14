@@ -12,6 +12,7 @@ class User < ApplicationRecord
 
   # Associations
   has_many :projects, dependent: :delete_all
+  has_many :user_workspaces, dependent: :delete_all
 
   def self.from_omniauth(access_token)
     data = access_token.info
@@ -56,10 +57,10 @@ class User < ApplicationRecord
         self.update!(access_token: user_access_token)
         user_access_token
       rescue RestClient::BadRequest => e
-        Rails.logger.error "#{Time.now}: Unable to generate access token for user #{self.email}; refresh token is invalid."
+        Rails.logger.error "Unable to generate access token for user #{self.email}; refresh token is invalid."
         nil
       rescue => e
-        Rails.logger.error "#{Time.now}: Unable to generate access token for user #{self.email} due to unknown error; #{e.message}"
+        Rails.logger.error "Unable to generate access token for user #{self.email} due to unknown error; #{e.message}"
       end
     else
       nil
@@ -81,9 +82,9 @@ class User < ApplicationRecord
     user_group_config = AdminConfiguration.find_by(config_type: 'Unity FireCloud User Group')
     if user_group_config.present?
       group_name = user_group_config.value
-      Rails.logger.info "#{Time.now}: adding #{self.email} to #{group_name} user group"
+      Rails.logger.info "Adding #{self.email} to #{group_name} user group"
       ApplicationController.fire_cloud_client.add_user_to_group(group_name, 'member', self.email)
-      Rails.logger.info "#{Time.now}: user group registration complete"
+      Rails.logger.info "User group registration complete"
     end
   end
 end

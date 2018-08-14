@@ -4,10 +4,12 @@ class Project < ApplicationRecord
   attribute :namespace, :string
   attribute :user_role, :string
 
+  has_many :user_workspaces
+
+  validate :verify_project_membership
   validates_uniqueness_of :namespace, scope: [:user_id]
   validates_presence_of :namespace, :user_role
   validates_format_of :namespace, with: ALPHANUMERIC_EXTENDED, message: ALPHANUMERIC_EXTENDED_MESSAGE
-  validate :verify_project_membership
   validates :user_role, inclusion: {in: %w(Member Owner)}
 
   def self.owned_by(user)
@@ -32,12 +34,14 @@ class Project < ApplicationRecord
         if fc_project.present?
           # set the project user role
           self.user_role = fc_project['role']
+          Rails.logger.info "setting user role: #{self.user_role} from #{fc_project['role']}"
           true
         else
+          Rails.logger.info "No "
           errors.add(:namespace, " - You must be a member of '#{self.namespace}' to use it with Unity.  Please select another project.")
         end
       rescue => e
-        Rails.logger.error "#{Time.now} - unable to verify project membership of #{self.namespace} for #{self.user.email}: #{e.message}"
+        Rails.logger.error "Unable to verify project membership of #{self.namespace} for #{self.user.email}: #{e.message}"
         errors.add(:namespace, " - We are unable to verify project permissions for #{self.namespace} due to an error.  Please select another project.")
       end
     end

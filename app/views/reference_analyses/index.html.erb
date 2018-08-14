@@ -4,32 +4,32 @@
   <div class="col-md">
     <div class="table-responsive">
       <table class="table table-striped table-active" id="reference-analyses">
-  <thead>
-    <tr>
-      <th>Firecloud project/workspace</th>
-      <th>WDLs</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
+        <thead>
+          <tr>
+            <th>Firecloud project/workspace</th>
+            <th>WDLs</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
 
-  <tbody>
-    <% @reference_analyses.each do |reference_analysis| %>
-      <tr>
-        <td><%= link_to reference_analysis.display_name, reference_analysis.firecloud_url %></td>
-        <td>
-          <span class="badge badge-dark">Analysis</span> <span class="badge badge-secondary"><%= reference_analysis.analysis_wdl %></span><br />
-          <span class="badge badge-dark">Benchmark</span> <span class="badge badge-secondary"><%= reference_analysis.benchmark_wdl %></span><br />
-          <span class="badge badge-dark">Orchestration</span> <span class="badge badge-secondary"><%= reference_analysis.orchestration_wdl %></span>
-        </td>
-        <td class="actions">
-          <%= link_to 'More Info', reference_analysis_path(reference_analysis), class: 'btn btn-sm btn-secondary' %>&nbsp;
-          <%= link_to 'Edit', edit_reference_analysis_path(reference_analysis), class: 'btn btn-sm btn-primary' %>&nbsp;
-          <%= link_to 'Destroy', reference_analysis, method: :delete, data: { confirm: 'Are you sure you want to delete this configuration?' }, class: 'btn btn-sm btn-danger' %>
-        </td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+        <tbody>
+          <% @reference_analyses.each do |reference_analysis| %>
+            <tr>
+              <td><%= link_to reference_analysis.display_name, firecloud_link_for(reference_analysis.display_name) %></td>
+              <td>
+                <span class="badge badge-dark">Analysis</span> <span class="badge badge-secondary"><%= reference_analysis.analysis_wdl %></span><br />
+                <span class="badge badge-dark">Benchmark</span> <span class="badge badge-secondary"><%= reference_analysis.benchmark_wdl %></span><br />
+                <span class="badge badge-dark">Orchestration</span> <span class="badge badge-secondary"><%= reference_analysis.orchestration_wdl %></span>
+              </td>
+              <td class="actions">
+                <%= link_to 'More Info', reference_analysis_path(reference_analysis), class: 'btn btn-sm btn-secondary' %>&nbsp;
+                <%= link_to 'Edit', edit_reference_analysis_path(reference_analysis), class: 'btn btn-sm btn-primary' %>&nbsp;
+                <%= link_to 'Destroy', reference_analysis, method: :delete, data: { confirm: 'Are you sure you want to delete this configuration?' }, class: 'btn btn-sm btn-danger' %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
       <p><%= link_to 'New Reference Analysis', new_reference_analysis_path, class: 'btn btn-lg btn-success' %></p>
 
       <script type="text/javascript">
@@ -43,5 +43,4 @@
   </div>
 </div>
 
-<br>
 
