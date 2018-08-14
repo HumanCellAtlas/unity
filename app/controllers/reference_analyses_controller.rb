@@ -30,7 +30,7 @@ class ReferenceAnalysesController < ApplicationController
 
     respond_to do |format|
       if @reference_analysis.save
-        format.html { redirect_to @reference_analysis, notice: "'#{@reference_analysis.display_name}' was successfully created." }
+        format.html { redirect_to reference_analysis_path(@reference_analysis), notice: "'#{@reference_analysis.display_name}' was successfully created." }
         format.json { render :show, status: :created, location: @reference_analysis }
       else
         format.html { render :new }
@@ -44,7 +44,7 @@ class ReferenceAnalysesController < ApplicationController
   def update
     respond_to do |format|
       if @reference_analysis.update(reference_analysis_params)
-        format.html { redirect_to @reference_analysis, notice: "'#{@reference_analysis.display_name}' was successfully updated." }
+        format.html { redirect_to reference_analysis_path(@reference_analysis), notice: "'#{@reference_analysis.display_name}' was successfully updated." }
         format.json { render :show, status: :ok, location: @reference_analysis }
       else
         format.html { render :edit }

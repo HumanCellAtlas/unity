@@ -41,7 +41,7 @@ class ProjectsController < ApplicationController
 
     respond_to do |format|
       if @project.save
-        format.html { redirect_to @project, notice: "'#{@project.namespace}' was successfully registered." }
+        format.html { redirect_to project_path(@project), notice: "'#{@project.namespace}' was successfully registered." }
         format.json { render :show, status: :created, location: @project }
       else
         format.html { render :new }
@@ -65,7 +65,6 @@ class ProjectsController < ApplicationController
         logger.error "Error in creating new billing project #{@project.namespace}: #{e.message}"
         @project.errors.add(:base, "Unable to create project #{@project.namespace}: #{e.message}")
         # immediately exit and do not attempt to save project
-        logger.info 'in first block'
         respond_to do |format|
           format.html { render :new_from_scratch }
           format.json { render json: @project.errors, status: :unprocessable_entity }
@@ -74,9 +73,8 @@ class ProjectsController < ApplicationController
     end
 
     respond_to do |format|
-      logger.info 'in second block'
       if @project.save
-        format.html { redirect_to @project, notice: "'#{@project.namespace}' was successfully created and registered." }
+        format.html { redirect_to project_path(@project), notice: "'#{@project.namespace}' was successfully created and registered." }
         format.json { render :show, status: :created, location: @project }
       else
         format.html { render :new_from_scratch }
