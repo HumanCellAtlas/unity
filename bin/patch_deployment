@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+kubectl patch deployment unity-benchmark-deployment -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"date\":\"`date +'%s'`\"}}}}}"
