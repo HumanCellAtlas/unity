@@ -16,7 +16,7 @@
 
 <div class="tab-content top-pad-small">
   <div role="tabpanel" class="tab-pane fade <%= @user_workspaces.empty? ? nil : 'show active' %>" id="my-benchmarks">
-    <%= render partial: 'my_workspaces' %>
+    <%= render partial: 'user_workspaces' %>
   </div>
   <div role="tabpanel" class="tab-pane fade <%= @user_workspaces.empty? ? 'show active' : nil %>" id="reference-pipelines">
     <%= render partial: 'reference_pipelines' %>

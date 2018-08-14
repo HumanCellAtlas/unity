@@ -1,0 +1,10 @@
+<h1><%= @user_workspace.name %></h1>
+<dl class="row">
+  <dt class="col-sm-3">Project</dt>
+  <dd class="col-sm-9"><%= @user_workspace.namespace %></dd>
+  <dt class="col-sm-3">Reference Analysis</dt>
+  <dd class="col-sm-9"><%= @user_workspace.reference_analysis.analysis_wdl %></dd>
+</dl>
+<p><%= link_to "View Workspace <i class='fas fa-search'></i>".html_safe, firecloud_link_for(@user_workspace.full_name), class: 'btn btn-primary' %></p>
+
+<p><%= link_to "<i class='fas fa-fw fa-chevron-left'></i> Back".html_safe, user_workspaces_path, class: 'btn btn-sm btn-warning' %></p>

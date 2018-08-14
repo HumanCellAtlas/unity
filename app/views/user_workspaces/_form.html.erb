@@ -1,0 +1,35 @@
+<%= form_with(model: user_workspace, local: true, html: {class: 'form', id: 'user-workspace-form'}) do |form| %>
+  <% if user_workspace.errors.any? %>
+    <div class="bs-callout bs-callout-danger" id="reference-analysis-errors-block">
+      <h4><%= pluralize(user_workspace.errors.count, "error") %> prohibited this benchmark workspace from being saved:</h4>
+
+      <ul>
+      <% user_workspace.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <%= form.hidden_field :user_id %>
+
+  <div class="form-group row">
+    <div class="col-sm">
+      <%= form.label :name %>
+      <%= form.text_field :name, class: 'form-control' %>
+    </div>
+    <div class="col-sm">
+      <%= form.label :project_id %>
+      <%= form.select :project_id, options_from_collection_for_select(@projects, :id, :namespace), {}, class: 'form-control' %>
+    </div>
+    <div class="col-sm">
+      <%= form.label :reference_analysis_id, 'Reference Analysis' %>
+      <%= form.select :reference_analysis_id, options_for_select([[@reference_analysis.analysis_wdl, @reference_analysis.id]]), {}, {class: 'form-control'} %>
+    </div>
+  </div>
+
+  <div class="form-group row">
+    <div class="col-sm">
+      <%= form.submit 'Save', class: 'btn btn-success' %>
+    </div>
+  </div>
+<% end %>
