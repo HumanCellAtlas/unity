@@ -72,6 +72,11 @@ spec:
                 secretKeyRef:
                   name: encryption-key
                   key: encryption-key
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: prod-secret-key-base
+                  key: secret-key-base
             - name: SERVICE_ACCOUNT_KEY
               value: /etc/service-account/unity-benchmark-service-account.json
             # [END cloudsql_secrets]
