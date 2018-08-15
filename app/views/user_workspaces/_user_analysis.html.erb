@@ -1,0 +1,11 @@
+<div class="card">
+  <div class="card-header">
+    <h5><%= link_to user_analysis.full_name, "##{user_analysis.full_name_as_id}", data: {toggle: 'collapse', target: "##{user_analysis.full_name_as_id}"} %></h5>
+  </div>
+
+  <div id="<%= user_analysis.full_name_as_id %>" class="collapse">
+    <div class="card-body">
+      <pre><%= user_analysis.wdl_contents %></pre>
+    </div>
+  </div>
+</div>

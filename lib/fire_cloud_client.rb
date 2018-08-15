@@ -26,6 +26,8 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   SERVICE_ACCOUNT_KEY = !ENV['SERVICE_ACCOUNT_KEY'].blank? ? File.absolute_path(ENV['SERVICE_ACCOUNT_KEY']) : ''
   # Permission values allowed for FireCloud workspace ACLs
   WORKSPACE_PERMISSIONS = ['OWNER', 'READER', 'WRITER', 'NO ACCESS']
+  # Permission values allowed for FireCloud workspace ACLs
+  METHOD_PERMISSIONS = ['OWNER', 'READER', 'NO ACCESS']
   # List of FireCloud user group roles
   USER_GROUP_ROLES = %w(admin member)
   # List of FireCloud billing project roles
@@ -548,6 +550,81 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   def get_method(namespace, method_name, snapshot_id, only_payload=false)
     path = self.api_root + "/api/methods/#{namespace}/#{method_name}/#{snapshot_id}?onlyPayload=#{only_payload}"
     process_firecloud_request(:get, path)
+  end
+
+  # create a FireCloud method object
+  #
+  # * *params*
+  #   - +namespace+ (String) => namespace of method
+  #   - +name+ (String) => name of method
+  #   - +synopsis+ (String) => synopsis of method (80 characters max)
+  #   - +wdl_contents+ (String) => plain text WDL payload
+  #
+  # * *return*
+  #   - +Hash+ method object
+  def create_method(namespace, method_name, synopsis, wdl_contents)
+    path = self.api_root + '/api/methods'
+    wdl_payload = {
+        namespace: namespace,
+        name: method_name,
+        synopsis: synopsis,
+        snapshotComment: '',
+        documentation: '',
+        payload: wdl_contents,
+        entityType: 'Task'
+    }
+    process_firecloud_request(:post, path, wdl_payload.to_json)
+  end
+
+  # redact a FireCloud method object
+  #
+  # * *params*
+  #   - +namespace+ (String) => namespace of method
+  #   - +name+ (String) => name of method
+  #   - +snapshot_id+ (Integer) => snapshot ID of method
+  #
+  # * *return*
+  #   - +Integer+ 1 if method is redacted
+  def delete_method(namespace, method_name, snapshot_id)
+    path = self.api_root + "/api/methods/#{namespace}/#{method_name}/#{snapshot_id}"
+    process_firecloud_request(:delete, path)
+  end
+
+  # update a FireCloud method ACL
+  #
+  # * *params*
+  #   - +namespace+ (String) => namespace of method
+  #   - +name+ (String) => name of method
+  #   - +snapshot+ (String) => snapshot of method
+  #   - +acl+ (Array) => Array of permissions to update for method (from create_method_acl)
+  #
+  # * *return*
+  #   - +Hash+ method object
+  def update_method_acl(namespace, method_name, snapshot, acl)
+    path = self.api_root + "/api/methods/#{namespace}/#{method_name}/#{snapshot}/permissions"
+    process_firecloud_request(:post, path, acl)
+  end
+
+  # helper for creating FireCloud Method ACL objects
+  # will raise a RuntimeError if permission requested does not match allowed values in METHOD_PERMISSONS
+  #
+  # * *params*
+  #   - +user+ (String) => email of FireCloud user, or 'public' for public access
+  #   - +role+ (String) => granted permission level
+  #
+  # * *return*
+  #   - +JSON+ ACL object
+  def create_method_acl(user, role)
+    if METHOD_PERMISSIONS.include?(role)
+        [
+            {
+                'user' => user,
+                'role' => role
+            }
+        ].to_json
+    else
+      raise RuntimeError.new("Invalid FireCloud Method ACL permission setting: #{role}; must be member of #{METHOD_PERMISSIONS.join(', ')}")
+    end
   end
 
   # get list of available configurations from the repository

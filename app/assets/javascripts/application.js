@@ -13,6 +13,7 @@
 //= require rails-ujs
 //= require activestorage
 //= require jquery
+//= require spin.min
 //= require popper
 //= require bootstrap-sprockets
 //= require jquery_nested_form

@@ -18,6 +18,10 @@ echo "*** INITIALIZING & MIGRATING DATABASE ***"
 sudo -E -u app -H bundle exec rake RAILS_ENV=$PASSENGER_APP_ENV db:exists && rake RAILS_ENV=$PASSENGER_APP_ENV db:migrate || rake RAILS_ENV=$PASSENGER_APP_ENV db:setup
 echo "*** COMPLETED ***"
 
+echo "*** WRITING ENCRYPTED CREDENTIALS ***"
+echo "secret_key_base: $SECRET_KEY_BASE" | EDITOR="vi -w" bin/rails credentials:edit
+echo "*** COMPLETED ***"
+
 echo "*** CREATING CRON ENV FILES ***"
 if [[ -f /home/app/webapp/.cron_env ]]; then
 		sudo -E -u app -H rm -f /home/app/webapp/.cron_env
@@ -30,6 +34,7 @@ echo "export SENDGRID_PASSWORD=$SENDGRID_PASSWORD" >> /home/app/webapp/.cron_env
 echo "export DATABASE_HOST=$DATABASE_HOST" >> /home/app/webapp/.cron_env
 echo "export DATABASE_USER=$DATABASE_USER" >> /home/app/webapp/.cron_env
 echo "export DATABASE_PASSWORD=$DATABASE_PASSWORD" >> /home/app/webapp/.cron_env
+echo "export SECRET_KEY_BASE=$SECRET_KEY_BASE" >> /home/app/webapp/.cron_env
 if [[ -z $SERVICE_ACCOUNT_KEY ]]; then
 	echo $GOOGLE_CLOUD_KEYFILE_JSON >| /home/app/webapp/.google_service_account.json
 	chmod 400 /home/app/webapp/.google_service_account.json

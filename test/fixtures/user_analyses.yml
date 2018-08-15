@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  namespace: MyString
+  name: MyString
+  snapshot: 1
+
+two:
+  namespace: MyString
+  name: MyString
+  snapshot: 1

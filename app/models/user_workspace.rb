@@ -3,6 +3,8 @@ class UserWorkspace < ApplicationRecord
   belongs_to :project
   belongs_to :reference_analysis
 
+  has_one :user_analysis, dependent: :destroy # call destroy to have callbacks fire
+
   attribute :name, :string
   attribute :bucket_id, :string
 

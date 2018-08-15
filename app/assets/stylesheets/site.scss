@@ -53,6 +53,17 @@ html, body {
   margin-top: 10px;
 }
 
+.top-margin-5 {
+  margin-top: 5px;
+}
+
+#spinner_target, .spinner-target {
+  min-height: 200px;
+  position: relative;
+  text-align: center;
+  margin: 20px 0;
+}
+
 /* bs-callout classes */
 
 .bs-callout {
@@ -140,3 +151,4 @@ html, body {
 .bs-callout-success ul {
   color: #5cb85c;
 }
+

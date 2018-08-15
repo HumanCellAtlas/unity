@@ -1,6 +1,6 @@
 class UserWorkspacesController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_user_workspace, only: [:show, :destroy]
+  before_action :set_user_workspace, only: [:show, :destroy, :create_user_analysis, :update_user_analysis, :get_reference_wdl_payload]
   before_action :set_user_projects, only: [:new, :create]
   before_action :set_reference_analysis, only: [:new]
 
@@ -14,6 +14,12 @@ class UserWorkspacesController < ApplicationController
   # GET /user_workspaces/1.json
   def show
     @submissions = []
+    @user_analysis = @user_workspace.user_analysis
+    if @user_analysis.nil?
+      @user_analysis = @user_workspace.user_analysis.build
+      @user_analysis.namespace = @user_analysis.default_namespace
+      @user_analysis.user = @user_workspace.user
+    end
     begin
       user_client = user_fire_cloud_client(current_user, @user_workspace.namespace)
       @submissions = user_client.get_workspace_submissions(@user_workspace.namespace, @user_workspace.name)
@@ -67,6 +73,32 @@ class UserWorkspacesController < ApplicationController
     end
   end
 
+  # add a user_analysis to this benchmarking workspace
+  def create_user_analysis
+    @user_analysis = UserAnalysis.new(user_analysis_params)
+    @user_analysis.save
+  end
+
+  # update a user_analysis in this benchmarking workspace
+  def update_user_analysis
+    @user_analysis = @user_workspace.user_analysis
+    @user_analysis.update(user_analysis_params)
+  end
+
+  # load WDL payload from methods repo
+  def get_reference_wdl_payload
+    begin
+      namespace, name, snapshot = @user_workspace.reference_analysis.extract_wdl_keys(:analysis_wdl)
+      pipeline_attr = [namespace, name, snapshot]
+      @pipeline_wdl = fire_cloud_client.get_method(namespace, name, snapshot, true)
+      @pipeline_name = pipeline_attr.join('/')
+      @pipeline_id = pipeline_attr.join('-')
+    rescue RuntimeError => e
+      @pipeline_wdl = "We're sorry, but we could not load the requested workflow object.  Please try again later.\n\nError: #{e.message}"
+      logger.error "Unable to load WDL for #{params[:namespace]}:#{params[:name]}:#{params[:snapshot]}; #{e.message}"
+    end
+  end
+
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_user_workspace
@@ -89,5 +121,9 @@ class UserWorkspacesController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def user_workspace_params
     params.require(:user_workspace).permit(:name, :project_id, :user_id, :reference_analysis_id)
+  end
+
+  def user_analysis_params
+    params.require(:user_analysis).permit(:name, :user_id, :user_workspace_id, :namespace, :snapshot, :wdl_contents)
   end
 end

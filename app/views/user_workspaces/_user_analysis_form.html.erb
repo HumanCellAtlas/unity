@@ -1,0 +1,68 @@
+<%= form_with(model: user_analysis, url: create_user_analysis_path, html: {class: 'form user-analysis-form', id: "user-analysis-form"}) do |form| %>
+  <% if user_analysis.errors.any? %>
+    <div class="bs-callout bs-callout-danger" id="reference-analysis-errors-block">
+      <h4><%= pluralize(user_workspace.errors.count, "error") %> prohibited this anlaysis from being saved:</h4>
+
+      <ul>
+      <% user_analysis.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <div class="bs-callout bs-callout-primary">
+    <p class="text-primary">Use this form to add/update your own analysis to benchmark against <strong><%= @user_workspace.reference_analysis.analysis_wdl %></strong>.</p>
+  </div>
+  <%= form.hidden_field :user_id %>
+  <%= form.hidden_field :user_workspace_id %>
+  <%= form.hidden_field :namespace %>
+
+  <div class="form-group row">
+    <div class="col-sm-10">
+      <%= form.label :name %>
+      <%= form.text_field :name, class: 'form-control', placeholder: 'Enter a name for this analysis...' %>
+    </div>
+    <div class="col-sm-2">
+      <%= form.label :snapshot, 'Current Snapshot' %>
+      <%= form.text_field :snapshot, class: 'form-control', readonly: true %>
+    </div>
+  </div>
+  <div class="form-group row">
+    <div class="col-md">
+      <%= form.label :wdl_contents, "Paste contents of WDL below" %>
+      <%= form.text_area :wdl_contents, rows: 10, class: 'form-control wdl-contents' %>
+    </div>
+  </div>
+  <div class="form-group row">
+    <div class="col-sm">
+      <label for="wdl-contents-file">Read WDL from File</label>
+      <input type="file" class="form-control-file" id="wdl-contents-file">
+    </div>
+  </div>
+  <div class="form-group row">
+    <div class="col-sm">
+      <%= form.submit 'Save', class: 'btn btn-success' %>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+      var fileInput = $('#wdl-contents-file')[0];
+      var wdlTarget = $('#user_analysis_wdl_contents');
+      $(fileInput).change(function() {
+          if (fileInput.files.length) {
+              var reader = new FileReader();
+              var upload = fileInput.files[0];
+              reader.readAsText(upload);
+              $(reader).on('load', function(e) {
+                  var file = e.target.result,
+                      results;
+                  if (file && file.length) {
+                      $(wdlTarget).html(reader.result);
+                  }
+              });
+          }
+          $(fileInput).val("")
+      });
+
+  </script>
+<% end %>

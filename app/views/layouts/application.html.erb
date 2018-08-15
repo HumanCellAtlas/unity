@@ -9,21 +9,21 @@
 
     <%= stylesheet_link_tag    'application', media: 'all' %>
     <%= javascript_include_tag 'application' %>
-    <script src="//cdn.plot.ly/plotly-1.37.1.min.js"></script>
     <%= stylesheet_link_tag 'https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap4.min.css' %>
     <%= javascript_include_tag 'https://cdn.datatables.net/1.10.18/js/jquery.dataTables.min.js' %>
     <%= javascript_include_tag 'https://cdn.datatables.net/1.10.18/js/dataTables.bootstrap4.min.js' %>
   </head>
 
   <body>
-    <%= render partial: '/layouts/nav' %>
-    <%= render partial: '/layouts/notices' %>
+    <%= render partial: 'layouts/nav' %>
+    <%= render partial: 'layouts/notices' %>
     <main role="main" id="wrap" class="container-fluid">
       <div class="top-pad-60" id="main-body">
         <%= yield %>
       </div>
     </main>
-    <%= render partial: '/layouts/footer' %>
+    <%= render partial: 'layouts/generic_modal' %>
+    <%= render partial: 'layouts/footer' %>
   </body>
 
   <script type="text/javascript">
