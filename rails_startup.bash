@@ -4,9 +4,11 @@ cd /home/app/webapp
 echo "*** ROLLING OVER LOGS ***"
 ruby /home/app/webapp/bin/cycle_logs.rb
 echo "*** COMPLETED ***"
-echo "*** WRITING ENCRYPTED CREDENTIALS ***"
-echo "secret_key_base: $SECRET_KEY_BASE" | RAILS_ENV=$PASSENGER_APP_ENV EDITOR="vi -w" bin/rails credentials:edit
-echo "*** COMPLETED ***"
+if [[ $PASSENGER_APP_ENV -ne "production" ]]; then
+    echo "*** WRITING ENCRYPTED CREDENTIALS ***"
+    echo "secret_key_base: $SECRET_KEY_BASE" | RAILS_ENV=$PASSENGER_APP_ENV EDITOR="vi -w" bin/rails credentials:edit
+    echo "*** COMPLETED ***"
+fi
 echo "*** CLEARING TMP CACHE ***"
 sudo -E -u app -H bundle exec rake RAILS_ENV=$PASSENGER_APP_ENV tmp:clear
 echo "*** COMPLETED ***"
