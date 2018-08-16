@@ -79,6 +79,8 @@ spec:
                   key: secret-key-base
             - name: SERVICE_ACCOUNT_KEY
               value: /etc/service-account/unity-benchmark-service-account.json
+            - name: PROD_HOSTNAME
+              value: 'unity.broadinstitute.org'
             # [END cloudsql_secrets]
         # Change <INSTANCE_CONNECTION_NAME> here to include your GCP
         # project, the region of your Cloud SQL instance and the name
