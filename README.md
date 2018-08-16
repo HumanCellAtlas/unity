@@ -54,8 +54,8 @@ portal is configured and ready to use:
   * Click the navigation menu in the top left and select 'APIs & Services' > 'Credentials'
   * Click 'Create Credentials' > 'OAuth Client ID'
   * Select 'Web Application', and provide a name
-  * For 'Authorized Javascript Origins', enter <code>https://(your hostname)/unity</code>
-  * For 'Authorized redirect URIs', enter <code>https://(your hostname)/unity/omniauth/google_oauth2/callback</code>
+  * For 'Authorized Javascript Origins', enter <code>https://(your hostname)/</code>
+  * For 'Authorized redirect URIs', enter <code>https://(your hostname)//omniauth/google_oauth2/callback</code>
   * Save the client id
 * <b>Whitelisting your OAuth Audience</b>
 	* Once you have exported your OAuth credentials, you will need to have your client id whitelisted to allow it to make
@@ -90,6 +90,7 @@ This sets up several environment variables in your shell and then runs the follo
 <pre>docker run --rm -it --name $CONTAINER_NAME --link $DATABASE_HOST:$DATABASE_HOST -p 80:80 -p 443:443 -h localhost -v $PROJECT_DIR:/home/app/webapp:rw -e PASSENGER_APP_ENV=$PASSENGER_APP_ENV -e DATABASE_HOST=$DATABASE_HOST -e DATABASE_USER=$DATABASE_USER -e PROD_DATABASE_PASSWORD=$DATABASE_PASSWORD -e SERVICE_ACCOUNT_KEY=$SERVICE_ACCOUNT_KEY -e SENDGRID_USERNAME=$SENDGRID_USERNAME -e SENDGRID_PASSWORD=$SENDGRID_PASSWORD -e SECRET_KEY_BASE=$SECRET_KEY_BASE -e OAUTH_CLIENT_ID=$OAUTH_CLIENT_ID -e OAUTH_CLIENT_SECRET=$OAUTH_CLIENT_SECRET -e GOOGLE_CLOUD_KEYFILE_JSON="$GOOGLE_CLOUD_KEYFILE_JSON" -e GOOGLE_PRIVATE_KEY="$GOOGLE_PRIVATE_KEY" -e GOOGLE_CLIENT_EMAIL="$GOOGLE_CLIENT_EMAIL" -e GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" -e GOOGLE_CLOUD_PROJECT="$GOOGLE_CLOUD_PROJECT" unity_benchmark_docker:$DOCKER_IMAGE_VERSION</pre>
 
 The container will then start running, and will execute its local startup scripts that will configure the application automatically.
+You can then access your instance of Unity at https://localhost
 
 You can also run the <code>bin/boot_docker</code> script in help mode by passing <code>-H</code> to print the help text
 which will show you how to pass specific values to the above env variables.  <em>Note: running the shortcut script with
