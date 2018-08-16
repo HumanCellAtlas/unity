@@ -22,8 +22,8 @@
               <td>N/A</td>
               <td>0</td>
               <td class="actions">
-                <%= link_to 'Show', user_workspace_path(project: user_workspace.namespace, name: user_workspace.name), class: 'btn btn-sm btn-secondary' %>&nbsp;
-                <%= link_to 'Destroy', user_workspace_path(project: user_workspace.namespace, name: user_workspace.name), method: :delete, data: { confirm: 'Are you sure you want to delete this benchmark workspace?' },
+                <%= link_to 'Benchmark', user_workspace_path(project: user_workspace.namespace, name: user_workspace.name), class: 'btn btn-sm btn-primary' %>&nbsp;
+                <%= link_to 'Delete', user_workspace_path(project: user_workspace.namespace, name: user_workspace.name), method: :delete, data: { confirm: 'Are you sure you want to delete this benchmark workspace?' },
                             class: 'btn btn-sm btn-danger' %></td>
             </tr>
           <% end %>
