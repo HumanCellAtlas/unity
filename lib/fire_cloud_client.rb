@@ -521,7 +521,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   end
 
   ##
-  ## WORKFLOW SUBMISSION METHODS
+  ## METHODS & CONFIGURATIONS REPOSITORY METHODS
   ##
 
   # get list of available FireCloud methods
@@ -590,43 +590,6 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
     process_firecloud_request(:delete, path)
   end
 
-  # update a FireCloud method ACL
-  #
-  # * *params*
-  #   - +namespace+ (String) => namespace of method
-  #   - +name+ (String) => name of method
-  #   - +snapshot+ (String) => snapshot of method
-  #   - +acl+ (Array) => Array of permissions to update for method (from create_method_acl)
-  #
-  # * *return*
-  #   - +Hash+ method object
-  def update_method_acl(namespace, method_name, snapshot, acl)
-    path = self.api_root + "/api/methods/#{namespace}/#{method_name}/#{snapshot}/permissions"
-    process_firecloud_request(:post, path, acl)
-  end
-
-  # helper for creating FireCloud Method ACL objects
-  # will raise a RuntimeError if permission requested does not match allowed values in METHOD_PERMISSONS
-  #
-  # * *params*
-  #   - +user+ (String) => email of FireCloud user, or 'public' for public access
-  #   - +role+ (String) => granted permission level
-  #
-  # * *return*
-  #   - +JSON+ ACL object
-  def create_method_acl(user, role)
-    if METHOD_PERMISSIONS.include?(role)
-        [
-            {
-                'user' => user,
-                'role' => role
-            }
-        ].to_json
-    else
-      raise RuntimeError.new("Invalid FireCloud Method ACL permission setting: #{role}; must be member of #{METHOD_PERMISSIONS.join(', ')}")
-    end
-  end
-
   # get list of available configurations from the repository
   #
   # * *params*
@@ -654,6 +617,111 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
     path = self.api_root + "/api/configurations/#{namespace}/#{name}/#{snapshot_id}?payloadAsObject=#{payload_as_object}"
     process_firecloud_request(:get, path)
   end
+
+  # get a FireCloud method permission ACL
+  #
+  # * *params*
+  #   - +namespace+ (String) => namespace of method
+  #   - +name+ (String) => name of method
+  #   - +snapshot+ (String) => snapshot of method
+  #
+  # * *return*
+  #   - +Hash+ method object
+  def get_method_permissions(namespace, method_name, snapshot, acl)
+    path = self.api_root + "/api/methods/#{namespace}/#{method_name}/#{snapshot}/permissions"
+    process_firecloud_request(:get, path)
+  end
+
+  # update a FireCloud method permission ACL
+  #
+  # * *params*
+  #   - +namespace+ (String) => namespace of method
+  #   - +name+ (String) => name of method
+  #   - +snapshot+ (String) => snapshot of method
+  #   - +acl+ (Array) => Array of permissions to update for method (from create_method_acl)
+  #
+  # * *return*
+  #   - +Hash+ method object
+  def update_method_permissions(namespace, method_name, snapshot, acl)
+    path = self.api_root + "/api/methods/#{namespace}/#{method_name}/#{snapshot}/permissions"
+    process_firecloud_request(:post, path, acl)
+  end
+
+  # helper for creating FireCloud Method ACL objects
+  # will raise a RuntimeError if permission requested does not match allowed values in METHOD_PERMISSONS
+  #
+  # * *params*
+  #   - +user+ (String) => email of FireCloud user, or 'public' for public access
+  #   - +role+ (String) => granted permission level
+  #
+  # * *return*
+  #   - +JSON+ ACL object
+  def create_method_acl(user, role)
+    if METHOD_PERMISSIONS.include?(role)
+      [
+          {
+              'user' => user,
+              'role' => role
+          }
+      ].to_json
+    else
+      raise RuntimeError.new("Invalid FireCloud Method ACL permission setting: #{role}; must be member of #{METHOD_PERMISSIONS.join(', ')}")
+    end
+  end
+
+  # get permissions for a method configuration namespace
+  #
+  # * *params*
+  #   - +config_namespace+ (String) => namespace of configuraiton
+  #
+  # * *return*
+  #   - +Array+ of users & permission levels
+  def get_config_namespace_permissions(config_namespace)
+    path = self.api_root + "/api/configurations/#{config_namespace}/permissions"
+    process_firecloud_request(:get, path)
+  end
+
+  # get permissions for a method configuration namespace
+  #
+  # * *params*
+  #   - +config_namespace+ (String) => namespace of configuraiton
+  #   - +permissions+ (Array) => Array of permission objects (Hash of user & role, from create_method_acl)
+  #
+  # * *return*
+  #   - +Array+ of users & permission levels
+  def update_config_namespace_permissions(config_namespace, permissions)
+    path = self.api_root + "/api/configurations/#{config_namespace}/permissions"
+    process_firecloud_request(:post, path, permissions)
+  end
+
+  # get permissions for a method namespace
+  #
+  # * *params*
+  #   - +config_namespace+ (String) => namespace of configuraiton
+  #
+  # * *return*
+  #   - +Array+ of users & permission levels
+  def get_method_namespace_permissions(config_namespace)
+    path = self.api_root + "/api/methods/#{config_namespace}/permissions"
+    process_firecloud_request(:get, path)
+  end
+
+  # get permissions for a method namespace
+  #
+  # * *params*
+  #   - +config_namespace+ (String) => namespace of configuraiton
+  #   - +permissions+ (Array) => Array of permission objects (Hash of user & role, from create_method_acl)
+  #
+  # * *return*
+  #   - +Array+ of users & permission levels
+  def update_method_namespace_permissions(config_namespace, permissions)
+    path = self.api_root + "/api/methods/#{config_namespace}/permissions"
+    process_firecloud_request(:post, path, permissions)
+  end
+
+  ##
+  ## WORKFLOW SUBMISSION METHODS
+  ##
 
   # copy a FireCloud method configuration from the repository into a workspace
   #
@@ -902,56 +970,6 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   def get_workspace_submission_outputs(workspace_namespace, workspace_name, submission_id, workflow_id)
     path = self.api_root + "/api/workspaces/#{workspace_namespace}/#{workspace_name}/submissions/#{submission_id}/workflows/#{workflow_id}/outputs"
     process_firecloud_request(:get, path)
-  end
-
-  # get permissions for a method configuration namespace
-  #
-  # * *params*
-  #   - +config_namespace+ (String) => namespace of configuraiton
-  #
-  # * *return*
-  #   - +Array+ of users & permission levels
-  def get_config_namespace_permissions(config_namespace)
-    path = self.api_root + "/api/configurations/#{config_namespace}/permissions"
-    process_firecloud_request(:get, path)
-  end
-
-  # get permissions for a method configuration namespace
-  #
-  # * *params*
-  #   - +config_namespace+ (String) => namespace of configuraiton
-  #   - +permissions+ (Array) => Array of permission objects (Hash of user & role)
-  #
-  # * *return*
-  #   - +Array+ of users & permission levels
-  def update_config_namespace_permissions(config_namespace, permissions)
-    path = self.api_root + "/api/configurations/#{config_namespace}/permissions"
-    process_firecloud_request(:post, path, permissions.to_json)
-  end
-
-  # get permissions for a method namespace
-  #
-  # * *params*
-  #   - +config_namespace+ (String) => namespace of configuraiton
-  #
-  # * *return*
-  #   - +Array+ of users & permission levels
-  def get_method_namespace_permissions(config_namespace)
-    path = self.api_root + "/api/methods/#{config_namespace}/permissions"
-    process_firecloud_request(:get, path)
-  end
-
-  # get permissions for a method namespace
-  #
-  # * *params*
-  #   - +config_namespace+ (String) => namespace of configuraiton
-  #   - +permissions+ (Array) => Array of permission objects (Hash of user & role)
-  #
-  # * *return*
-  #   - +Array+ of users & permission levels
-  def update_method_namespace_permissions(config_namespace, permissions)
-    path = self.api_root + "/api/methods/#{config_namespace}/permissions"
-    process_firecloud_request(:post, path, permissions.to_json)
   end
 
   ##
