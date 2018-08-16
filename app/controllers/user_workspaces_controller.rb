@@ -16,9 +16,8 @@ class UserWorkspacesController < ApplicationController
     @submissions = []
     @user_analysis = @user_workspace.user_analysis
     if @user_analysis.nil?
-      @user_analysis = @user_workspace.user_analysis.build
+      @user_analysis = @user_workspace.build_user_analysis(user: @user_workspace.user)
       @user_analysis.namespace = @user_analysis.default_namespace
-      @user_analysis.user = @user_workspace.user
     end
     begin
       user_client = user_fire_cloud_client(current_user, @user_workspace.namespace)
@@ -76,13 +75,31 @@ class UserWorkspacesController < ApplicationController
   # add a user_analysis to this benchmarking workspace
   def create_user_analysis
     @user_analysis = UserAnalysis.new(user_analysis_params)
-    @user_analysis.save
+
+    respond_to do |format|
+      if @user_analysis.save
+        format.html { redirect_to user_workspace_path(project: @user_workspace.namespace, name: @user_workspace.name), notice: "'#{@user_analysis.full_name}' was successfully created." }
+        format.json { render :show, status: :created, location: @user_workspace }
+      else
+        format.html { render :show }
+        format.json { render json: @user_analysis.errors, status: :unprocessable_entity }
+      end
+    end
   end
 
   # update a user_analysis in this benchmarking workspace
   def update_user_analysis
     @user_analysis = @user_workspace.user_analysis
-    @user_analysis.update(user_analysis_params)
+
+    respond_to do |format|
+      if @user_analysis.update(user_analysis_params)
+        format.html { redirect_to user_workspace_path(project: @user_workspace.namespace, name: @user_workspace.name), notice: "'#{@user_analysis.full_name}' was successfully updated." }
+        format.json { render :show, status: :created, location: @user_workspace }
+      else
+        format.html { render :show }
+        format.json { render json: @user_analysis.errors, status: :unprocessable_entity }
+      end
+    end
   end
 
   # load WDL payload from methods repo

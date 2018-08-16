@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_08_15_155445) do
+ActiveRecord::Schema.define(version: 2018_08_16_165202) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "hstore"
@@ -53,7 +53,7 @@ ActiveRecord::Schema.define(version: 2018_08_15_155445) do
   create_table "reference_analysis_data", force: :cascade do |t|
     t.bigserial "reference_analysis_id", null: false
     t.string "parameter_name"
-    t.string "gs_url"
+    t.string "parameter_value"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "data_type"

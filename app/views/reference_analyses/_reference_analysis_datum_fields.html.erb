@@ -31,7 +31,7 @@
         <%= f.text_field :parameter_name, class: 'form-control', placeholder: 'Parameter Name (from WDL/Configuration)' %>
       </div>
       <div class="col-sm-5">
-        <%= f.text_field :gs_url, class: 'form-control', placeholder: 'GS URL to file' %>
+        <%= f.text_field :parameter_value, class: 'form-control', placeholder: 'Parameter Value (optional)' %>
       </div>
       <div class="col-sm-2">
         <%= f.link_to_remove "<span class='btn btn-danger'><span class='fas fa-fw fa-times'></span></span>".html_safe, data: {confirm: 'Are you sure?  This cannot be undone unless you reload the page before saving.'} %>

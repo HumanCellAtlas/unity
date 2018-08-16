@@ -1,5 +1,11 @@
-$('#reference-wdl-content-target').html("<%= escape_javascript(render partial: '/site/wdl_content') %>");
+<% if params[:target].blank? %>
+  $('#reference-wdl-content-target').html("<%= escape_javascript(render partial: '/site/wdl_content') %>");
 
-$('#wdl-content-modal').modal('show');
+  $('#wdl-content-modal').modal('show');
 
-$('#get-reference-wdl').removeClass('disabled');
+  $('#get-reference-wdl').removeClass('disabled');
+<% else %>
+  closeModalSpinner('#generic-modal-spinner', '#generic-modal', function() {
+      $('#<%= params[:target] %>').html("<%= escape_javascript(@pipeline_wdl) %>");
+  });
+<% end %>

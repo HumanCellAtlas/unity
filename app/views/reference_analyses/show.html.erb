@@ -8,30 +8,37 @@
   <dt class="col-sm-3">Orchestration</dt>
   <dd class="col-sm-9"><%= link_to @reference_analysis.orchestration_wdl, @reference_analysis.wdl_view_url(:orchestration_wdl) %></dd>
 </dl>
-<h3>Reference Data</h3>
-<p class="text-muted">This is a list of reference input/output data that is not included in the default configuration.</p>
-<% if @reference_analysis.reference_analysis_data.where(data_type: 'input').any? %>
-  <h4>Inputs (<%= @reference_analysis.config_setting_count('input') %>)</h4>
-  <dl class="row">
-    <% @reference_analysis.reference_analysis_data.where(data_type: 'input').each do |input| %>
-      <dt class="col-sm-3"><%= input.call_name %>.<%= input.parameter_name %></dt>
-      <dd class="col-sm-9"><%= input.gs_url %></dd>
+<h3>Required Inputs/Outputs</h3>
+<p class="text-muted">These are input/output parameters that are used to validate user-supplied analyses when attempting
+  to benchmark this reference analysis.  If the supplied analysis does not conform to this list, then it will not
+  run when imported into the orchestration WDL.</p>
+<table id="reference-analysis-data" class="table table-striped table-active">
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Call Name</th>
+      <th>Parameter</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @reference_analysis.configuration_settings.each do |data_type, settings| %>
+      <% settings.each do |call_name, parameters| %>
+        <% parameters.each do |name, value| %>
+          <tr>
+            <td><%= data_type %></td>
+            <td><%= call_name %></td>
+            <td><%= name %></td>
+            <td><%= value %></td>
+          </tr>
+        <% end %>
+      <% end %>
     <% end %>
-  </dl>
-<% end %>
+  </tbody>
+</table>
 
-<% if @reference_analysis.reference_analysis_data.where(data_type: 'output').any? %>
-  <h4>Outputs (<%= @reference_analysis.config_setting_count('output') %>)</h4>
-  <dl class="row">
-    <% @reference_analysis.reference_analysis_data.where(data_type: 'output').each do |output| %>
-      <dt class="col-sm-3"><%= output.call_name %>.<%= output.parameter_name %></dt>
-      <dd class="col-sm-9"><%= output.gs_url %></dd>
-    <% end %>
-  </dl>
-<% end %>
-
-<h3>Options</h3>
 <% if @reference_analysis.options.any? %>
+  <h3>Extra Options</h3>
   <dl class="row">
     <% @reference_analysis.options.each do |name, value| %>
         <dt class="col-sm-3"><%= name %></dt>
@@ -45,3 +52,10 @@
   <%= link_to "<i class='fas fa-fw fa-chevron-left'></i> Back".html_safe, reference_analyses_path, class: 'btn btn-sm btn-warning' %>
 </p>
 
+<script type="text/javascript">
+
+    $('#reference-analysis-data').DataTable({
+        pagingType: 'full_numbers'
+    });
+
+</script>

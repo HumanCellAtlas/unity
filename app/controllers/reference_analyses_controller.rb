@@ -73,7 +73,7 @@ class ReferenceAnalysesController < ApplicationController
     # Never trust parameters from the scary internet, only allow the white list through.
     def reference_analysis_params
       params.require(:reference_analysis).permit(:firecloud_project, :firecloud_workspace, :analysis_wdl, :benchmark_wdl, :orchestration_wdl,
-                                                 reference_analysis_data_attributes: [:id, :data_type, :call_name, :parameter_name, :gs_url, :_destroy],
+                                                 reference_analysis_data_attributes: [:id, :data_type, :call_name, :parameter_name, :parameter_value, :_destroy],
                                                  reference_analysis_options_attributes: [:id, :name, :value, :_destroy]
 
       )

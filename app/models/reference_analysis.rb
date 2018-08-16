@@ -22,7 +22,7 @@ class ReferenceAnalysis < ApplicationRecord
 
   # combine firecloud_project & firecloud_workspace for use in generating URLs (via firecloud_link_for)
   def display_name
-    "#{firecloud_project}/#{firecloud_workspace}"
+    "#{self.firecloud_project}/#{self.firecloud_workspace}"
   end
 
   # get the number of input/output settings by type
@@ -31,15 +31,30 @@ class ReferenceAnalysis < ApplicationRecord
   end
 
   # get all configuration files for this analysis as a hash
-  # can get inputs or outputs
-  def configuration_settings(data_type)
+  def configuration_settings
     settings = {}
-    data = self.reference_analysis_data.where(data_type: data_type)
-    data.each do |parameter|
-      settings[parameter.call_name.to_sym] ||= {}
-      settings[parameter.call_name.to_sym].merge!({parameter.parameter_name.to_sym => parameter.gs_url})
+    self.reference_analysis_data.each do |parameter|
+      settings[parameter.data_type.to_sym] ||= {}
+      settings[parameter.data_type.to_sym][parameter.call_name.to_sym] ||= {}
+      settings[parameter.data_type.to_sym][parameter.call_name.to_sym].merge!({parameter.parameter_name.to_sym => parameter.parameter_value})
     end
     settings
+  end
+
+  # get a list of all call names for this reference analysis by data_type, or all (default)
+  def call_names(data_type=nil)
+    data = data_type.present? ? self.reference_analysis_data.where(data_type: data_type) : self.reference_analysis_data
+    data.map(&:call_name).uniq
+  end
+
+  # get require input configuration
+  def required_inputs
+    self.configuration_settings[:input]
+  end
+
+  # get required output configuration
+  def required_outputs
+    self.configuration_settings[:output]
   end
 
   # get key/value options pairs as hash
