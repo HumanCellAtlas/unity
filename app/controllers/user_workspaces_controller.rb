@@ -54,21 +54,27 @@ class UserWorkspacesController < ApplicationController
   # DELETE /user_workspaces/1.json
   def destroy
     name = @user_workspace.name
+    message = "'#{name}' was successfully destroyed."
     # remove workspace, unless user requests it to persist
     begin
       unless params[:persist] == 'true'
-        user_client = user_fire_cloud_client(current_user, @user_workspace.namespace)
-        Rails.logger.info "Removing user_workspace: #{@user_workspace.full_name}"
-        user_client.delete_workspace(@user_workspace.namespace, @user_workspace.name)
+        begin
+          user_client = user_fire_cloud_client(current_user, @user_workspace.namespace)
+          Rails.logger.info "Removing user_workspace: #{@user_workspace.full_name}"
+          user_client.delete_workspace(@user_workspace.namespace, @user_workspace.name)
+        rescue => e
+          Rails.logger.info "Unable to remove user_workspace: #{@user_workspace.full_name} due to error: #{e.message}"
+          message += " Unity was unable to remove the associated workspace due to an error: #{e.message}"
+        end
       end
       @user_workspace.destroy
       respond_to do |format|
-        format.html { redirect_to user_workspaces_path, notice: "'#{name}' was successfully destroyed." }
+        format.html { redirect_to user_workspaces_path, notice: message }
         format.json { head :no_content }
       end
     rescue => e
       Rails.logger.error "Error removing benchmark workspace '#{name}': #{e.message}"
-      redirect_to user_workspace_path, alert: "We were unable to remove benchmarking workspace '#{name}' due to an error: #{e.message}" and return
+      redirect_to user_workspaces_path, alert: "We were unable to remove benchmarking workspace '#{name}' due to an error: #{e.message}" and return
     end
   end
 
