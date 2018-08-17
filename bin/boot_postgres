@@ -20,6 +20,7 @@ EOF
 
 # defaults
 CONTAINER_NAME="pg"
+USERNAME="postgres"
 DATA_DIR="$HOME/Documents/Data/docker-postgres"
 
 while getopts "n:d:u:p:H" OPTION; do
