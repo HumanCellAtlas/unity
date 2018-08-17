@@ -6,7 +6,7 @@
   <dd class="col-sm-9"><%= @user_workspace.reference_analysis.analysis_wdl %></dd>
 </dl>
 <p>
-  <%= link_to "View Reference WDL <i class='fas fa-code'></i>".html_safe, get_reference_wdl_path(project: @user_workspace.namespace, name: @user_workspace.name), class: 'btn btn-secondary', id: 'get-reference-wdl', data: { remote: true } %>
+  <%= link_to "View Reference Analysis WDL <i class='fas fa-code'></i>".html_safe, get_analysis_wdl_path(project: @user_workspace.namespace, name: @user_workspace.name), class: 'btn btn-secondary', id: 'get-reference-wdl', data: { remote: true } %>
 </p>
 
 <div id="reference-wdl-content-target"></div>

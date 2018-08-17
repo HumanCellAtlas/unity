@@ -3,6 +3,8 @@ OPEN_MODAL = '';
 function enableDefaultActions() {
     $('.dropdown-toggle').dropdown();
     $('body').tooltip({selector: '[data-toggle="tooltip"]', container: 'body', trigger: 'hover'});
+    $('[data-toggle="popover"]').popover()
+
 }
 
 // set error state on blank text boxes or selects

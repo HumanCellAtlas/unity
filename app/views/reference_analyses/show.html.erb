@@ -16,24 +16,30 @@
   <thead>
     <tr>
       <th>Type</th>
+      <th>Parameter Format</th>
       <th>Call Name</th>
-      <th>Parameter</th>
+      <th>Parameter Name</th>
+      <th>Optional</th>
       <th>Value</th>
     </tr>
   </thead>
   <tbody>
-    <% @reference_analysis.configuration_settings.each do |data_type, settings| %>
-      <% settings.each do |call_name, parameters| %>
-        <% parameters.each do |name, value| %>
-          <tr>
-            <td><%= data_type %></td>
-            <td><%= call_name %></td>
-            <td><%= name %></td>
-            <td><%= value %></td>
-          </tr>
-        <% end %>
+      <% @reference_analysis.reference_analysis_data.each do |parameter| %>
+        <tr>
+          <td><%= parameter.data_type %></td>
+          <td><%= parameter.parameter_type %></td>
+          <td><%= parameter.call_name %></td>
+          <td><%= parameter.parameter_name %></td>
+          <td>
+            <% if parameter.data_type == 'inputs' %>
+              <%= parameter.optional ? "<i class='fas fa-check-circle text-success'></i>".html_safe : "<i class='fas fa-times-circle text-danger'></i>".html_safe %>
+            <% else %>
+              N/A
+            <% end %>
+          </td>
+          <td><%= parameter.parameter_value %></td>
+        </tr>
       <% end %>
-    <% end %>
   </tbody>
 </table>
 

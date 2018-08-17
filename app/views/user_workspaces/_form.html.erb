@@ -29,7 +29,16 @@
 
   <div class="form-group row">
     <div class="col-sm">
-      <%= form.submit 'Save', class: 'btn btn-success' %>
+      <%= form.submit 'Save', class: 'btn btn-success', id: 'save-user-workspace' %>
     </div>
   </div>
 <% end %>
+
+<script type="text/javascript">
+
+    $('#save-user-workspace').on('click', function() {
+        $('#generic-modal-title').html('Provisioning Workspace... Please Wait');
+        launchModalSpinner('#generic-modal-spinner', '#generic-modal', function() { return true;})
+    });
+
+</script>

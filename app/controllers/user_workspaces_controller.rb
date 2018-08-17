@@ -1,6 +1,6 @@
 class UserWorkspacesController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_user_workspace, only: [:show, :destroy, :create_user_analysis, :update_user_analysis, :get_reference_wdl_payload]
+  before_action :set_user_workspace, only: [:show, :destroy, :create_user_analysis, :update_user_analysis, :get_analysis_wdl_payload]
   before_action :set_user_projects, only: [:new, :create]
   before_action :set_reference_analysis, only: [:new]
 
@@ -20,7 +20,7 @@ class UserWorkspacesController < ApplicationController
       @user_analysis.namespace = @user_analysis.default_namespace
     end
     begin
-      user_client = user_fire_cloud_client(current_user, @user_workspace.namespace)
+      user_client = user_fire_cloud_client(current_user)
       @submissions = user_client.get_workspace_submissions(@user_workspace.namespace, @user_workspace.name)
     rescue => e
       Rails.logger.info "Cannot retrieve submissions for user_workspace '#{@user_workspace.full_name}': #{e.message}"
@@ -81,6 +81,8 @@ class UserWorkspacesController < ApplicationController
         format.html { redirect_to user_workspace_path(project: @user_workspace.namespace, name: @user_workspace.name), notice: "'#{@user_analysis.full_name}' was successfully created." }
         format.json { render :show, status: :created, location: @user_workspace }
       else
+        user_client = user_fire_cloud_client(current_user)
+        @submissions = user_client.get_workspace_submissions(@user_workspace.namespace, @user_workspace.name)
         format.html { render :show }
         format.json { render json: @user_analysis.errors, status: :unprocessable_entity }
       end
@@ -96,6 +98,8 @@ class UserWorkspacesController < ApplicationController
         format.html { redirect_to user_workspace_path(project: @user_workspace.namespace, name: @user_workspace.name), notice: "'#{@user_analysis.full_name}' was successfully updated." }
         format.json { render :show, status: :created, location: @user_workspace }
       else
+        user_client = user_fire_cloud_client(current_user)
+        @submissions = user_client.get_workspace_submissions(@user_workspace.namespace, @user_workspace.name)
         format.html { render :show }
         format.json { render json: @user_analysis.errors, status: :unprocessable_entity }
       end
@@ -103,7 +107,7 @@ class UserWorkspacesController < ApplicationController
   end
 
   # load WDL payload from methods repo
-  def get_reference_wdl_payload
+  def get_analysis_wdl_payload
     begin
       namespace, name, snapshot = @user_workspace.reference_analysis.extract_wdl_keys(:analysis_wdl)
       pipeline_attr = [namespace, name, snapshot]

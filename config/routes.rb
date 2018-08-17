@@ -8,7 +8,11 @@ Rails.application.routes.draw do
 
   # admin & reference_analysis routes
   resources :admin_configurations, path: 'admin'
-  resources :reference_analyses
+  resources :reference_analyses do
+    member do
+      get 'populate_analysis_params', to: 'reference_analyses#populate_analysis_params', as: :populate_analysis_params
+    end
+  end
 
   # project routes
   resources :projects, only: [:index, :new, :show, :create, :destroy] do
@@ -28,7 +32,7 @@ Rails.application.routes.draw do
   delete 'my-benchmarks/:project/:name', to: 'user_workspaces#destroy', as: :destroy_user_workspace
   delete 'my-benchmarks/:id', to: 'user_workspaces#destroy' # fallback route
   post 'my-benchmarks/:project/:name/user_analysis', to: 'user_workspaces#create_user_analysis', as: :create_user_analysis
-  get 'my-benchmarks/:project/:name/reference_wdl', to: 'user_workspaces#get_reference_wdl_payload', as: :get_reference_wdl
+  get 'my-benchmarks/:project/:name/analysis_wdl', to: 'user_workspaces#get_analysis_wdl_payload', as: :get_analysis_wdl
 
   # profile routes
   get 'profile', to: 'site#profile', as: :profile

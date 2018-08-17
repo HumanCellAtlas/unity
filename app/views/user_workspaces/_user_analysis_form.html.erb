@@ -1,7 +1,7 @@
 <%= form_with(model: user_analysis, url: create_user_analysis_path, local: true, html: {class: 'form user-analysis-form', id: "user-analysis-form"}) do |form| %>
   <% if user_analysis.errors.any? %>
     <div class="bs-callout bs-callout-danger" id="reference-analysis-errors-block">
-      <h4><%= pluralize(user_workspace.errors.count, "error") %> prohibited this anlaysis from being saved:</h4>
+      <h4><%= pluralize(user_analysis.errors.count, "error") %> prohibited this analysis from being saved:</h4>
 
       <ul>
       <% user_analysis.errors.full_messages.each do |message| %>
@@ -18,7 +18,7 @@
   <%= form.hidden_field :namespace %>
 
   <div class="form-group row">
-    <div class="col-sm-10">
+    <div class="col-sm-8">
       <%= form.label :name %>
       <%= form.text_field :name, class: 'form-control', placeholder: 'Enter a name for this analysis...' %>
     </div>
@@ -26,21 +26,30 @@
       <%= form.label :snapshot, 'Current Snapshot' %>
       <%= form.text_field :snapshot, class: 'form-control', readonly: true %>
     </div>
+    <div class="col-sm-2">
+      <label for="view-user-analysis-wdl">View WDL in Repo</label><br />
+      <% unless user_analysis.new_record? %>
+        <%= link_to "View <i class='fas fa-external-link-alt'></i>".html_safe, user_analysis.wdl_view_url, class: 'btn btn-dark', target: :_blank %>
+      <% else %>
+        <span class="btn btn-outline-dark disabled">View <i class="fas fa-ban"></i> </span>
+      <% end %>
+    </div>
   </div>
   <div class="form-group row">
     <div class="col-md">
       <%= form.label :wdl_contents, "WDL Contents" %>
       <div class="row">
-        <div class="col-sm">
+        <div class="col-sm-8">
           <div class="input-group mb-3">
-          <div class="custom-file">
-            <input type="file" class="custom-file-input" id="wdl-contents-file">
-            <label class="custom-file-label" for="wdl-contents-file">Read WDL from file...</label>
+            <div class="custom-file">
+              <input type="file" class="custom-file-input" id="wdl-contents-file">
+              <label class="custom-file-label" for="wdl-contents-file">Read WDL from file...</label>
+            </div>
           </div>
         </div>
-        </div>
-        <div class="col-sm">
-          <%= link_to "Pre-populate with Reference Analysis", '#', class: 'btn btn-block btn-outline-secondary', id: 'populate-reference-wdl' %>
+        <div class="col-sm-4">
+          <%= link_to "Pre-populate with Reference Analysis WDL <i class='fas fa-code'></i>".html_safe, '#', class: 'btn btn-block btn-outline-secondary',
+                      id: 'populate-reference-wdl', data: {toggle: 'tooltip'}, title: 'Load the reference analysis WDL payload into the text area below.' %>
         </div>
       </div>
       <%= form.text_area :wdl_contents, rows: 10, class: 'form-control wdl-contents' %>
@@ -48,7 +57,7 @@
   </div>
   <div class="form-group row">
     <div class="col-sm">
-      <%= form.submit 'Save', class: 'btn btn-success' %>
+      <%= form.submit 'Save', class: 'btn btn-success', id: 'save-user-analysis' %>
     </div>
   </div>
 
@@ -72,11 +81,23 @@
           $(fileInput).val("")
       });
 
-      $('#populate-reference-wdl').on('click', function() {
+      $('#populate-reference-wdl').on('click', function(e) {
+          e.preventDefault();
           $('#generic-modal-title').html('Loading Reference WDL Payload, Please Wait...');
           launchModalSpinner('#generic-modal-spinner', '#generic-modal', function() {
               $.ajax({
-                  url: '<%= get_reference_wdl_path(target: 'user_analysis_wdl_contents') %>',
+                  url: '<%= get_analysis_wdl_path(target: 'user_analysis_wdl_contents') %>',
+                  method: 'GET',
+                  dataType: 'script'
+              });
+          });
+      });
+
+      $('#save-user-analysis').on('click', function() {
+          $('#generic-modal-title').html('Validating WDL Payload, Please Wait...');
+          launchModalSpinner('#generic-modal-spinner', '#generic-modal', function() {
+              $.ajax({
+                  url: '<%= get_analysis_wdl_path(target: 'user_analysis_wdl_contents') %>',
                   method: 'GET',
                   dataType: 'script'
               });

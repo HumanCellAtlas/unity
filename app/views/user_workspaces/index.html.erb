@@ -9,7 +9,6 @@
             <th>Name</th>
             <th>Reference Analysis</th>
             <th>My Analysis</th>
-            <th>Submissions</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -17,13 +16,22 @@
         <tbody>
           <% @user_workspaces.each do |user_workspace| %>
             <tr>
-              <td><%= user_workspace.name %></td>
-              <td><%= user_workspace.reference_analysis.analysis_wdl %></td>
-              <td>N/A</td>
-              <td>0</td>
+              <td><%= link_to user_workspace.name, user_workspace_path(project: user_workspace.namespace, name: user_workspace.name) %></td>
+              <td><%= link_to "#{user_workspace.reference_analysis.analysis_wdl} <i class='fas fa-external-link-alt'></i>".html_safe,
+                              user_workspace.reference_analysis.wdl_view_url(:analysis_wdl), target: :_blank %></td>
+              <td>
+                <% if user_workspace.user_analysis.present? %>
+                  <%= link_to "#{user_workspace.user_analysis.full_name} <i class='fas fa-external-link-alt'></i>".html_safe,
+                              user_workspace.user_analysis.wdl_view_url, target: :_blank %>
+                <% else %>
+                  N/A
+                <% end %>
+              </td>
               <td class="actions">
-                <%= link_to 'Benchmark', user_workspace_path(project: user_workspace.namespace, name: user_workspace.name), class: 'btn btn-sm btn-primary' %>&nbsp;
-                <%= link_to 'Delete', user_workspace_path(project: user_workspace.namespace, name: user_workspace.name), method: :delete, data: { confirm: 'Are you sure you want to delete this benchmark workspace?' },
+                <%= link_to 'Benchmark', user_workspace_path(project: user_workspace.namespace, name: user_workspace.name),
+                            class: 'btn btn-sm btn-primary' %>&nbsp;
+                <%= link_to 'Delete', user_workspace_path(project: user_workspace.namespace, name: user_workspace.name),
+                            method: :delete, data: { confirm: 'Are you sure you want to delete this benchmark workspace?' },
                             class: 'btn btn-sm btn-danger' %></td>
             </tr>
           <% end %>

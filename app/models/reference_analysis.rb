@@ -20,6 +20,8 @@ class ReferenceAnalysis < ApplicationRecord
   accepts_nested_attributes_for :reference_analysis_data, allow_destroy: true
   accepts_nested_attributes_for :reference_analysis_options, allow_destroy: true
 
+  after_create :load_parameters_from_wdl!
+
   # combine firecloud_project & firecloud_workspace for use in generating URLs (via firecloud_link_for)
   def display_name
     "#{self.firecloud_project}/#{self.firecloud_workspace}"
@@ -30,31 +32,66 @@ class ReferenceAnalysis < ApplicationRecord
     self.reference_analysis_data.where(data_type: data_type).count
   end
 
+  # populate inputs & outputs from reference analysis WDL definition.  will automatically fire after record creation
+  def load_parameters_from_wdl!
+    begin
+      wdl_namespace, wdl_name, wdl_version = extract_wdl_keys(:analysis_wdl)
+      config = ApplicationController.fire_cloud_client.get_method_parameters(wdl_namespace, wdl_name, wdl_version.to_i)
+      config.each do |data_type, settings|
+        settings.each do |setting|
+          vals = setting['name'].split('.')
+          call_name = vals.shift
+          parameter_name = vals.join('.')
+          parameter_type = data_type == 'inputs' ? setting['inputType'] : setting['outputType']
+          optional = setting['optional'] == true
+          config_attr = {
+              data_type: data_type,
+              parameter_type: parameter_type,
+              call_name: call_name,
+              parameter_name: parameter_name,
+              optional: optional
+          }
+          unless self.reference_analysis_data.where(config_attr).exists?
+            self.reference_analysis_data.create!(config_attr)
+          end
+        end
+      end
+      true
+    rescue => e
+      Rails.logger.info "Error retrieving analysis WDL inputs/outputs: #{e.message}"
+      e
+    end
+  end
+
   # get all configuration files for this analysis as a hash
   def configuration_settings
     settings = {}
     self.reference_analysis_data.each do |parameter|
-      settings[parameter.data_type.to_sym] ||= {}
-      settings[parameter.data_type.to_sym][parameter.call_name.to_sym] ||= {}
-      settings[parameter.data_type.to_sym][parameter.call_name.to_sym].merge!({parameter.parameter_name.to_sym => parameter.parameter_value})
+      settings[parameter.data_type] ||= []
+      config = {
+          'name' => "#{parameter.call_name}.#{parameter.parameter_name}"
+      }
+      if parameter.data_type == 'inputs'
+        config.merge!({
+                          'optional' => parameter.optional,
+                          'inputType' => parameter.parameter_type
+                      })
+      else
+        config.merge!({'outputType' => parameter.parameter_type})
+      end
+      settings[parameter.data_type] << config
     end
     settings
   end
 
-  # get a list of all call names for this reference analysis by data_type, or all (default)
-  def call_names(data_type=nil)
-    data = data_type.present? ? self.reference_analysis_data.where(data_type: data_type) : self.reference_analysis_data
-    data.map(&:call_name).uniq
-  end
-
   # get require input configuration
   def required_inputs
-    self.configuration_settings[:input]
+    self.configuration_settings['inputs']
   end
 
   # get required output configuration
   def required_outputs
-    self.configuration_settings[:output]
+    self.configuration_settings['outputs']
   end
 
   # get key/value options pairs as hash

@@ -15,12 +15,6 @@ ActionView::Base.field_error_proc = Proc.new do |html_tag, instance|
       html = %(#{e}).html_safe
     elsif form_fields.include? e.node_name
       e['class'] += ' is-invalid'
-      e['data-toggle'] = 'tooltip'
-      if instance.error_message.kind_of?(Array)
-        e['title'] = instance.error_message.uniq.join(', ')
-      else
-        e['title'] = instance.error_message
-      end
       html = %(#{e}).html_safe
     end
   end

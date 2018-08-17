@@ -24,17 +24,17 @@
   </div>
   <div class="form-group row">
     <div class="col-sm">
-      <%= form.label :analysis_wdl %>
+      <%= form.label :analysis_wdl, 'Analysis WDL' %>
       <%= form.text_field :analysis_wdl, class: 'form-control' %>
     </div>
 
     <div class="col-sm">
-      <%= form.label :benchmark_wdl %>
+      <%= form.label :benchmark_wdl, 'Benchmark WDL' %>
       <%= form.text_field :benchmark_wdl, class: 'form-control' %>
     </div>
 
     <div class="col-sm">
-      <%= form.label :orchestration_wdl %>
+      <%= form.label :orchestration_wdl, 'Orchestration WDL' %>
       <%= form.text_field :orchestration_wdl, class: 'form-control' %>
     </div>
   </div>
@@ -44,6 +44,8 @@
       <p class="text-muted">These are input/output parameters that are used to validate user-supplied analyses when attempting
         to benchmark this reference analysis.  If the supplied analysis does not conform to this list, then it will not
         run when imported into the orchestration WDL.</p>
+      <p class="text-muted">You can add these paramteres manually, or they will auto-populate from the analysis WDL inputs/ouputs
+        when the record is first created.</p>
       <%= form.fields_for :reference_analysis_data, class: 'form-control' %>
     </div>
   </div>
@@ -69,7 +71,16 @@
   <div class="form-group row">
     <div class="col-sm">
       <%= form.label :submit, "&nbsp;".html_safe %><br />
-      <%= form.submit 'Save', class: 'btn btn-success' %>
+      <%= form.submit 'Save', class: 'btn btn-success', id: 'save-reference-analysis' %>
     </div>
   </div>
 <% end %>
+
+<script type="text/javascript">
+
+    $('#save-reference-analysis').on('click', function() {
+        $('#generic-modal-title').html('Validating WDLs... Please Wait');
+        launchModalSpinner('#generic-modal-spinner', '#generic-modal', function() { return true;})
+    })
+
+</script>
