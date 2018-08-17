@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# build_and_push_image
+#
+# shell script to rebuild the unity docker image and push to dockerhub.
+
+# usage error message
+usage=$(
+cat <<EOF
+
+### shell script to rebuild the unity docker image and push to dockerhub. ###
+$0
+
+[OPTIONS]
+-v VALUE	set docker version/tag to build and push, defaults to 'latest'
+-H COMMAND	print this text
+EOF
+)
+
+# defaults
+IMAGE_VERSION="latest"
+while getopts "v:H" OPTION; do
+case $OPTION in
+	v)
+		IMAGE_VERSION="$OPTARG"
+		;;
+	H)
+		echo "$usage"
+		exit 0
+		;;
+	*)
+    echo "unrecognized option"
+    echo "$usage"
+    ;;
+	esac
+done
+
+docker build -t unitybenchmark/unity_benchmark_docker:$IMAGE_VERSION -f Dockerfile .
+docker push unitybenchmark/unity_benchmark_docker:$IMAGE_VERSION
