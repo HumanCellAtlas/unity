@@ -13,7 +13,7 @@ class ApplicationController < ActionController::Base
   end
 
   # instantiate a user-scoped firecloud client
-  def user_fire_cloud_client(user, project=FireCloudClient::PROJECT_NAMESPACE)
+  def user_fire_cloud_client(user, project=AdminConfiguration.project_namespace)
     FireCloudClient.new(user, project)
   end
 

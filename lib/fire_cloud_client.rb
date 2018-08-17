@@ -21,7 +21,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   # constant used for retry loops in process_firecloud_request and execute_gcloud_method
   MAX_RETRY_COUNT = 3
   # default namespace containing reference workspaces for Unity
-  PROJECT_NAMESPACE = AdminConfiguration.project_namespace
+  PROJECT_NAMESPACE =
   # location of Google service account JSON (must be absolute path to file)
   SERVICE_ACCOUNT_KEY = !ENV['SERVICE_ACCOUNT_KEY'].blank? ? File.absolute_path(ENV['SERVICE_ACCOUNT_KEY']) : ''
   # Permission values allowed for FireCloud workspace ACLs
@@ -43,7 +43,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   #   - +project+: (String) => Default GCP Project to use (can be overridden by other parameters)
   # * *return*
   #   - +FireCloudClient+ object
-  def initialize(user=nil, project=PROJECT_NAMESPACE)
+  def initialize(user=nil, project=AdminConfiguration.project_namespace)
     # when initializing without a user, default to base configuration
     if user.nil?
       self.access_token = FireCloudClient.generate_access_token
@@ -52,7 +52,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
       # instantiate Google Cloud Storage driver to work with files in workspace buckets
       # if no keyfile is present, use environment variables
       storage_attr = {
-          project: PROJECT_NAMESPACE,
+          project: project,
           timeout: 3600
       }
       if !ENV['SERVICE_ACCOUNT_KEY'].blank?
@@ -159,7 +159,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   #
   # * *return*
   #   - +Google::Cloud::Storage+ instance
-  def refresh_storage_driver(project_name=PROJECT_NAMESPACE)
+  def refresh_storage_driver(project_name=AdminConfiguration.project_namespace)
     storage_attr = {
         project: project_name,
         timeout: 3600
