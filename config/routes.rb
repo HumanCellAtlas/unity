@@ -10,7 +10,7 @@ Rails.application.routes.draw do
   resources :admin_configurations, path: 'admin'
   resources :reference_analyses do
     member do
-      get 'populate_analysis_params', to: 'reference_analyses#populate_analysis_params', as: :populate_analysis_params
+      put 'reset_wdl_params', to: 'reference_analyses#reset_wdl_params', as: :reset_wdl_params
     end
   end
 

@@ -43,16 +43,20 @@
       <h4>Required Inputs/Outputs</h4>
       <p class="text-muted">These are input/output parameters that are used to validate user-supplied analyses when attempting
         to benchmark this reference analysis.  If the supplied analysis does not conform to this list, then it will not
-        run when imported into the orchestration WDL.</p>
-      <p class="text-muted">You can add these paramteres manually, or they will auto-populate from the analysis WDL inputs/ouputs
-        when the record is first created.</p>
+        run when imported into the orchestration WDL.  You can add these parameters manually, or they will auto-populate
+        from the analysis WDL inputs/ouputs when the record is first created.</p>
       <%= form.fields_for :reference_analysis_data, class: 'form-control' %>
     </div>
   </div>
   <div class="form-group row">
     <div class="col-sm">
-      <%= form.link_to_add "<span class='fa fa-plus'></span> Add input/output files".html_safe, :reference_analysis_data, class: 'btn btn-sm btn-primary',
-                           id: 'add-reference-analysis-data' %>
+      <%= form.link_to_add "<span class='fa fa-plus'></span> Add input/output parameters".html_safe,
+                           :reference_analysis_data, class: 'btn btn-sm btn-primary', id: 'add-reference-analysis-data' %>
+      <% if !reference_analysis.new_record? %>
+        <%= link_to "<span class='fas fa-sync-alt'></span> Reset Parameters to Defaults".html_safe,
+                    reset_wdl_params_reference_analysis_path, method: :put, class: 'btn btn-sm btn-danger',
+                    data: {toggle: 'tooltip'}, title: 'Reset all input/output parameters to defaults from WDL' %>
+      <% end %>
     </div>
   </div>
   <div class="form-group row">
@@ -63,8 +67,8 @@
   </div>
   <div class="form-group row">
     <div class="col-sm">
-      <%= form.link_to_add "<span class='fa fa-plus'></span> Add options".html_safe, :reference_analysis_options, class: 'btn btn-sm btn-secondary',
-                           id: 'add-reference-analysis-options' %>
+      <%= form.link_to_add "<span class='fa fa-plus'></span> Add options".html_safe, :reference_analysis_options,
+                           class: 'btn btn-sm btn-secondary', id: 'add-reference-analysis-options' %>
     </div>
   </div>
 

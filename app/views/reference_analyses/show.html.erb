@@ -2,11 +2,20 @@
 <h3>WDLs</h3>
 <dl class="row">
   <dt class="col-sm-3">Reference Analysis WDL</dt>
-  <dd class="col-sm-9"><%= link_to @reference_analysis.analysis_wdl, @reference_analysis.wdl_view_url(:analysis_wdl) %></dd>
+  <dd class="col-sm-9"><%= link_to "#{@reference_analysis.analysis_wdl} <i class='fas fa-external-link-alt'></i>".html_safe,
+                                   @reference_analysis.wdl_view_url(:analysis_wdl), class: 'btn btn-sm btn-outline-primary',
+                                   target: :_blank %>
+  </dd>
   <dt class="col-sm-3">Benchmark WDL</dt>
-  <dd class="col-sm-9"><%= link_to @reference_analysis.benchmark_wdl, @reference_analysis.wdl_view_url(:benchmark_wdl) %></dd>
+  <dd class="col-sm-9"><%= link_to "#{@reference_analysis.benchmark_wdl} <i class='fas fa-external-link-alt'></i>".html_safe,
+                                   @reference_analysis.wdl_view_url(:benchmark_wdl), class: 'btn btn-sm btn-outline-primary',
+                                   target: :_blank %>
+  </dd>
   <dt class="col-sm-3">Orchestration</dt>
-  <dd class="col-sm-9"><%= link_to @reference_analysis.orchestration_wdl, @reference_analysis.wdl_view_url(:orchestration_wdl) %></dd>
+  <dd class="col-sm-9"><%= link_to "#{@reference_analysis.orchestration_wdl} <i class='fas fa-external-link-alt'></i>".html_safe,
+                                   @reference_analysis.wdl_view_url(:orchestration_wdl), class: 'btn btn-sm btn-outline-primary',
+                                   target: :_blank %>
+  </dd>
 </dl>
 <h3>Required Inputs/Outputs</h3>
 <p class="text-muted">These are input/output parameters that are used to validate user-supplied analyses when attempting

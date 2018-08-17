@@ -17,31 +17,39 @@
   <div class="card-body bg-light">
     <div class="form-group row">
       <div class="col-sm-2">
+        <%= f.label :data_type, 'Type' %>
         <%= f.select :data_type, options_for_select(ReferenceAnalysisDatum::DATA_TYPES, selected: f.object.data_type), {}, class: 'form-control' %>
       </div>
       <div class="col-sm-3">
-        <%= f.text_field :call_name, class: 'form-control', placeholder: 'WDL Call/Task Name' %>
+        <%= f.label :call_name, 'WDL Call/Task Name' %>
+        <%= f.text_field :call_name, class: 'form-control' %>
       </div>
       <div class="col-sm-3">
-        <%= f.text_field :parameter_type, class: 'form-control', placeholder: 'Parameter Type' %>
+        <%= f.label :call_name, 'Parameter Type/Format' %>
+        <%= f.text_field :parameter_type, class: 'form-control' %>
       </div>
       <div class="col-sm-2">
+        <label>&nbsp;</label>
         <%= link_to "Parameter Types <i class='fas fa-external-link-alt'></i>".html_safe,
                     'https://gatkforums.broadinstitute.org/wdl/discussion/7030/data-types-and-serialization',
                     class: 'text-secondary bg-light form-control', target: :_blank %>
       </div>
       <div class="col-sm-2">
-        <%= f.select :data_type, options_for_select([['Required', 0],['Optional', 1]], selected: f.object.optional), {}, class: 'form-control' %>
+        <%= f.label :optional, 'Required/Optional' %>
+        <%= f.select :optional, options_for_select([['Required', 0],['Optional', 1]], selected: f.object.optional), {}, class: 'form-control' %>
       </div>
     </div>
     <div class="form-group row">
       <div class="col-sm-3">
-        <%= f.text_field :parameter_name, class: 'form-control', placeholder: 'Parameter Name (from WDL/Configuration)' %>
+        <%= f.label :parameter_name, 'Parameter Name' %>
+        <%= f.text_field :parameter_name, class: 'form-control' %>
       </div>
       <div class="col-sm-7">
-        <%= f.text_field :parameter_value, class: 'form-control', placeholder: 'Parameter Value (optional)' %>
+        <%= f.label :parameter_value, 'Parameter Value' %>
+        <%= f.text_field :parameter_value, class: 'form-control' %>
       </div>
       <div class="col-sm-1">
+        <label class="w-100">&nbsp;</label>
         <%= f.link_to_remove "<span class='btn btn-danger'><span class='fas fa-fw fa-times'></span></span>".html_safe, data: {confirm: 'Are you sure?  This cannot be undone unless you reload the page before saving.'} %>
       </div>
     </div>

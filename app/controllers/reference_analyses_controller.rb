@@ -1,7 +1,7 @@
 class ReferenceAnalysesController < ApplicationController
   before_action :authenticate_user!
   before_action :authenticate_admin
-  before_action :set_reference_analysis, only: [:show, :edit, :update, :destroy, :populate_analysis_params]
+  before_action :set_reference_analysis, only: [:show, :edit, :update, :destroy, :reset_wdl_params]
 
   # GET /reference_analyses
   # GET /reference_analyses.json
@@ -51,6 +51,12 @@ class ReferenceAnalysesController < ApplicationController
         format.json { render json: @reference_analysis.errors, status: :unprocessable_entity }
       end
     end
+  end
+
+  # clear out any saved input/output parameters and set directly from WDL
+  def reset_wdl_params
+    @reference_analysis.load_parameters_from_wdl!
+    redirect_to reference_analysis_path(@reference_analysis), notice: "'#{@reference_analysis.display_name}' required parameters successfully reset."
   end
 
   # DELETE /reference_analyses/1

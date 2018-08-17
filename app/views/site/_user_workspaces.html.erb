@@ -5,7 +5,7 @@
       <thead class="thead-light">
       <tr>
         <th>Name</th>
-        <th>Submissions</th>
+        <th>Analysis</th>
         <th>Actions</th>
       </tr>
       </thead>
@@ -13,7 +13,12 @@
       <% @user_workspaces.each do |workspace| %>
         <tr>
           <td><%= workspace.full_name %></td>
-          <td>0</td>
+          <td><% if workspace.user_analysis.present? %>
+              <%= link_to "#{workspace.user_analysis.full_name} <i class='fas fa-external-link-alt'></i>".html_safe,
+                          workspace.user_analysis.wdl_view_url, target: :_blank %>
+            <% else %>
+              N/A
+            <% end %></td>
           <td>
             <%= link_to "View <i class='fas fa-fw fa-info-circle'></i>".html_safe, user_workspace_path(project: workspace.namespace, name: workspace.name), class: 'btn btn-outline-secondary btn-sm' %>
           </td>

@@ -33,8 +33,10 @@ class ReferenceAnalysis < ApplicationRecord
   end
 
   # populate inputs & outputs from reference analysis WDL definition.  will automatically fire after record creation
+  # also clears out any previously saved inputs/outputs, so use with caution!
   def load_parameters_from_wdl!
     begin
+      self.reference_analysis_data.delete_all
       wdl_namespace, wdl_name, wdl_version = extract_wdl_keys(:analysis_wdl)
       config = ApplicationController.fire_cloud_client.get_method_parameters(wdl_namespace, wdl_name, wdl_version.to_i)
       config.each do |data_type, settings|
