@@ -2,6 +2,7 @@ class ReferenceAnalysesController < ApplicationController
   before_action :authenticate_user!
   before_action :authenticate_admin
   before_action :set_reference_analysis, only: [:show, :edit, :update, :destroy, :reset_wdl_params]
+  before_action :check_firecloud_availability, except: [:index, :show]
 
   # GET /reference_analyses
   # GET /reference_analyses.json

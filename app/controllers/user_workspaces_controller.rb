@@ -3,6 +3,8 @@ class UserWorkspacesController < ApplicationController
   before_action :set_user_workspace, only: [:show, :destroy, :create_user_analysis, :update_user_analysis, :get_analysis_wdl_payload]
   before_action :set_user_projects, only: [:new, :create]
   before_action :set_reference_analysis, only: [:new]
+  before_action :check_firecloud_registration, except: [:index]
+  before_action :check_firecloud_availability, except: [:index]
 
   # GET /user_workspaces
   # GET /user_workspaces.json
@@ -153,4 +155,5 @@ class UserWorkspacesController < ApplicationController
   def user_analysis_params
     params.require(:user_analysis).permit(:name, :user_id, :user_workspace_id, :namespace, :snapshot, :wdl_contents)
   end
+
 end

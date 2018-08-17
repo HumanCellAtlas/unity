@@ -2,7 +2,7 @@ class ProjectsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_project, only: [:show, :workspaces, :destroy]
   before_action :verify_project_ownership, only: [:show, :destroy]
-  before_action :check_firecloud_status
+  before_action :check_profile_and_project_status, except: [:index]
   before_action :set_available_projects, only: [:new, :create]
   before_action :set_available_billing, only: [:new_from_scratch, :create_from_scratch]
 
@@ -141,7 +141,7 @@ class ProjectsController < ApplicationController
       end
     end
 
-    def check_firecloud_status
+    def check_profile_and_project_status
       unless ApplicationController.fire_cloud_client.services_available?('Thurloe', 'Sam')
         redirect_to site_path, alert: "User billing projects/workspaces are currently unavailable.  Please try again later." and return
       end
