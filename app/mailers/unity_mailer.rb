@@ -19,7 +19,7 @@ class UnityMailer < ApplicationMailer
   end
 
   # notifier of FireCloud API service interruptions
-  def firecloud_api_notification(current_status, requester)
+  def firecloud_api_notification(current_status, requester=nil)
     unless Rails.application.config.disable_admin_notifications == true
       @admins = User.where(admin: true).map(&:email)
       @requester = requester.nil? ? 'no-reply@broadinstitute.org' : requester
