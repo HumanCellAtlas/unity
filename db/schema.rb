@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_08_16_195332) do
+ActiveRecord::Schema.define(version: 2018_08_20_181149) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "hstore"
@@ -20,6 +20,22 @@ ActiveRecord::Schema.define(version: 2018_08_16_195332) do
     t.string "config_type"
     t.string "value_type"
     t.string "value"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "benchmark_analyses", force: :cascade do |t|
+    t.bigserial "user_analysis_id", null: false
+    t.bigserial "user_id", null: false
+    t.string "name"
+    t.string "namespace"
+    t.integer "snapshot"
+    t.string "configuration_name"
+    t.string "configuration_namespace"
+    t.integer "configuration_snapshot"
+    t.string "submission_id"
+    t.string "submission_status"
+    t.string "benchmark_results"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
