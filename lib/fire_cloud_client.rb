@@ -571,7 +571,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
         snapshotComment: '',
         documentation: '',
         payload: wdl_contents,
-        entityType: 'Task'
+        entityType: 'Workflow'
     }
     process_firecloud_request(:post, path, wdl_payload.to_json)
   end
