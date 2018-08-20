@@ -1,11 +1,11 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  config_type: MyString
-  value_type: MyString
-  value: MyString
+  config_type: Reference Data Workspace
+  value_type: String
+  value: unity-reference-data
 
 two:
-  config_type: MyString
-  value_type: MyString
-  value: MyString
+  config_type: Unity FireCloud User Group
+  value_type: String
+  value: unity-users
