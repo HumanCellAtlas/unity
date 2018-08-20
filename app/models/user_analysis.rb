@@ -60,13 +60,13 @@ class UserAnalysis < ApplicationRecord
   end
 
   # construct and import a new user_analysis specific WDL into the methods repo to benchmark against this reference_analysis
-  def create_orchestration_from_self
+  def create_orchestration_workflow
     begin
       Rails.logger.info "Creating custom orchestration WDL for #{self.full_name}"
       # get orchestration WDL contents
       orchestration_namespace, orchestration_name, orchestration_snapshot = self.reference_analysis.extract_wdl_keys(:orchestration_wdl)
       orchestration_wdl = ApplicationController.fire_cloud_client.get_method(orchestration_namespace, orchestration_name,
-                                                                             orchestration_snapshot.to_i)
+                                                                             orchestration_snapshot.to_i, true)
       orchestration_wdl_contents = orchestration_wdl.split("\n")
       # find the original analysis_wdl import and replace with user_analyis.wdl_import_url
       analysis_index = orchestration_wdl_contents.index {|import| import =~ /#{self.reference_analysis.wdl_import_url(:analysis_wdl)}/}
@@ -88,22 +88,22 @@ class UserAnalysis < ApplicationRecord
   end
 
   # create a configuration object to run this user_analysis in a benchmark submission
-  def create_orchestration_configuration(custom_orchestration)
+  def create_orchestration_config(orchestration_workflow)
     begin
       orchestration_namespace, orchestration_name, orchestration_snapshot = self.reference_analysis.extract_wdl_keys(:orchestration_wdl)
       user_client = FireCloudClient.new(self.user)
       workspace_configs = user_client.get_workspace_configurations(self.user_workspace.namespace, self.user_workspace.name)
-      orchestration_config = workspace_configs.find do |config|
+      matching_config = workspace_configs.find do |config|
           config['methodRepoMethod']['methodName'] == orchestration_name &&
           config['methodRepoMethod']['methodNamespace'] == orchestration_namespace &&
           config['methodRepoMethod']['methodVersion'] == orchestration_snapshot.to_i
       end
-      if orchestration_config.present?
-        # now set configuration method to use newly created custom orchestration WDL
+      if matching_config.present?
+        orchestration_config = user_client.get_workspace_configuration(self.user_workspace.namespace, self.user_workspace.name,
+                                                                       matching_config['namespace'], matching_config['name'])
+        # now set configuration method URI to use newly created custom orchestration WDL (this overrides the methodRepo name, namespace settings)
         # if the user_analysis is valid, then the inputs/outputs match the existing reference_analysis and the config is valid
-        orchestration_config['methodRepoMethod']['methodName'] = custom_orchestration['name']
-        orchestration_config['methodRepoMethod']['methodNamespace'] = custom_orchestration['namespace']
-        orchestration_config['methodRepoMethod']['methodVersion'] = custom_orchestration['snapshotId']
+        orchestration_config['methodRepoMethod']['methodUri'] = generate_source_repo_url(orchestration_workflow, orchestration_config)
         orchestration_config['namespace'] = self.namespace
         orchestration_config['name'] = self.orchestration_name
         new_workspace_config = user_client.create_workspace_configuration(self.user_workspace.namespace,
@@ -175,5 +175,10 @@ class UserAnalysis < ApplicationRecord
     rescue => e
       Rails.logger.error "Unable to redact #{self.full_name} to methods repo: #{e.message}"
     end
+  end
+
+  # construct a new source repository url from a method & existing configuration
+  def generate_source_repo_url(new_method, existing_configuration)
+    "#{existing_configuration['methodRepoMethod']['sourceRepo']}://#{new_method['namespace']}/#{new_method['name']}/#{new_method['snapshotId']}"
   end
 end
