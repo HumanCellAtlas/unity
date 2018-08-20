@@ -175,6 +175,8 @@ into your deployment.  These secrets must be created with the following key/valu
     1. localhost.crt: a valid SSL certificate for your domain (filename of localhost does not affect certificate)
 1. ssl-keyfile
     1. localhost.key: keyfile for your SSL certificate (filename of localhost does not affect certificate)
+1. prod-secret-key-base
+    1. secret-key-base: value for SECRET_KEY_BASE, which is used to encrypt secure cookies.  This can be set/updated by using <code>bin/set_prod_secret_key_base</code>
 
 Once your secrets are loaded and <code>kubectl</code> is pointing at your remote cluster:
 1. Navigate to the project directory
