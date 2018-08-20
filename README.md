@@ -102,7 +102,7 @@ There are several variables that need to be passed to the Docker container in or
 1. *CONTAINER_NAME* (passed with --name): This names your container to whatever you want.  This is useful when linking containers.
 1. *PROJECT_DIR* (passed with -v): This mounts your local working directory inside the Docker container.  Makes doing local development via hot deployment possible.
 1. *PASSENGER_APP_ENV* (passed with -e): The Rails environment you wish to load.  Can be either development, test, or production (default is development).
-1. *ENCRYPTION_KEY* (passed with -e): Salt value for encrypting sensitive information, like OAuth refresh tokens.
+1. *ENCRYPTION_KEY* (passed with -e): Salt value for encrypting sensitive information, like OAuth refresh tokens.  This must be at least 32 bytes in length, and cannot exceed 64 bytes.
 1. *DATABASE_HOST* (passed with -e): Name of the container running postgres.  Even though our two containers are linked, this needs to be set to allow Rails to communicate with the database.
 1. *DATABASE_USER* (passed with -e): Name of the container running postgres.  Even though our two containers are linked, this needs to be set to allow Rails to communicate with the database.
 1. *DATABASE_PASSWORD* (passed with -e): Name of the container running postgres.  Even though our two containers are linked, this needs to be set to allow Rails to communicate with the database.
@@ -126,7 +126,7 @@ The run command explained in its entirety:
   - Enables hot deployment for local development
   - Persists all project data past destruction of Docker container (since we're running with --rm), but not system-level log or tmp files.
 * <b>-e PASSENGER_APP_ENV= [RAILS_ENV]:</b> The Rails environment.  Will default to development, so if you're doing a production deployment, set this accordingly.
-* <b>-e ENCRYPTION_KEY= [ENCRYPTION_KEY]:</b> Salt value for encrypting sensitive information, like OAuth refresh tokens.  This value must be consistent, or previously stored credentials will not decrypt correctly.
+* <b>-e ENCRYPTION_KEY= [ENCRYPTION_KEY]:</b> Salt value for encrypting sensitive information, like OAuth refresh tokens.  This value must be consistent, and between 32-64 bytes, or previously stored credentials will not decrypt correctly.
 * <b>-e DATABASE_HOST= [DATABASE_HOST]:</b> Name of the container running postgres.  Even though our two containers are linked, this needs to be set to allow Rails to communicate with the database.
 * <b>-e DATABASE_USER= [DATABASE_USER] -e DATABASE_PASSWORD= [DATABASE_PASSWORD]:</b> Credentials for authenticating into postgres.
 * <b>-e SENDGRID_USERNAME= [SENDGRID_USERNAME] -e SENDGRID_PASSWORD= [SENDGRID_PASSWORD]:</b> The credentials for Sendgrid to send emails.  Alternatively, you could decide to not use Sendgrid and configure the application to use a different SMTP server (would be done inside your environment's config file).
