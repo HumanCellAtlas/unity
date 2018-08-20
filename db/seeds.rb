@@ -11,5 +11,3 @@
                                                benchmark_wdl: 'unity-benchmark-development/test-benchmark/3',
                                                orchestration_wdl: 'unity-benchmark-development/test-orchestration/2')
 @reference_analysis.load_parameters_from_wdl!
-@user = User.create(email: 'fake@gmail.com', password: 'password')
-@user_workspace = UserWorkspace.create()
