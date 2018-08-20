@@ -168,12 +168,12 @@ class UserAnalysis < ApplicationRecord
       user_client = FireCloudClient.new(self.user)
       max_snapshot = self.snapshot
       max_snapshot.downto(1) do |version|
-        Rails.logger.info "Redacting #{self.full_name}/#{version} from methods repo"
+        Rails.logger.info "Redacting #{self.namespace}/#{self.name}/#{version} from methods repo"
         user_client.delete_method(self.namespace, self.name, version)
-        Rails.logger.info "#{self.full_name}/#{version} successfully redacted from methods repo"
+        Rails.logger.info "#{self.namespace}/#{self.name}/#{version} successfully redacted from methods repo"
       end
     rescue => e
-      Rails.logger.error "Unable to redact #{self.full_name} to methods repo: #{e.message}"
+      Rails.logger.error "Unable to redact #{self.namespace}/#{self.name} to methods repo: #{e.message}"
     end
   end
 
