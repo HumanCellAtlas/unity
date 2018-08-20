@@ -11,7 +11,7 @@ class AdminConfiguration < ApplicationRecord
   validates_uniqueness_of :value, scope: [:config_type, :value_type]
   validates_uniqueness_of :config_type,
                           message: ": '%{value}' has already been set.  Please edit the corresponding entry to update.",
-                          unless: proc {|attributes| ['Reference Data Workspace', 'Workflow Name'].include?(attributes['config_type'])}
+                          unless: proc {|attributes| attributes['config_type'] === 'Reference Data Workspace'}
 
   validates_format_of :value, with: OBJECT_LABELS, message: OBJECT_LABELS_MESSAGE
 

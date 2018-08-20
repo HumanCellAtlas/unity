@@ -84,10 +84,10 @@ portal is configured and ready to use:
 ## RUNNING THE CONTAINER
 
 Once the image has successfully built and the database container is running, use the following command to start the container:
-<pre>bin/boot_docker -u (sendgrid username) -P (sendgrid password) -k (service account key path) -o (oauth client id) -S (oauth client secret) -l</pre>
+<pre>bin/boot_docker -u (sendgrid username) -P (sendgrid password) -E (encryption key) -k (service account key path) -o (oauth client id) -S (oauth client secret) -l</pre>
 
 This sets up several environment variables in your shell and then runs the following command:
-<pre>docker run --rm -it --name $CONTAINER_NAME --link $DATABASE_HOST:$DATABASE_HOST -p 80:80 -p 443:443 -h localhost -v $PROJECT_DIR:/home/app/webapp:rw -e PASSENGER_APP_ENV=$PASSENGER_APP_ENV -e DATABASE_HOST=$DATABASE_HOST -e DATABASE_USER=$DATABASE_USER -e PROD_DATABASE_PASSWORD=$DATABASE_PASSWORD -e SERVICE_ACCOUNT_KEY=$SERVICE_ACCOUNT_KEY -e SENDGRID_USERNAME=$SENDGRID_USERNAME -e SENDGRID_PASSWORD=$SENDGRID_PASSWORD -e SECRET_KEY_BASE=$SECRET_KEY_BASE -e OAUTH_CLIENT_ID=$OAUTH_CLIENT_ID -e OAUTH_CLIENT_SECRET=$OAUTH_CLIENT_SECRET -e GOOGLE_CLOUD_KEYFILE_JSON="$GOOGLE_CLOUD_KEYFILE_JSON" -e GOOGLE_PRIVATE_KEY="$GOOGLE_PRIVATE_KEY" -e GOOGLE_CLIENT_EMAIL="$GOOGLE_CLIENT_EMAIL" -e GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" -e GOOGLE_CLOUD_PROJECT="$GOOGLE_CLOUD_PROJECT" unity_benchmark_docker:$DOCKER_IMAGE_VERSION</pre>
+<pre>docker run --rm -it --name $CONTAINER_NAME --link $DATABASE_HOST:$DATABASE_HOST -p 80:80 -p 443:443 -h localhost -v $PROJECT_DIR:/home/app/webapp:rw -e PASSENGER_APP_ENV=$PASSENGER_APP_ENV -e DATABASE_HOST=$DATABASE_HOST -e DATABASE_USER=$DATABASE_USER -e ENCRYPTION_KEY=$ENCRYPTION_KEY -e PROD_DATABASE_PASSWORD=$DATABASE_PASSWORD -e SERVICE_ACCOUNT_KEY=$SERVICE_ACCOUNT_KEY -e SENDGRID_USERNAME=$SENDGRID_USERNAME -e SENDGRID_PASSWORD=$SENDGRID_PASSWORD -e SECRET_KEY_BASE=$SECRET_KEY_BASE -e OAUTH_CLIENT_ID=$OAUTH_CLIENT_ID -e OAUTH_CLIENT_SECRET=$OAUTH_CLIENT_SECRET -e GOOGLE_CLOUD_KEYFILE_JSON="$GOOGLE_CLOUD_KEYFILE_JSON" -e GOOGLE_PRIVATE_KEY="$GOOGLE_PRIVATE_KEY" -e GOOGLE_CLIENT_EMAIL="$GOOGLE_CLIENT_EMAIL" -e GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" -e GOOGLE_CLOUD_PROJECT="$GOOGLE_CLOUD_PROJECT" unity_benchmark_docker:$DOCKER_IMAGE_VERSION</pre>
 
 The container will then start running, and will execute its local startup scripts that will configure the application automatically.
 You can then access your instance of Unity at https://localhost
@@ -100,19 +100,20 @@ than <code>--rm -it</code>.</em>
 ### DOCKER RUN COMMAND ENVIRONMENT VARIABLES
 There are several variables that need to be passed to the Docker container in order to run properly:
 1. *CONTAINER_NAME* (passed with --name): This names your container to whatever you want.  This is useful when linking containers.
-3. *PROJECT_DIR* (passed with -v): This mounts your local working directory inside the Docker container.  Makes doing local development via hot deployment possible.
-4. *PASSENGER_APP_ENV* (passed with -e): The Rails environment you wish to load.  Can be either development, test, or production (default is development).
-5. *DATABASE_HOST* (passed with -e): Name of the container running postgres.  Even though our two containers are linked, this needs to be set to allow Rails to communicate with the database.
-5. *DATABASE_USER* (passed with -e): Name of the container running postgres.  Even though our two containers are linked, this needs to be set to allow Rails to communicate with the database.
-5. *DATABASE_PASSWORD* (passed with -e): Name of the container running postgres.  Even though our two containers are linked, this needs to be set to allow Rails to communicate with the database.
-6. *SENDGRID_USERNAME* (passed with -e): The username associated with a Sendgrid account (for sending emails).
-7. *SENDGRID_PASSWORD* (passed with -e): The password associated with a Sendgrid account (for sending emails).
-8. *SECRET_KEY_BASE* (passed with -e): Sets the Rails SECRET_KEY_BASE environment variable, used mostly by Devise in authentication for cookies.
-9. *SERVICE_ACCOUNT_KEY* (passed with -e): Sets the SERVICE_ACCOUNT_KEY environment variable, used for making authenticated API calls to FireCloud & GCP.
-10. *OAUTH_CLIENT_ID* (passed with -e): Sets the OAUTH_CLIENT_ID environment variable, used for Google OAuth2 integration.
-11. *OAUTH_CLIENT_SECRET* (passed with -e): Sets the OAUTH_CLIENT_SECRET environment variable, used for Google OAuth2 integration.
-12. *GOOGLE_[VARIOUS]* (passed with -e): If no SERVICE_ACCOUNT_KEY is present, the application will default to using the standard OAuth2 enviroment variables for authentication.  See [here](https://googlecloudplatform.github.io/google-cloud-ruby/#/docs/google-cloud-storage/v0.23.2/guides/authentication) for more information.
-13. *DOCKER_IMAGE_VERSION*: sets the version of the unity_benchmark_docker image to use (defaults to _latest_)
+1. *PROJECT_DIR* (passed with -v): This mounts your local working directory inside the Docker container.  Makes doing local development via hot deployment possible.
+1. *PASSENGER_APP_ENV* (passed with -e): The Rails environment you wish to load.  Can be either development, test, or production (default is development).
+1. *ENCRYPTION_KEY* (passed with -e): Salt value for encrypting sensitive information, like OAuth refresh tokens.
+1. *DATABASE_HOST* (passed with -e): Name of the container running postgres.  Even though our two containers are linked, this needs to be set to allow Rails to communicate with the database.
+1. *DATABASE_USER* (passed with -e): Name of the container running postgres.  Even though our two containers are linked, this needs to be set to allow Rails to communicate with the database.
+1. *DATABASE_PASSWORD* (passed with -e): Name of the container running postgres.  Even though our two containers are linked, this needs to be set to allow Rails to communicate with the database.
+1. *SENDGRID_USERNAME* (passed with -e): The username associated with a Sendgrid account (for sending emails).
+1. *SENDGRID_PASSWORD* (passed with -e): The password associated with a Sendgrid account (for sending emails).
+1. *SECRET_KEY_BASE* (passed with -e): Sets the Rails SECRET_KEY_BASE environment variable, used mostly by Devise in authentication for cookies.
+1. *SERVICE_ACCOUNT_KEY* (passed with -e): Sets the SERVICE_ACCOUNT_KEY environment variable, used for making authenticated API calls to FireCloud & GCP.
+1. *OAUTH_CLIENT_ID* (passed with -e): Sets the OAUTH_CLIENT_ID environment variable, used for Google OAuth2 integration.
+1. *OAUTH_CLIENT_SECRET* (passed with -e): Sets the OAUTH_CLIENT_SECRET environment variable, used for Google OAuth2 integration.
+1. *GOOGLE_[VARIOUS]* (passed with -e): If no SERVICE_ACCOUNT_KEY is present, the application will default to using the standard OAuth2 enviroment variables for authentication.  See [here](https://googlecloudplatform.github.io/google-cloud-ruby/#/docs/google-cloud-storage/v0.23.2/guides/authentication) for more information.
+1. *DOCKER_IMAGE_VERSION*: sets the version of the unity_benchmark_docker image to use (defaults to _latest_)
 
 ### RUN COMMAND IN DETAIL
 The run command explained in its entirety:
@@ -125,6 +126,7 @@ The run command explained in its entirety:
   - Enables hot deployment for local development
   - Persists all project data past destruction of Docker container (since we're running with --rm), but not system-level log or tmp files.
 * <b>-e PASSENGER_APP_ENV= [RAILS_ENV]:</b> The Rails environment.  Will default to development, so if you're doing a production deployment, set this accordingly.
+* <b>-e ENCRYPTION_KEY= [ENCRYPTION_KEY]:</b> Salt value for encrypting sensitive information, like OAuth refresh tokens.  This value must be consistent, or previously stored credentials will not decrypt correctly.
 * <b>-e DATABASE_HOST= [DATABASE_HOST]:</b> Name of the container running postgres.  Even though our two containers are linked, this needs to be set to allow Rails to communicate with the database.
 * <b>-e DATABASE_USER= [DATABASE_USER] -e DATABASE_PASSWORD= [DATABASE_PASSWORD]:</b> Credentials for authenticating into postgres.
 * <b>-e SENDGRID_USERNAME= [SENDGRID_USERNAME] -e SENDGRID_PASSWORD= [SENDGRID_PASSWORD]:</b> The credentials for Sendgrid to send emails.  Alternatively, you could decide to not use Sendgrid and configure the application to use a different SMTP server (would be done inside your environment's config file).
@@ -136,7 +138,9 @@ The run command explained in its entirety:
 
 ## TESTS
 
-TBD
+### UNIT & INTEGRATION
+To run all available rake tests (unit & integration), simply boot the container in test mode:
+<pre>bin/boot_docker -e test -E (encryption key) -u (sendgrid username) -P (sendgrid password) -k (service account key path) -o (oauth client id) -S (oauth client secret) -l</pre>
 
 ## PRODUCTION DEPLOYMENT
 
@@ -155,29 +159,29 @@ into your deployment.  These secrets must be created with the following key/valu
 1. cloudsql-db-credentials
     1. username: database username
     1. password: database password
-2. oauth-client-credentials
+1. oauth-client-credentials
     1. client_id: OAuth client ID
     1. client_secret: OAuth client secret
-3. encryption-key
+1. encryption-key
     1. encryption-key: 32-byte encryption key string
-4. unity-service-account
+1. unity-service-account
     1. unity-benchmark-service-account.json: JSON contents of Unity project service account credentials (must be project owner/editor)
-5. cloudsql-instance-credentials
+1. cloudsql-instance-credentials
     1. credentials.json: JSON contents of CloudSQL service account credentials (must have CloudSQL access)
-6. google-site-verification
+1. google-site-verification
     1. verification-code: google-site-verification meta header value (for verifying site ownership in Google search console, 
        required for OAuth verification)
-7. ssl-certificate
+1. ssl-certificate
     1. localhost.crt: a valid SSL certificate for your domain (filename of localhost does not affect certificate)
-8. ssl-keyfile
+1. ssl-keyfile
     1. localhost.key: keyfile for your SSL certificate (filename of localhost does not affect certificate)
 
 Once your secrets are loaded and <code>kubectl</code> is pointing at your remote cluster:
 1. Navigate to the project directory
-2. Create the deployment: <code>kubectl apply -f config/unity-benchmark-deployment.yaml</code>
-3. Create the service: <code>kubectl apply -f config/unity-benchmark-service.yaml</code>
-4. Once your service is running, get the EXTERNAL-IP address: <code>kubectl get service unity-benchmark-service</code>
-5. You can change the external IP from ephemeral to static inside your VPC Network > [External IP Addresses](https://console.cloud.google.com/networking/addresses/list) console in GCP
+1. Create the deployment: <code>kubectl apply -f config/unity-benchmark-deployment.yaml</code>
+1. Create the service: <code>kubectl apply -f config/unity-benchmark-service.yaml</code>
+1. Once your service is running, get the EXTERNAL-IP address: <code>kubectl get service unity-benchmark-service</code>
+1. You can change the external IP from ephemeral to static inside your VPC Network > [External IP Addresses](https://console.cloud.google.com/networking/addresses/list) console in GCP
 
 Unity will now be available publicly on the above IP address.
 

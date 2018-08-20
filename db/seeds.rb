@@ -11,3 +11,5 @@
                                                benchmark_wdl: 'unity-benchmark-development/test-benchmark/3',
                                                orchestration_wdl: 'unity-benchmark-development/test-orchestration/2')
 @reference_analysis.load_parameters_from_wdl!
+@user = User.create(provider: 'google_oauth2', uid: 123545, email: 'unity-admin@broadinstitute.org',
+                    registered_for_firecloud: true, admin: true)

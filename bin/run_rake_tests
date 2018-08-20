@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+# script that is called when booting portal in test environment to run all available tests
+
+start=$(date +%s)
+echo "Seeding test database..."
+/home/app/webapp/bin/rake RAILS_ENV=test db:purge && rake RAILS_ENV=test db:setup
+echo "Database initialized, launching unit & integration tests..."
+/home/app/webapp/bin/rake test
+echo "Cleaning up..."
+/home/app/webapp/bin/rake RAILS_ENV=test db:purge
+echo "Cleanup complete!"
+end=$(date +%s)
+difference=$(($end - $start))
+min=$(($difference / 60))
+sec=$(($difference % 60))
+echo "Total elapsed time: $min minutes, $sec seconds"
+exit
