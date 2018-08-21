@@ -5,7 +5,6 @@
       <thead>
       <tr>
         <th>Date</th>
-        <th>Submitter</th>
         <th>ID</th>
         <th>Name</th>
         <th>State</th>
@@ -18,9 +17,6 @@
         <tr id="submission-<%= submission['submissionId'] %>">
           <td id="submission-<%= submission['submissionId'] %>-date" class="submission-date">
             <%= local_timestamp(submission['submissionDate']) %>
-          </td>
-          <td id="submission-<%= submission['submissionId'] %>-user" class="submission-user">
-            <%= submission['submitter'] %>
           </td>
           <td id="submission-<%= submission['submissionId'] %>-id" class="submission-id">
             <%= link_to submission['submissionId'], @user_workspace.submission_url(submission['submissionId']),
@@ -49,7 +45,6 @@
   <button type="button" id="refresh-submissions-table" class="btn btn-sm btn-outline-secondary refresh-submissions-table"
           data-loading-text="Refreshing Submissions..."><i class='fas fa-sync-alt'></i> Refresh Submissions</button>
 </p>
-
 <script type="text/javascript">
     var submissionsTable = $('#submissions-table').DataTable({
         pagingType: "full_numbers",
@@ -59,13 +54,20 @@
         },
         columns: [
             {data: 'submission_date'},
-            {data: 'submission_email'},
             {data: 'submission_id'},
             {data: 'submission_workflow'},
             {data: 'submission_state'},
             {data: 'submission_status'},
             {data: 'submission_actions'}
         ]
+    });
+
+    $('.refresh-submissions-table').on('click', function() {
+        $(this).addClass('disabled');
+        $.ajax({
+            url: "<%= get_workspace_submissions_path(project: @user_workspace.namespace, name: @user_workspace.name) %>",
+            dataType: 'script'
+        });
     });
 
     // display a confirmation when a user tries to abort a submission
@@ -75,7 +77,8 @@
         var submissionId = $(this).data('id');
         var submissionName = $('#submission-' + submissionId + '-name').text();
         var submissionDate = $('#submission-' + submissionId + '-date').text();
-        if (confirm('Are you sure you want to abort this submission of ' + submissionName + ' (' + submissionId + ', submitted on ' + submissionDate + ')?  This cannot be undone.')) {
+        if (confirm('Are you sure you want to abort this submission of ' + submissionName + ' (' + submissionId +
+            ', submitted on ' + submissionDate + ')?  This cannot be undone.')) {
             $('#generic-modal-title').html("Aborting Submission... Please Wait");
             launchModalSpinner('#generic-modal-spinner', '#generic-modal', function() {
                 $.ajax({
@@ -112,6 +115,13 @@
         });
     });
 
+    function getSubmissionErrors(submissionUrl, workflowIds) {
+        $.ajax({
+            url: submissionUrl + "?workflow_ids=" + workflowIds,
+            dataType: 'script'
+        });
+    }
+
     // get outputs from a particular submission
     $('#submissions-table').on('click', '.get-submission-outputs', function () {
         $(this).tooltip('hide');
@@ -132,7 +142,8 @@
         var submissionId = $(this).data('id');
         var submissionName = $('#submission-' + submissionId + '-name').text();
         var submissionDate = $('#submission-' + submissionId + '-date').text();
-        if (confirm('Are you sure you want to delete the outputs of ' + submissionName + ' (' + submissionId + ', submitted on ' + submissionDate + ')?  This cannot be undone.')) {
+        if (confirm('Are you sure you want to delete the outputs of ' + submissionName + ' (' + submissionId + ', submitted on ' +
+            submissionDate + ')?  This cannot be undone.')) {
             $('#generic-modal-title').html("Deleting Outputs... Please Wait (this may take a few minutes)");
             launchModalSpinner('#generic-modal-spinner', '#generic-modal', function() {
                 $.ajax({
@@ -146,34 +157,4 @@
         }
     });
 
-    // sync outputs from a particular submission
-    $('#submissions-table').on('click', '.sync-submission-outputs', function () {
-        console.log('sync outputs');
-        $('#generic-modal-title').html("Syncing Outputs... Please Wait<br/><small>This may take a few minutes to complete...</small>");
-        launchModalSpinner('#generic-modal-spinner', '#generic-modal', function() {
-            return true;
-        });
-    });
-
-    // view submission metadata
-    $('#submissions-table').on('click', '.view-submission-metadata', function () {
-        console.log('view metadata');
-        var submissionUrl = $(this).data('url');
-        $('#generic-modal-title').html("Getting Run Info... Please Wait");
-        launchModalSpinner('#generic-modal-spinner', '#generic-modal', function() {
-            $.ajax({
-                url: submissionUrl,
-                method: 'GET',
-                dataType: 'script'
-            });
-        });
-
-    });
-
-    function getSubmissionErrors(submissionUrl, workflowIds) {
-        $.ajax({
-            url: submissionUrl + "?workflow_ids=" + workflowIds,
-            dataType: 'script'
-        });
-    }
 </script>

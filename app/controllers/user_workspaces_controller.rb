@@ -1,7 +1,6 @@
 class UserWorkspacesController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_user_workspace, only: [:show, :destroy, :create_user_analysis, :update_user_analysis, :get_analysis_wdl_payload,
-                                            :create_benchmark_analysis, :submit_benchmark_analysis]
+  before_action :set_user_workspace, except: [:index, :new, :create]
   before_action :set_user_projects, only: [:new, :create]
   before_action :set_reference_analysis, only: [:new]
   before_action :set_user_analysis, only: [:update_user_analysis, :create_benchmark_analysis, :submit_benchmark_analysis]
@@ -26,7 +25,7 @@ class UserWorkspacesController < ApplicationController
     begin
       @submissions = user_fire_cloud_client(current_user).get_workspace_submissions(@user_workspace.namespace, @user_workspace.name)
     rescue => e
-      Rails.logger.info "Cannot retrieve submissions for user_workspace '#{@user_workspace.full_name}': #{e.message}"
+      logger.info "Cannot retrieve submissions for user_workspace '#{@user_workspace.full_name}': #{e.message}"
     end
   end
 
@@ -62,10 +61,10 @@ class UserWorkspacesController < ApplicationController
     begin
       unless params[:persist] == 'true'
         begin
-          Rails.logger.info "Removing user_workspace: #{@user_workspace.full_name}"
+          logger.info "Removing user_workspace: #{@user_workspace.full_name}"
           user_fire_cloud_client(current_user).delete_workspace(@user_workspace.namespace, @user_workspace.name)
         rescue => e
-          Rails.logger.info "Unable to remove user_workspace: #{@user_workspace.full_name} due to error: #{e.message}"
+          logger.info "Unable to remove user_workspace: #{@user_workspace.full_name} due to error: #{e.message}"
           message += " Unity was unable to remove the associated workspace due to an error: #{e.message}"
         end
       end
@@ -75,7 +74,7 @@ class UserWorkspacesController < ApplicationController
         format.json { head :no_content }
       end
     rescue => e
-      Rails.logger.error "Error removing benchmark workspace '#{name}': #{e.message}"
+      logger.error "Error removing benchmark workspace '#{name}': #{e.message}"
       redirect_to user_workspaces_path, alert: "We were unable to remove benchmarking workspace '#{name}' due to an error: #{e.message}" and return
     end
   end
@@ -156,20 +155,20 @@ class UserWorkspacesController < ApplicationController
         else
           # redact workflow
           error_msg = @benchmark_analysis.errors.full_messages.join(', ')
-          Rails.logger.error "Unable to create benchmark analysis for #{@user_analysis.full_name} due to error: #{error_msg}"
+          logger.error "Unable to create benchmark analysis for #{@user_analysis.full_name} due to error: #{error_msg}"
           redact_workflow(current_user, benchmark_analysis_wdl['namespace'], benchmark_analysis_wdl['name'], benchmark_analysis_wdl['snapshotId'].to_i)
           redirect_to user_workspace_path(project: @user_workspace.namespace, name: @user_workspace.name),
                       alert: "We were unable to create this benchmark due to the following errors: #{error_msg})" and return
         end
       else
         # redact workflow
-        Rails.logger.error "Unable to create orchestration config for #{@user_analysis.full_name} due to error: #{benchmark_analysis_config}"
+        logger.error "Unable to create orchestration config for #{@user_analysis.full_name} due to error: #{benchmark_analysis_config}"
         redact_workflow(current_user, benchmark_analysis_wdl['namespace'], benchmark_analysis_wdl['name'], benchmark_analysis_wdl['snapshotId'].to_i)
         redirect_to user_workspace_path(project: @user_workspace.namespace, name: @user_workspace.name),
                     alert: "We were unable to create this benchmark due to the following errors: #{benchmark_analysis_config}" and return
       end
     else
-      Rails.logger.error "Unable to create orchestration workflow for #{@user_analysis.full_name} due to error: #{benchmark_analysis_wdl}"
+      logger.error "Unable to create orchestration workflow for #{@user_analysis.full_name} due to error: #{benchmark_analysis_wdl}"
       redirect_to user_workspace_path(project: @user_workspace.namespace, name: @user_workspace.name),
                   alert: "We were unable to create this benchmark due to the following errors: #{benchmark_analysis_wdl}" and return
     end
@@ -193,6 +192,153 @@ class UserWorkspacesController < ApplicationController
       redirect_to user_workspace_path(project: @user_workspace.namespace, name: @user_workspace.name),
                   alert: "'#{@benchmark_analysis.full_name}' failed to submit due to an error: #{e.message})" and return
     end
+  end
+
+  # get all submissions for a user_workspace
+  def get_workspace_submissions
+    user_client = user_fire_cloud_client(current_user)
+    workspace = user_client.get_workspace(@user_workspace.namespace, @user_workspace.name)
+    @submissions = user_client.get_workspace_submissions(@user_workspace.namespace, @user_workspace.name)
+    # remove deleted submissions from list of runs
+    if !workspace['workspace']['attributes']['deleted_submissions'].blank?
+      deleted_submissions = workspace['workspace']['attributes']['deleted_submissions']['items']
+      @submissions.delete_if {|submission| deleted_submissions.include?(submission['submissionId'])}
+    end
+    render '/user_workspaces/submissions/get_workspace_submissions'
+  end
+
+  # get a submission workflow object as JSON, usually as a pre-flight request to getting errors
+  def get_submission_workflow
+    begin
+      submission = user_fire_cloud_client(current_user).get_workspace_submission(@user_workspace.namespace, @user_workspace.name, params[:submission_id])
+      render json: submission.to_json
+    rescue => e
+      logger.error "#{Time.now}: unable to load workspace submission #{params[:submission_id]} in #{@user_workspace.name} due to: #{e.message}"
+      render js: "alert('We were unable to load the requested submission due to an error: #{e.message}')"
+    end
+  end
+
+  # abort a pending workflow submission
+  def abort_submission_workflow
+    @submission_id = params[:submission_id]
+    begin
+      user_fire_cloud_client(current_user).abort_workspace_submission(@user_workspace.namespace, @user_workspace.name, @submission_id)
+      @notice = "Submission #{@submission_id} was successfully aborted."
+
+    rescue => e
+      @alert = "Unable to abort submission #{@submission_id} due to an error: #{e.message}"
+      render '/user_workspaces/submissions/display_modal'
+    end
+  end
+
+  # get errors for a failed submission
+  def get_submission_errors
+    begin
+      user_client = user_fire_cloud_client(current_user)
+      workflow_ids = params[:workflow_ids].split(',')
+      errors = []
+      # first check workflow messages - if there was an issue with inputs, errors could be here
+      submission = user_client.get_workspace_submission(@user_workspace.namespace,
+                                                                                 @user_workspace.name,
+                                                                                 params[:submission_id])
+      submission['workflows'].each do |workflow|
+        if workflow['messages'].any?
+          workflow['messages'].each {|message| errors << message}
+        end
+      end
+      # now look at each individual workflow object
+      workflow_ids.each do |workflow_id|
+        workflow = user_client.get_workspace_submission_workflow(@user_workspace.namespace, @user_workspace.name,
+                                                                 params[:submission_id], workflow_id)
+        # failure messages are buried deeply within the workflow object, so we need to go through each to find them
+        workflow['failures'].each do |workflow_failure|
+          errors << workflow_failure['message']
+          # sometimes there are extra errors nested below...
+          if workflow_failure['causedBy'].any?
+            workflow_failure['causedBy'].each do |failure|
+              errors << failure['message']
+            end
+          end
+        end
+      end
+      @error_message = errors.join("<br />")
+    rescue => e
+      @alert = "Unable to retrieve submission #{@submission_id} error messages due to: #{e.message}"
+      render '/user_workspaces/submissions/display_modal'
+    end
+  end
+
+  # get outputs from a requested submission
+  def get_submission_outputs
+    begin
+      @outputs = []
+      user_client = user_fire_cloud_client(current_user)
+      submission = user_client.get_workspace_submission(@user_workspace.namespace, @user_workspace.name,
+                                                        params[:submission_id])
+      submission['workflows'].each do |workflow|
+        workflow = user_client.get_workspace_submission_workflow(@user_workspace.namespace, @user_workspace.name,
+                                                                 params[:submission_id], workflow['workflowId'])
+        workflow['outputs'].each do |output, file_url|
+          display_name = file_url.split('/').last
+          file_location = file_url.gsub(/gs\:\/\/#{@user_workspace.bucket_id}\//, '')
+          output = {display_name: display_name, file_location: file_location}
+          @outputs << output
+        end
+      end
+      render '/user_workspaces/submissions/get_submission_outputs'
+    rescue => e
+      @alert = "Unable to retrieve submission #{@submission_id} outputs due to: #{e.message}"
+      render '/user_workspaces/submissions/display_modal'
+    end
+  end
+
+  # delete all files from a submission
+  def delete_submission_files
+    begin
+      user_client = user_fire_cloud_client(current_user)
+      # first, add submission to list of 'deleted_submissions' in workspace attributes (will hide submission in list)
+      workspace = user_client.get_workspace(@user_workspace.namespace, @user_workspace.name)
+      ws_attributes = workspace['workspace']['attributes']
+      if ws_attributes['deleted_submissions'].blank?
+        ws_attributes['deleted_submissions'] = [params[:submission_id]]
+      else
+        ws_attributes['deleted_submissions']['items'] << params[:submission_id]
+      end
+      logger.info "Adding #{params[:submission_id]} to workspace delete_submissions attribute in #{@user_workspace.name}"
+      user_client.set_workspace_attributes(@user_workspace.namespace, @user_workspace.name, ws_attributes)
+      logger.info "Starting submission #{params[:submission]} deletion in #{@user_workspace.name}"
+      submission_files = user_client.execute_gcloud_method(:get_workspace_files, @user_workspace.namespace,
+                                                           @user_workspace.name, prefix: params[:submission_id])
+      submission_files.each do |file|
+        logger.info "Deleting #{file.name} in #{@user_workspace.name}"
+        user_client.execute_gcloud_method(:delete_workspace_file, @user_workspace.namespace,
+                                          @user_workspace.name, file.name)
+      end
+    rescue => e
+      logger.error "Unable to remove submission #{params[:submission_id]} files from #{@user_workspace.name} due to: #{e.message}"
+      @alert = "Unable to delete the outputs for #{params[:submission_id]} due to the following error: #{e.message}"
+      render '/user_workspaces/submissions/display_modal'
+    end
+  end
+
+  # download an output file
+  def download_benchmark_output
+    if !AdminConfiguration.firecloud_access_enabled? || !ApplicationController.fire_cloud_client.services_available?('GoogleBuckets')
+      head 503 and return
+    end
+
+    user_client = user_fire_cloud_client(current_user)
+    requested_file = user_client.execute_gcloud_method(:get_workspace_file, @user_workspace.namespace,
+                                                       @user_workspace.name, params[:filename])
+    if requested_file.present?
+      @signed_url = user_client.execute_gcloud_method(:generate_signed_url, @user_workspace.namespace,
+                                                      @user_workspace.name, params[:filename], expires: 15)
+      redirect_to @signed_url
+    else
+      redirect_to user_workspace_path(project: @user_workspace.namespace, name: @user_workspace.name),
+                  alert: 'The file you requested was unavailable.  Please try again.' and return
+    end
+
   end
 
   private
@@ -234,11 +380,11 @@ class UserWorkspacesController < ApplicationController
   def redact_workflow(user, namespace, name, snapshot)
     full_name = [namespace, name, snapshot].join('/')
     begin
-      Rails.logger.info "Redacting workflow #{full_name}"
+      logger.info "Redacting workflow #{full_name}"
       user_fire_cloud_client(user).delete_method(namespace, name, snapshot.to_i)
-      Rails.logger.info "Redaction complete for #{full_name}"
+      logger.info "Redaction complete for #{full_name}"
     rescue => e
-      Rails.logger.error "Unable to redact #{full_name} due to error: #{e.message}"
+      logger.error "Unable to redact #{full_name} due to error: #{e.message}"
     end
   end
 end

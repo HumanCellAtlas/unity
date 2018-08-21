@@ -1,0 +1,8 @@
+<p class="text-center">
+    <% @outputs.each do |output| %>
+      <%= link_to output[:display_name],
+                  download_benchmark_output_path(project: @user_workspace.namespace, name: @user_workspace.name,
+                                                 filename: output[:file_location]),
+                  class: 'btn btn-primary submission-output' %>
+    <% end %>
+</p>

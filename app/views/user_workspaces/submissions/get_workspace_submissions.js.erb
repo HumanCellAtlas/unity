@@ -1,0 +1,46 @@
+console.log('updating submissions table');
+$('#submissions-count').html("<%= @submissions.size %>");
+submissionsTable.clear();
+var rows = []
+<% @submissions.each do |submission| %>
+var row = {
+    'DT_RowId': "submission-<%= submission['submissionId'] %>",
+    'submission_date' : "<%= escape_javascript(local_timestamp(submission['submissionDate'])) %>",
+    'submission_id': "<%= escape_javascript(link_to submission['submissionId'], @user_workspace.submission_url(submission['submissionId']), class: 'submission-bucket-link', target: :_blank, data: {toggle: 'tooltip'}, title: 'View submission directory') %>",
+    'submission_workflow': "<%= escape_javascript(submission['methodConfigurationName']) %>",
+    'submission_state': "<%= escape_javascript(submission_status_label(submission['status'])) %>",
+    'submission_status': "<%= escape_javascript(workflow_status_labels(submission['workflowStatuses'])) %>",
+    'submission_actions': "<%= escape_javascript(get_submission_actions(submission, @user_workspace)) %>"
+}
+rows.push(row);
+<% end %>
+submissionsTable.rows.add(rows);
+submissionsTable.draw();
+
+// add cell ids to table row cells
+$('#submissions-table tbody tr').each(function(index, tableRow) {
+    var id = $(tableRow).attr('id');
+    var cellIds = [
+        "submission-" + id + "-date",
+        "submission-" + id + "-id",
+        "submission-" + id + "-name",
+        "submission-" + id + "-state",
+        "submission-" + id + "-status",
+        "submission-" + id + "-actions"
+    ];
+    var cellClasses = [
+        "submission-date",
+        "submission-id",
+        "submission-name",
+        "submission-state",
+        "submission-status",
+        "submission-actions"
+    ]
+    $(tableRow).find('td').each(function(i, cell) {
+        console.log('setting ' + id + ' cell id: ' + cellIds[i]);
+        $(cell).attr('id', cellIds[i]);
+        $(cell).addClass(cellClasses[i]);
+    });
+});
+console.log('submissions table update complete');
+$('.refresh-submissions-table').each(function() {$(this).removeClass('disabled')});

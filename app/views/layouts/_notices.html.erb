@@ -1,30 +1,32 @@
-<% unless notice.nil? && alert.nil? %>
-  <div class="modal fade" id="notices-modal" tabindex="-1" role="dialog" aria-labelledby="notices-modal" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-body">
-          <p class="text-success text-center" id="notice-content"><%= !notice.blank? ? notice.html_safe : nil %></p>
-          <p class="text-danger text-center" id="alert-content"><strong><%= !alert.blank? ? alert.html_safe : nil %></strong></p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
+<div id="notices-target">
+  <% unless notice.nil? && alert.nil? %>
+    <div class="modal fade" id="notices-modal" tabindex="-1" role="dialog" aria-labelledby="notices-modal" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+            <p class="text-success text-center" id="notice-content"><%= !notice.blank? ? notice.html_safe : nil %></p>
+            <p class="text-danger text-center" id="alert-content"><strong><%= !alert.blank? ? alert.html_safe : nil %></strong></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <script type="text/javascript">
-      $("#notices-modal").modal("show");
+    <script type="text/javascript">
+        $("#notices-modal").modal("show");
 
-      // don't timeout alert messages
-      if (<%= alert.nil? %>) {
-          setTimeout(function() {
-              $("#notices-modal").modal("hide");
-          }, 3000);
-      }
+        // don't timeout alert messages
+        if (<%= alert.nil? %>) {
+            setTimeout(function() {
+                $("#notices-modal").modal("hide");
+            }, 3000);
+        }
 
-  </script>
+    </script>
 
-<% end %>
+  <% end %>
+</div>

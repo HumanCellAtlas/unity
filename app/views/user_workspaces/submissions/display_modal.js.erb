@@ -1,0 +1,3 @@
+closeModalSpinner('#generic-modal-spinner', '#generic-modal', function() {
+    $('#notices-target').html("<%= j render partial: '/layouts/notices', locals: {alert: @alert, notice: @notice} %>");
+});
