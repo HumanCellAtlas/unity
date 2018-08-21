@@ -1,4 +1,4 @@
-<%= form_with(model: user_analysis, url: create_user_analysis_path, local: true, html: {class: 'form user-analysis-form', id: "user-analysis-form"}) do |form| %>
+<%= form_with(model: user_analysis, url: user_analysis.new_record? ? create_user_analysis_path : update_user_analysis_path(user_analysis_id: user_analysis.id), local: true, html: {class: 'form user-analysis-form', id: "user-analysis-form"}) do |form| %>
   <% if user_analysis.errors.any? %>
     <div class="bs-callout bs-callout-danger" id="reference-analysis-errors-block">
       <h4><%= pluralize(user_analysis.errors.count, "error") %> prohibited this analysis from being saved:</h4>

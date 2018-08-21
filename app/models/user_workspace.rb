@@ -34,6 +34,16 @@ class UserWorkspace < ApplicationRecord
     self.reference_analysis.extract_wdl_keys(:analysis_wdl).join('-')
   end
 
+  # helper to generate a URL to a workspace's GCP bucket
+  def google_bucket_url
+    "https://accounts.google.com/AccountChooser?continue=https://console.cloud.google.com/storage/browser/#{self.bucket_id}"
+  end
+
+  # helper to generate a URL to a specific FireCloud submission inside a workspace's GCP bucket
+  def submission_url(submission_id)
+    self.google_bucket_url + "/#{submission_id}"
+  end
+
   private
 
   # create a new benchmark workspace by cloning the reference workspace

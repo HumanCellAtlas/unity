@@ -32,6 +32,9 @@ Rails.application.routes.draw do
   delete 'my-benchmarks/:project/:name', to: 'user_workspaces#destroy', as: :destroy_user_workspace
   delete 'my-benchmarks/:id', to: 'user_workspaces#destroy' # fallback route
   post 'my-benchmarks/:project/:name/user_analysis', to: 'user_workspaces#create_user_analysis', as: :create_user_analysis
+  post 'my-benchmarks/:project/:name/user_analysis/:user_analysis_id', to: 'user_workspaces#update_user_analysis', as: :update_user_analysis
+  post 'my-benchmarks/:project/:name/user_analysis/:user_analysis_id/benchmark_analyses', to: 'user_workspaces#create_benchmark_analysis', as: :create_benchmark_analysis
+  post 'my-benchmarks/:project/:name/user_analysis/:user_analysis_id/benchmark_analyses/:benchmark_analysis_id', to: 'user_workspaces#submit_benchmark_analysis', as: :submit_benchmark_analysis
   get 'my-benchmarks/:project/:name/analysis_wdl', to: 'user_workspaces#get_analysis_wdl_payload', as: :get_analysis_wdl
 
   # profile routes

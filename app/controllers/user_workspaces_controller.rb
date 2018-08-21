@@ -1,15 +1,17 @@
 class UserWorkspacesController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_user_workspace, only: [:show, :destroy, :create_user_analysis, :update_user_analysis, :get_analysis_wdl_payload]
+  before_action :set_user_workspace, only: [:show, :destroy, :create_user_analysis, :update_user_analysis, :get_analysis_wdl_payload,
+                                            :create_benchmark_analysis, :submit_benchmark_analysis]
   before_action :set_user_projects, only: [:new, :create]
   before_action :set_reference_analysis, only: [:new]
+  before_action :set_user_analysis, only: [:update_user_analysis, :create_benchmark_analysis, :submit_benchmark_analysis]
   before_action :check_firecloud_registration, except: [:index]
   before_action :check_firecloud_availability, except: [:index]
 
   # GET /user_workspaces
   # GET /user_workspaces.json
   def index
-    @user_workspaces = UserWorkspace.all
+    @user_workspaces = UserWorkspace.owned_by(current_user)
   end
 
   # GET /user_workspaces/1
@@ -22,8 +24,7 @@ class UserWorkspacesController < ApplicationController
       @user_analysis.namespace = @user_analysis.default_namespace
     end
     begin
-      user_client = user_fire_cloud_client(current_user)
-      @submissions = user_client.get_workspace_submissions(@user_workspace.namespace, @user_workspace.name)
+      @submissions = user_fire_cloud_client(current_user).get_workspace_submissions(@user_workspace.namespace, @user_workspace.name)
     rescue => e
       Rails.logger.info "Cannot retrieve submissions for user_workspace '#{@user_workspace.full_name}': #{e.message}"
     end
@@ -61,9 +62,8 @@ class UserWorkspacesController < ApplicationController
     begin
       unless params[:persist] == 'true'
         begin
-          user_client = user_fire_cloud_client(current_user, @user_workspace.namespace)
           Rails.logger.info "Removing user_workspace: #{@user_workspace.full_name}"
-          user_client.delete_workspace(@user_workspace.namespace, @user_workspace.name)
+          user_fire_cloud_client(current_user).delete_workspace(@user_workspace.namespace, @user_workspace.name)
         rescue => e
           Rails.logger.info "Unable to remove user_workspace: #{@user_workspace.full_name} due to error: #{e.message}"
           message += " Unity was unable to remove the associated workspace due to an error: #{e.message}"
@@ -89,8 +89,7 @@ class UserWorkspacesController < ApplicationController
         format.html { redirect_to user_workspace_path(project: @user_workspace.namespace, name: @user_workspace.name), notice: "'#{@user_analysis.full_name}' was successfully created." }
         format.json { render :show, status: :created, location: @user_workspace }
       else
-        user_client = user_fire_cloud_client(current_user)
-        @submissions = user_client.get_workspace_submissions(@user_workspace.namespace, @user_workspace.name)
+        @submissions = user_fire_cloud_client(current_user).get_workspace_submissions(@user_workspace.namespace, @user_workspace.name)
         format.html { render :show }
         format.json { render json: @user_analysis.errors, status: :unprocessable_entity }
       end
@@ -106,8 +105,7 @@ class UserWorkspacesController < ApplicationController
         format.html { redirect_to user_workspace_path(project: @user_workspace.namespace, name: @user_workspace.name), notice: "'#{@user_analysis.full_name}' was successfully updated." }
         format.json { render :show, status: :created, location: @user_workspace }
       else
-        user_client = user_fire_cloud_client(current_user)
-        @submissions = user_client.get_workspace_submissions(@user_workspace.namespace, @user_workspace.name)
+        @submissions = user_fire_cloud_client(current_user).get_workspace_submissions(@user_workspace.namespace, @user_workspace.name)
         format.html { render :show }
         format.json { render json: @user_analysis.errors, status: :unprocessable_entity }
       end
@@ -128,6 +126,75 @@ class UserWorkspacesController < ApplicationController
     end
   end
 
+  # create a benchmark_analysis (custom orchestration workflow) for use in a user_workspace
+  def create_benchmark_analysis
+    benchmark_analysis_wdl = @user_analysis.create_orchestration_workflow
+    user_client = user_fire_cloud_client(current_user)
+    if benchmark_analysis_wdl.is_a?(Hash)
+      benchmark_analysis_config = @user_analysis.create_orchestration_config(benchmark_analysis_wdl)
+      if benchmark_analysis_config.is_a?(Hash)
+        @benchmark_analysis = @user_analysis.benchmark_analyses.build(user: @user_workspace.user,
+                                                                      name: benchmark_analysis_wdl['name'],
+                                                                      namespace: benchmark_analysis_wdl['namespace'],
+                                                                      snapshot: benchmark_analysis_wdl['snapshotId'].to_i,
+                                                                      configuration_name: benchmark_analysis_config['name'],
+                                                                      configuration_namespace: benchmark_analysis_config['namespace'],
+                                                                      configuration_snapshot: benchmark_analysis_config['methodConfigVersion'])
+        if @benchmark_analysis.save
+          # go ahead and submit this new benchmark_analysis
+          begin
+            submission = user_client.create_workspace_submission(@user_workspace.namespace,
+                                                                 @user_workspace.name,
+                                                                 @benchmark_analysis.configuration_namespace,
+                                                                 @benchmark_analysis.configuration_name)
+            redirect_to user_workspace_path(project: @user_workspace.namespace, name: @user_workspace.name),
+                        notice: "'#{@benchmark_analysis.full_name}' was successfully created and submitted (submission: #{submission['submissionId']})" and return
+          rescue => e
+            redirect_to user_workspace_path(project: @user_workspace.namespace, name: @user_workspace.name),
+                        alert: "'#{@benchmark_analysis.full_name}' was successfully created, but failed to submit due to an error: #{e.message})" and return
+          end
+        else
+          # redact workflow
+          error_msg = @benchmark_analysis.errors.full_messages.join(', ')
+          Rails.logger.error "Unable to create benchmark analysis for #{@user_analysis.full_name} due to error: #{error_msg}"
+          redact_workflow(current_user, benchmark_analysis_wdl['namespace'], benchmark_analysis_wdl['name'], benchmark_analysis_wdl['snapshotId'].to_i)
+          redirect_to user_workspace_path(project: @user_workspace.namespace, name: @user_workspace.name),
+                      alert: "We were unable to create this benchmark due to the following errors: #{error_msg})" and return
+        end
+      else
+        # redact workflow
+        Rails.logger.error "Unable to create orchestration config for #{@user_analysis.full_name} due to error: #{benchmark_analysis_config}"
+        redact_workflow(current_user, benchmark_analysis_wdl['namespace'], benchmark_analysis_wdl['name'], benchmark_analysis_wdl['snapshotId'].to_i)
+        redirect_to user_workspace_path(project: @user_workspace.namespace, name: @user_workspace.name),
+                    alert: "We were unable to create this benchmark due to the following errors: #{benchmark_analysis_config}" and return
+      end
+    else
+      Rails.logger.error "Unable to create orchestration workflow for #{@user_analysis.full_name} due to error: #{benchmark_analysis_wdl}"
+      redirect_to user_workspace_path(project: @user_workspace.namespace, name: @user_workspace.name),
+                  alert: "We were unable to create this benchmark due to the following errors: #{benchmark_analysis_wdl}" and return
+    end
+  end
+
+  # resubmit an existing benchmark_analysis
+  def submit_benchmark_analysis
+    begin
+      @benchmark_analysis = BenchmarkAnalysis.find_by(id: params[:benchmark_analysis_id], user_id: current_user.id)
+      if @benchmark_analysis.present?
+        submission = user_fire_cloud_client(current_user).create_workspace_submission(@user_workspace.namespace, @user_workspace.name,
+                                                                                      @benchmark_analysis.configuration_namespace,
+                                                                                      @benchmark_analysis.configuration_name)
+        redirect_to user_workspace_path(project: @user_workspace.namespace, name: @user_workspace.name),
+                    notice: "'#{@benchmark_analysis.full_name}' was successfully submitted (submission: #{submission['submissionId']})" and return
+      else
+        redirect_to user_workspace_path(project: @user_workspace.namespace, name: @user_workspace.name),
+                    alert: "The requested benchmark analysis was not found." and return
+      end
+    rescue => e
+      redirect_to user_workspace_path(project: @user_workspace.namespace, name: @user_workspace.name),
+                  alert: "'#{@benchmark_analysis.full_name}' failed to submit due to an error: #{e.message})" and return
+    end
+  end
+
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_user_workspace
@@ -136,6 +203,9 @@ class UserWorkspacesController < ApplicationController
       @user_workspace = UserWorkspace.find_by(name: params[:name], project_id: project.id, user_id: current_user.id)
     else
       @user_workspace = UserWorkspace.find(params[:id])
+    end
+    if @user_workspace.nil?
+      redirect_to user_workspaces_path, alert: 'The requested workspace was not found' and return
     end
   end
 
@@ -147,6 +217,10 @@ class UserWorkspacesController < ApplicationController
     @reference_analysis = ReferenceAnalysis.find(params[:reference_analysis_id])
   end
 
+  def set_user_analysis
+    @user_analysis = @user_workspace.user_analysis
+  end
+
   # Never trust parameters from the scary internet, only allow the white list through.
   def user_workspace_params
     params.require(:user_workspace).permit(:name, :project_id, :user_id, :reference_analysis_id)
@@ -156,4 +230,15 @@ class UserWorkspacesController < ApplicationController
     params.require(:user_analysis).permit(:name, :user_id, :user_workspace_id, :namespace, :snapshot, :wdl_contents)
   end
 
+  # helper to redact a workflow on error
+  def redact_workflow(user, namespace, name, snapshot)
+    full_name = [namespace, name, snapshot].join('/')
+    begin
+      Rails.logger.info "Redacting workflow #{full_name}"
+      user_fire_cloud_client(user).delete_method(namespace, name, snapshot.to_i)
+      Rails.logger.info "Redaction complete for #{full_name}"
+    rescue => e
+      Rails.logger.error "Unable to redact #{full_name} due to error: #{e.message}"
+    end
+  end
 end

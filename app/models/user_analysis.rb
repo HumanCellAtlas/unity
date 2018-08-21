@@ -56,7 +56,12 @@ class UserAnalysis < ApplicationRecord
   end
 
   def orchestration_name
-    self.name + '-orchestration'
+    "#{self.name}-#{self.snapshot}-orchestration"
+  end
+
+  # check if there is an update to this analysis that has not been incorporated into a benchmark analysis
+  def has_valid_benchmark?
+    self.benchmark_analyses.where(name: self.orchestration_name).exists?
   end
 
   # construct and import a new user_analysis specific WDL into the methods repo to benchmark against this reference_analysis
@@ -90,6 +95,7 @@ class UserAnalysis < ApplicationRecord
   # create a configuration object to run this user_analysis in a benchmark submission
   def create_orchestration_config(orchestration_workflow)
     begin
+      Rails.logger.info "Creating custom orchestration config for #{self.full_name}"
       orchestration_namespace, orchestration_name, orchestration_snapshot = self.reference_analysis.extract_wdl_keys(:orchestration_wdl)
       user_client = FireCloudClient.new(self.user)
       workspace_configs = user_client.get_workspace_configurations(self.user_workspace.namespace, self.user_workspace.name)
@@ -99,6 +105,7 @@ class UserAnalysis < ApplicationRecord
           config['methodRepoMethod']['methodVersion'] == orchestration_snapshot.to_i
       end
       if matching_config.present?
+        Rails.logger.info "Found matching config for #{self.full_name}: #{matching_config['namespace']}/#{matching_config['name']}"
         orchestration_config = user_client.get_workspace_configuration(self.user_workspace.namespace, self.user_workspace.name,
                                                                        matching_config['namespace'], matching_config['name'])
         # now set configuration method URI to use newly created custom orchestration WDL (this overrides the methodRepo name, namespace settings)
@@ -106,9 +113,11 @@ class UserAnalysis < ApplicationRecord
         orchestration_config['methodRepoMethod']['methodUri'] = generate_source_repo_url(orchestration_workflow, orchestration_config)
         orchestration_config['namespace'] = self.namespace
         orchestration_config['name'] = self.orchestration_name
+        Rails.logger.info "Saving config for #{self.full_name} as #{orchestration_config['namespace']}/#{orchestration_config['name']}"
         new_workspace_config = user_client.create_workspace_configuration(self.user_workspace.namespace,
                                                                     self.user_workspace.name, orchestration_config)
-        new_workspace_config
+        Rails.logger.info "Orchestration config for #{self.full_name} successfully saved"
+        new_workspace_config['methodConfiguration'] # return just config object
       else
         raise RuntimeError.new "orchestration config not found for #{self.reference_analysis.orchestration_wdl}"
       end
@@ -126,6 +135,12 @@ class UserAnalysis < ApplicationRecord
       Rails.logger.info "Adding #{self.namespace}/#{self.name} to methods repo as new snapshot"
       user_client = FireCloudClient.new(self.user)
       synopsis = "User analysis for #{self.user_workspace.name}"
+      # update existing method if already present
+      if self.snapshot.present? && self.snapshot > 0
+        remote_method = user_client.update_method(self.namespace, self.name, self.snapshot, synopsis, self.wdl_contents)
+      else
+        remote_method = user_client.create_method(self.namespace, self.name, synopsis, self.wdl_contents)
+      end
       remote_method = user_client.create_method(self.namespace, self.name, synopsis, self.wdl_contents)
       if remote_method.present?
         self.snapshot = remote_method['snapshotId']

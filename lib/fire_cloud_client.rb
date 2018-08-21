@@ -576,6 +576,28 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
     process_firecloud_request(:post, path, wdl_payload.to_json)
   end
 
+  # update a FireCloud method object by creating a new snapshot
+  #
+  # * *params*
+  #   - +namespace+ (String) => namespace of method
+  #   - +name+ (String) => name of method
+  #   - +snapshot_id+ (Integer) => snapshot ID of method
+  #   - +synopsis+ (String) => synopsis of method (80 characters max)
+  #   - +wdl_contents+ (String) => plain text WDL payload
+  #
+  # * *return*
+  #   - +Hash+ method object
+  def update_method(namespace, method_name, snapshot_id, synopsis, wdl_contents)
+    path = self.api_root + "/api/methods/#{namespace}/#{method_name}/#{snapshot_id}"
+    wdl_payload = {
+        synopsis: synopsis,
+        snapshotComment: "updating to snapshot #{snapshot_id + 1}",
+        documentation: '',
+        payload: wdl_contents
+    }
+    process_firecloud_request(:post, path, wdl_payload.to_json)
+  end
+
   # redact a FireCloud method object
   #
   # * *params*
@@ -915,22 +937,23 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   #   - +workspace_name+ (String) => name of requested workspace
   #   - +config_namespace+ (String) => namespace of requested configuration
   #   - +config_name+ (String) => name of requested configuration
-  #   - +entity_type+ (String) => type of workspace entity (e.g. sample, participant, etc)
-  #   - +entity_name+ (String) => name of workspace entity
+  #   - +entity_type+ (String) => type of workspace entity (e.g. sample, participant, etc), optional
+  #   - +entity_name+ (String) => name of workspace entity, optional
   #
   # * *return*
   #   - +Hash+ of workflow submission details
-  def create_workspace_submission(workspace_namespace, workspace_name, config_namespace, config_name, entity_type, entity_name)
+  def create_workspace_submission(workspace_namespace, workspace_name, config_namespace, config_name, entity_type=nil, entity_name=nil)
     path = self.api_root + "/api/workspaces/#{workspace_namespace}/#{workspace_name}/submissions"
     submission = {
         methodConfigurationNamespace: config_namespace,
         methodConfigurationName: config_name,
-        entityType: entity_type,
-        entityName: entity_name,
         useCallCache: true,
         workflowFailureMode: 'NoNewCalls'
-    }.to_json
-    process_firecloud_request(:post, path, submission)
+    }
+    if entity_name.present? && entity_type.present?
+      submission.merge!({entityType: entity_type, entityName: entity_name})
+    end
+    process_firecloud_request(:post, path, submission.to_json)
   end
 
   # get a single workflow submission

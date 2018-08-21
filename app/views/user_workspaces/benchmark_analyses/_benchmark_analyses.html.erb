@@ -1,0 +1,48 @@
+<h3>Available Benchmarks</h3>
+<table class="table table-striped table-active" id="benchmark-analyses">
+  <thead>
+    <tr>
+      <th>Name/Snapshot</th>
+      <th>Source Analysis</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @user_analysis.benchmark_analyses.each do |benchmark_analysis| %>
+      <tr>
+        <td><%= benchmark_analysis.name %>/<%= benchmark_analysis.snapshot %></td>
+        <td><%= benchmark_analysis.user_analysis.name %>/<%= benchmark_analysis.user_analysis.snapshot %></td>
+        <td>
+          <%= link_to 'Run Benchmark', submit_benchmark_analysis_path(project: @user_workspace.namespace, name: @user_workspace.name,
+                                                                      user_analysis_id: @user_analysis.id, benchmark_analysis_id: benchmark_analysis.id),
+                      method: :post, class: 'btn btn-sm btn-outline-primary benchmark-analysis-btn', id: 'submit-benchmark-analysis' %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<p class="text-center">
+  <% unless @user_analysis.has_valid_benchmark? %>
+    <%= link_to 'Create New Benchmark', create_benchmark_analysis_path(project: @user_workspace.namespace,
+                                                                     name: @user_workspace.name, user_analysis_id: @user_analysis.id),
+                class: 'btn btn-primary benchmark-analysis-btn', data: {toggle: 'tooltip'}, title: "Create a new Benchmark Submission based off of #{@user_analysis.name}/#{@user_analysis.snapshot}",
+                id: 'create-benchmark-analysis', method: :post %></p>
+  <% else %>
+    <span class="btn btn-primary disabled"
+          data-toggle="tooltip" title="You already have a valid benchmark to run.  Please use one of the 'Run Benchmark' buttons above.">
+      Create New Benchmark
+    </span>
+  <% end %>
+
+<script type="text/javascript">
+
+    $('#benchmark-analyses').DataTable({
+        pagingType: 'full_numbers'
+    });
+
+    $('.benchmark-analysis-btn').on('click', function() {
+        $('#generic-modal-title').html('Submitting Benchmark, Please Wait...');
+        launchModalSpinner('#generic-modal-spinner', '#generic-modal', function () { return true });
+    });
+
+</script>

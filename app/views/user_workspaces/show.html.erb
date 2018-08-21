@@ -1,13 +1,19 @@
-<h1><%= @user_workspace.name %> <%= link_to "View Workspace <i class='fas fa-search'></i>".html_safe, firecloud_link_for(@user_workspace.full_name), class: 'btn btn-primary float-right top-margin-5' %></h1>
+<h1><%= @user_workspace.name %></h1>
 <dl class="row">
   <dt class="col-sm-3">Project</dt>
-  <dd class="col-sm-9"><%= @user_workspace.namespace %></dd>
+  <dd class="col-sm-9">
+    <%= @user_workspace.namespace %>
+    <%= link_to "View Workspace <i class='fas fa-search'></i>".html_safe, firecloud_link_for(@user_workspace.full_name),
+                class: 'btn btn-primary btn-sm float-right' %>
+  </dd>
   <dt class="col-sm-3">Reference Analysis</dt>
-  <dd class="col-sm-9"><%= @user_workspace.reference_analysis.analysis_wdl %></dd>
+  <dd class="col-sm-9">
+    <%= @user_workspace.reference_analysis.analysis_wdl %>
+    <%= link_to "View Reference Analysis WDL <i class='fas fa-code'></i>".html_safe,
+                get_analysis_wdl_path(project: @user_workspace.namespace, name: @user_workspace.name),
+                class: 'btn btn-secondary btn-sm float-right', id: 'get-reference-wdl', data: { remote: true } %>
+  </dd>
 </dl>
-<p>
-  <%= link_to "View Reference Analysis WDL <i class='fas fa-code'></i>".html_safe, get_analysis_wdl_path(project: @user_workspace.namespace, name: @user_workspace.name), class: 'btn btn-secondary', id: 'get-reference-wdl', data: { remote: true } %>
-</p>
 
 <div id="reference-wdl-content-target"></div>
 
@@ -34,6 +40,7 @@
     <%= render partial: 'user_analysis_form', locals: {user_analysis: @user_analysis} %>
   </div>
   <div role="tabpanel" class="tab-pane fade <%= @user_analysis.new_record? ? nil : 'show active' %>" id="benchmark-submissions">
+    <%= render partial: 'user_workspaces/benchmark_analyses/benchmark_analyses' %>
     <%= render partial: 'user_workspaces/submissions/history' %>
   </div>
 </div>

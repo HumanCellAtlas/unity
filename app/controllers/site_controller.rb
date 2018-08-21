@@ -33,8 +33,7 @@ class SiteController < ApplicationController
     begin
       @fire_cloud_profile = FireCloudProfile.new
       begin
-        user_client = user_fire_cloud_client(current_user)
-        profile = user_client.get_profile
+        profile = user_fire_cloud_client(current_user).get_profile
         profile['keyValuePairs'].each do |attribute|
           if @fire_cloud_profile.respond_to?("#{attribute['key']}=")
             @fire_cloud_profile.send("#{attribute['key']}=", attribute['value'])
@@ -53,8 +52,7 @@ class SiteController < ApplicationController
     begin
       @fire_cloud_profile = FireCloudProfile.new(profile_params)
       if @fire_cloud_profile.valid?
-        user_client = user_fire_cloud_client(current_user)
-        user_client.set_profile(profile_params)
+        user_fire_cloud_client(current_user).set_profile(profile_params)
         # log that user has registered so we can use this elsewhere
         if !current_user.registered_for_firecloud
           current_user.update(registered_for_firecloud: true)
