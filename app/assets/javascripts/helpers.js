@@ -1,4 +1,5 @@
-OPEN_MODAL = '';
+var OPEN_MODAL = '';
+var PAGE_RENDERED = false;
 // default actions to execute on all page loads
 function enableDefaultActions() {
     $('.dropdown-toggle').dropdown();
