@@ -1,5 +1,5 @@
 # use KDUX base Rails image, configure only project-specific items here
-FROM broadinstitute/kdux-rails-baseimage:1.3
+FROM broadinstitute/kdux-rails-baseimage:1.4
 
 # Set ruby version
 RUN bash -lc 'rvm --default use ruby-2.5.1'
@@ -24,11 +24,6 @@ RUN rm -f /etc/service/nginx/down
 
 # Compile native support for passenger for Ruby 2.2
 RUN passenger-config build-native-support
-
-# add yarn
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-RUN sudo apt-get update && sudo apt-get install yarn
 
 # Copy entire source into image rather than mount source
 ADD . .
