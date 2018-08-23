@@ -30,19 +30,23 @@
   <li class="nav-item">
     <a class="nav-link user-analysis-nav <%= @user_analysis.new_record? ? 'active' : nil %>" href="#user-analysis" role="tab" data-toggle="tab">My Analysis <i class="fas fa-fw fa-flask"></i></a>
   </li>
-  <li class="nav-item">
-    <a class="nav-link user-analysis-nav <%= @user_analysis.new_record? ? nil : 'active' %>" href="#benchmark-submissions" role="tab" data-toggle="tab">Benchmark Submissions <i class="fas fa-fw fa-project-diagram"></i></a>
-  </li>
+  <% unless @user_analysis.new_record? %>
+    <li class="nav-item">
+      <a class="nav-link user-analysis-nav <%= @user_analysis.new_record? ? nil : 'active' %>" href="#benchmark-submissions" role="tab" data-toggle="tab">Benchmark Submissions <i class="fas fa-fw fa-project-diagram"></i></a>
+    </li>
+  <% end %>
 </ul>
 
 <div class="tab-content top-pad-small">
   <div role="tabpanel" class="tab-pane fade <%= @user_analysis.new_record? ? 'show active' : nil %>" id="user-analysis">
     <%= render partial: 'user_analysis_form', locals: {user_analysis: @user_analysis} %>
   </div>
-  <div role="tabpanel" class="tab-pane fade <%= @user_analysis.new_record? ? nil : 'show active' %>" id="benchmark-submissions">
-    <%= render partial: 'user_workspaces/benchmark_analyses/benchmark_analyses' %>
-    <%= render partial: 'user_workspaces/submissions/history' %>
-  </div>
+  <% unless @user_analysis.new_record? %>
+    <div role="tabpanel" class="tab-pane fade <%= @user_analysis.new_record? ? nil : 'show active' %>" id="benchmark-submissions">
+      <%= render partial: 'user_workspaces/benchmark_analyses/benchmark_analyses' %>
+      <%= render partial: 'user_workspaces/submissions/history' %>
+    </div>
+  <% end %>
 </div>
 
 <p><%= link_to "<i class='fas fa-fw fa-chevron-left'></i> Back".html_safe, user_workspaces_path, class: 'btn btn-sm btn-warning' %></p>
