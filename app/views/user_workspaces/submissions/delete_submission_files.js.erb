@@ -1,0 +1,10 @@
+closeModalSpinner('#generic-modal-spinner', '#generic-modal', function () {
+    $('#generic-update-target').html("<%= escape_javascript(render partial: '/layouts/generic_update_modal') %>");
+    $('#generic-update-modal-title').html("Submission <%= params[:submission_id] %> has been deleted");
+    $('#generic-update-modal-body').html("All files belonging to submission <%= params[:submission_id] %> have been removed.  Any files that were synchronized back to this study have not been affected.");
+    $("#generic-update-modal").modal("show");
+    $.ajax({
+        url: '<%= get_workspace_submissions_path(project: @user_workspace.namespace, name: @user_workspace.name) %>',
+        dataType: 'script'
+    });
+});

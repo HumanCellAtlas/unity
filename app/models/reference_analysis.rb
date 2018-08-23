@@ -10,7 +10,8 @@ class ReferenceAnalysis < ApplicationRecord
   validates_format_of :firecloud_project, :firecloud_workspace, :analysis_wdl, :benchmark_wdl, :orchestration_wdl,
                       with: ALPHANUMERIC_EXTENDED, message: ALPHANUMERIC_EXTENDED_MESSAGE
 
-  validate :validate_wdl_accessibility
+  validate :validate_wdl_accessibility, if: proc {|attributes| attributes.analysis_wdl.present? && attributes.benchmark_wdl.present? && attributes.orchestration_wdl.present?}
+  validate :validate_wdl_configurations, if: proc {|attributes| attributes.analysis_wdl.present? && attributes.benchmark_wdl.present? && attributes.orchestration_wdl.present?}
 
   has_many :reference_analysis_data, dependent: :delete_all
   has_many :reference_analysis_options, dependent: :delete_all
@@ -138,6 +139,30 @@ class ReferenceAnalysis < ApplicationRecord
         end
       rescue => e
         errors.add(wdl_attr, 'is not viewable by Unity.  Please make this WDL public before continuing.')
+      end
+    end
+  end
+
+  # validate that a requested WDL has a valid configuration in the reference_analysis workspace
+  def validate_wdl_configurations
+    [:analysis_wdl, :benchmark_wdl, :orchestration_wdl].each do |wdl_attr|
+      if extract_wdl_keys(wdl_attr).size != 3
+        errors.add(wdl_attr, "is not in the correct format.  The value for #{wdl_attr} must be in the form of :namespace/:name/:version")
+      end
+      wdl_namespace, wdl_name, wdl_version = extract_wdl_keys(wdl_attr)
+      begin
+        configurations = ApplicationController.fire_cloud_client.get_workspace_configurations(self.firecloud_project, self.firecloud_workspace)
+        matching_config = configurations.find do |config|
+          config['methodRepoMethod']['methodName'] == wdl_name &&
+              config['methodRepoMethod']['methodNamespace'] == wdl_namespace &&
+              config['methodRepoMethod']['methodVersion'] == wdl_version.to_i
+        end
+
+        if matching_config.nil?
+          errors.add(wdl_attr, "does not have a matching configuration saved in the workspace #{self.firecloud_project}/#{self.firecloud_workspace}")
+        end
+      rescue => e
+        errors.add(wdl_attr, "does not have a matching configuration saved in the workspace #{self.firecloud_project}/#{self.firecloud_workspace}")
       end
     end
   end

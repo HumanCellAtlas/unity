@@ -6,6 +6,7 @@
   $('#get-reference-wdl').removeClass('disabled');
 <% else %>
   closeModalSpinner('#generic-modal-spinner', '#generic-modal', function() {
+      $('#<%= params[:target] %>').empty()
       $('#<%= params[:target] %>').html("<%= escape_javascript(@pipeline_wdl) %>");
   });
 <% end %>

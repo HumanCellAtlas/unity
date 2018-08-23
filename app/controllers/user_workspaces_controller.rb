@@ -6,6 +6,7 @@ class UserWorkspacesController < ApplicationController
   before_action :set_user_analysis, only: [:update_user_analysis, :create_benchmark_analysis, :submit_benchmark_analysis]
   before_action :check_firecloud_registration, except: [:index]
   before_action :check_firecloud_availability, except: [:index]
+  before_action :load_valid_submissions, only: [:show, :get_workspace_submissions]
 
   # GET /user_workspaces
   # GET /user_workspaces.json
@@ -16,16 +17,10 @@ class UserWorkspacesController < ApplicationController
   # GET /user_workspaces/1
   # GET /user_workspaces/1.json
   def show
-    @submissions = []
     @user_analysis = @user_workspace.user_analysis
     if @user_analysis.nil?
       @user_analysis = @user_workspace.build_user_analysis(user: @user_workspace.user)
       @user_analysis.namespace = @user_analysis.default_namespace
-    end
-    begin
-      @submissions = user_fire_cloud_client(current_user).get_workspace_submissions(@user_workspace.namespace, @user_workspace.name)
-    rescue => e
-      logger.info "Cannot retrieve submissions for user_workspace '#{@user_workspace.full_name}': #{e.message}"
     end
   end
 
@@ -196,14 +191,7 @@ class UserWorkspacesController < ApplicationController
 
   # get all submissions for a user_workspace
   def get_workspace_submissions
-    user_client = user_fire_cloud_client(current_user)
-    workspace = user_client.get_workspace(@user_workspace.namespace, @user_workspace.name)
-    @submissions = user_client.get_workspace_submissions(@user_workspace.namespace, @user_workspace.name)
-    # remove deleted submissions from list of runs
-    if !workspace['workspace']['attributes']['deleted_submissions'].blank?
-      deleted_submissions = workspace['workspace']['attributes']['deleted_submissions']['items']
-      @submissions.delete_if {|submission| deleted_submissions.include?(submission['submissionId'])}
-    end
+    # submissions are loaded from load_valid_submissions
     render '/user_workspaces/submissions/get_workspace_submissions'
   end
 
@@ -224,7 +212,7 @@ class UserWorkspacesController < ApplicationController
     begin
       user_fire_cloud_client(current_user).abort_workspace_submission(@user_workspace.namespace, @user_workspace.name, @submission_id)
       @notice = "Submission #{@submission_id} was successfully aborted."
-
+      render '/user_workspaces/submissions/abort_submission_workflow'
     rescue => e
       @alert = "Unable to abort submission #{@submission_id} due to an error: #{e.message}"
       render '/user_workspaces/submissions/display_modal'
@@ -314,6 +302,7 @@ class UserWorkspacesController < ApplicationController
         user_client.execute_gcloud_method(:delete_workspace_file, @user_workspace.namespace,
                                           @user_workspace.name, file.name)
       end
+      render '/user_workspaces/submissions/delete_submission_files'
     rescue => e
       logger.error "Unable to remove submission #{params[:submission_id]} files from #{@user_workspace.name} due to: #{e.message}"
       @alert = "Unable to delete the outputs for #{params[:submission_id]} due to the following error: #{e.message}"
@@ -385,6 +374,23 @@ class UserWorkspacesController < ApplicationController
       logger.info "Redaction complete for #{full_name}"
     rescue => e
       logger.error "Unable to redact #{full_name} due to error: #{e.message}"
+    end
+  end
+
+  # load submissions for a user_workspace
+  def load_valid_submissions
+    @submissions = []
+    begin
+      user_client = user_fire_cloud_client(current_user)
+      workspace = user_client.get_workspace(@user_workspace.namespace, @user_workspace.name)
+      @submissions = user_client.get_workspace_submissions(@user_workspace.namespace, @user_workspace.name)
+      # remove deleted submissions from list of runs
+      if !workspace['workspace']['attributes']['deleted_submissions'].blank?
+        deleted_submissions = workspace['workspace']['attributes']['deleted_submissions']['items']
+        @submissions.delete_if {|submission| deleted_submissions.include?(submission['submissionId'])}
+      end
+    rescue => e
+      logger.info "Cannot retrieve submissions for user_workspace '#{@user_workspace.full_name}': #{e.message}"
     end
   end
 end

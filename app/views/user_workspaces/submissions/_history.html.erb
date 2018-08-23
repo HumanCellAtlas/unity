@@ -14,7 +14,7 @@
       </thead>
       <tbody>
       <% @submissions.each do |submission| %>
-        <tr id="submission-<%= submission['submissionId'] %>">
+        <tr id="<%= submission['submissionId'] %>">
           <td id="submission-<%= submission['submissionId'] %>-date" class="submission-date">
             <%= local_timestamp(submission['submissionDate']) %>
           </td>
@@ -81,6 +81,11 @@
             ', submitted on ' + submissionDate + ')?  This cannot be undone.')) {
             $('#generic-modal-title').html("Aborting Submission... Please Wait");
             launchModalSpinner('#generic-modal-spinner', '#generic-modal', function() {
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-Token': Rails.csrfToken()
+                    }
+                });
                 $.ajax({
                     url: submissionUrl,
                     method: 'DELETE',
@@ -137,6 +142,11 @@
 
     // delete outputs from a particular submission
     $('#submissions-table').on('click', '.delete-submission-files', function () {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-Token': Rails.csrfToken()
+            }
+        });
         $(this).tooltip('hide');
         var submissionUrl = $(this).data('url');
         var submissionId = $(this).data('id');

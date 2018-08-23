@@ -12,7 +12,7 @@ class UserAnalysis < ApplicationRecord
   validates_presence_of :namespace, :name, :wdl_contents
   validates_format_of :namespace, :name, with: ALPHANUMERIC_EXTENDED, message: ALPHANUMERIC_EXTENDED_MESSAGE
   validate :add_method_to_repository, on: [:create, :update]
-  validate :validate_required_parameters, on: [:create, :update]
+  validate :validate_required_parameters, on: [:create, :update], unless: proc {|attributes| attributes.snapshot.blank?}
   validates_uniqueness_of :snapshot, scope: [:namespace, :name]
   before_destroy :remove_method_from_repository
 
@@ -36,12 +36,16 @@ class UserAnalysis < ApplicationRecord
 
   # get workflow inputs/ouputs from Methods Repo
   def configuration_settings
-    begin
-      user_client = FireCloudClient.new(self.user)
-      user_client.get_method_parameters(self.namespace, self.name, self.snapshot)
-    rescue => e
-      Rails.logger.info "Error retrieving user analysis WDL inputs/outputs: #{e.message}"
-      {error: e.message}
+    if self.snapshot.blank?
+      {error: "#{self.namespace}/#{self.name} does not exist in methods repo"}
+    else
+      begin
+        user_client = FireCloudClient.new(self.user)
+        user_client.get_method_parameters(self.namespace, self.name, self.snapshot)
+      rescue => e
+        Rails.logger.info "Error retrieving user analysis WDL inputs/outputs: #{e.message}"
+        {error: e.message}
+      end
     end
   end
 
@@ -168,7 +172,7 @@ class UserAnalysis < ApplicationRecord
     reference_analysis_config = self.reference_analysis.configuration_settings
     user_config = self.configuration_settings
     Rails.logger.info "Validating user_analysis #{self.full_name} inputs/outputs"
-    unless user_config == reference_analysis_config
+    unless user_config[:error].nil? && user_config == reference_analysis_config
       # redact this wdl so there are no orphans
       user_client = FireCloudClient.new(self.user)
       user_client.delete_method(self.namespace, self.name, self.snapshot)

@@ -1,0 +1,10 @@
+closeModalSpinner('#generic-modal-spinner', '#generic-modal', function () {
+    $('#generic-update-target').html("<%= escape_javascript(render partial: '/layouts/generic_update_modal') %>");
+    $('#generic-update-modal-title').html("<span class='text-success'>Submission Successfully Cancelled</span>");
+    $('#generic-update-modal-body').html("<p>Submission <strong><%= params[:submission_id] %></strong> has been successfully stopped.  You may still need to clean up files in the submission directory if the submission started running.")
+    $("#generic-update-modal").modal("show");
+    $.ajax({
+        url: '<%= get_workspace_submissions_path(project: @user_workspace.namespace, name: @user_workspace.name) %>',
+        dataType: 'script'
+    });
+});
