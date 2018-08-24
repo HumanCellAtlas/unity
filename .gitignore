@@ -32,4 +32,10 @@ public/unity/assets
 .google_service_account.json
 /node_modules
 yarn-debug.log*
+.yarn-integrity/public/packs
+/public/packs-test
+/node_modules
+yarn-debug.log*
 .yarn-integrity
+public/packs
+.babelrc

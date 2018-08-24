@@ -1,0 +1,21 @@
+{
+  "name": "test-orchestration",
+  "methodRepoMethod": {
+    "methodName": "test-orchestration",
+    "methodVersion": 2,
+    "methodNamespace": "unity-benchmark-development",
+    "methodUri": "agora://unity-benchmark-development/test-orchestration/2",
+    "sourceRepo": "agora"
+  },
+  "outputs": {
+    "orchestration.benchmark_data": ""
+  },
+  "inputs": {
+    "orchestration.message_string": "\"This is a testing message string for orchestration\"",
+    "orchestration.reference_dataset": "\"gs://fc-ea742003-98c4-41e7-a7f9-218b7b972ae2/reference_output.txt\""
+  },
+  "prerequisites": {},
+  "methodConfigVersion": 3,
+  "deleted": false,
+  "namespace": "unity-benchmark-development"
+}

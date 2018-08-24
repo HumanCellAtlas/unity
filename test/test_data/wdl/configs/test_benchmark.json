@@ -1,0 +1,21 @@
+{
+  "name": "test-benchmark",
+  "methodRepoMethod": {
+    "methodName": "test-benchmark",
+    "methodVersion": 3,
+    "methodNamespace": "unity-benchmark-development",
+    "methodUri": "agora://unity-benchmark-development/test-benchmark/3",
+    "sourceRepo": "agora"
+  },
+  "outputs": {
+    "benchmark.benchmark_results": ""
+  },
+  "inputs": {
+    "benchmark.analysis": "\"gs://fc-ea742003-98c4-41e7-a7f9-218b7b972ae2/7890eec1-2161-4bcb-b836-951d53a60319/analysis/a6beded2-aeab-4927-b878-3bbbe2ac613a/call-run_analysis/output_file.txt\"",
+    "benchmark.reference": "\"gs://fc-ea742003-98c4-41e7-a7f9-218b7b972ae2/reference_output.txt\""
+  },
+  "prerequisites": {},
+  "methodConfigVersion": 3,
+  "deleted": false,
+  "namespace": "unity-benchmark-development"
+}

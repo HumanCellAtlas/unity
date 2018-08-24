@@ -2,6 +2,11 @@
   "name": "unity_benchmark_service",
   "private": true,
   "dependencies": {
-    "jquery": "^3.3.1"
+    "@rails/webpacker": "3.5",
+    "jquery": "^3.3.1",
+    "spin.js": "^4.0.0"
+  },
+  "devDependencies": {
+    "webpack-dev-server": "2.11.2"
   }
 }

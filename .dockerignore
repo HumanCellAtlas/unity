@@ -9,3 +9,6 @@ config/*.json
 .google_service_account.json
 config/master.key
 /config/credentials.yml.enc
+public/packs
+.babelrc
+.postcssrc.yml

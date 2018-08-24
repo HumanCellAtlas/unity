@@ -6,16 +6,14 @@ function enableDefaultActions() {
     $('body').tooltip({selector: '[data-toggle="tooltip"]', container: 'body', trigger: 'hover'});
     $('[data-toggle="popover"]').popover()
 
-}
+    $(document).on('shown.bs.modal', function(e) {
+        console.log("modal " + $(e.target).attr('id') + ' opened');
+        OPEN_MODAL = $(e.target).attr('id');
+    });
 
-// set error state on blank text boxes or selects
-function setErrorOnBlank(selector) {
-    selector.map(function() {
-        if ( $(this).val() === "" ) {
-            $(this).parent().addClass('has-error has-feedback');
-        } else {
-            $(this).parent().removeClass('has-error has-feedback');
-        }
+    $(document).on('hidden.bs.modal', function(e) {
+        console.log("modal " + $(e.target).attr('id') + ' closed');
+        OPEN_MODAL = '';
     });
 }
 
@@ -69,12 +67,6 @@ var opts = {
     position: 'relative' // Element positioning
 };
 
-$(document).on('shown.bs.modal', function(e) {
-    console.log("modal " + $(e.target).attr('id') + ' opened');
-    OPEN_MODAL = $(e.target).attr('id');
-});
-
-$(document).on('hidden.bs.modal', function(e) {
-    console.log("modal " + $(e.target).attr('id') + ' closed');
-    OPEN_MODAL = '';
-});
+export {
+    OPEN_MODAL, PAGE_RENDERED, enableDefaultActions, launchModalSpinner, closeModalSpinner, opts
+}

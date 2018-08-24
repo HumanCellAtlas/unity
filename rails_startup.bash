@@ -17,6 +17,8 @@ then
     echo "*** PRECOMPILING ASSETS ***"
     sudo -E -u app -H bundle exec rake RAILS_ENV=$PASSENGER_APP_ENV assets:clean
     sudo -E -u app -H bundle exec rake RAILS_ENV=$PASSENGER_APP_ENV assets:precompile
+    sudo -E -u app -H bundle exec rake RAILS_ENV=$PASSENGER_APP_ENV yarn:install
+    sudo -E -u app -H bundle exec rake RAILS_ENV=$PASSENGER_APP_ENV webpacker:compile
     echo "*** COMPLETED ***"
 fi
 echo "*** INITIALIZING & MIGRATING DATABASE ***"

@@ -12,7 +12,7 @@ class ReferenceAnalysisTest < ActiveSupport::TestCase
     namespace, name, snapshot = @reference_analysis.extract_wdl_keys(:analysis_wdl)
     remote_config = ApplicationController.fire_cloud_client.get_method_parameters(namespace, name, snapshot.to_i)
     local_config = @reference_analysis.configuration_settings
-    assert local_config === remote_config, "local config does not match remote config; diff: #{compare_hashes(remote_config, local_config)}"
+    assert local_config === remote_config, "local configs does not match remote configs; diff: #{compare_hashes(remote_config, local_config)}"
 
     puts "#{File.basename(__FILE__)}: #{self.method_name} successful!"
   end

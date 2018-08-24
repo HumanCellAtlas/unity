@@ -1,0 +1,20 @@
+{
+  "name": "test-analysis",
+  "methodRepoMethod": {
+    "methodName": "test-analysis",
+    "methodVersion": 5,
+    "methodNamespace": "unity-benchmark-development",
+    "methodUri": "agora://unity-benchmark-development/test-analysis/5",
+    "sourceRepo": "agora"
+  },
+  "outputs": {
+    "analysis.analysis_output": ""
+  },
+  "inputs": {
+    "analysis.message_string": "\"this is a test message\""
+  },
+  "prerequisites": {},
+  "methodConfigVersion": 2,
+  "deleted": false,
+  "namespace": "unity-benchmark-development"
+}
