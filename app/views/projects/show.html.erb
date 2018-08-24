@@ -7,7 +7,7 @@
 </dl>
 
 <h4>All Members <i class="fas fa-fw fa-users"></i></h4>
-<table class="table table-active table-responsive-sm">
+<table class="table table-active table-responsive-sm" id="project-users">
   <thead>
     <tr>
       <th>User</th>
@@ -24,4 +24,7 @@
   </tbody>
 </table>
 
-<p><%= link_to "<i class='fas fa-fw fa-chevron-left'></i> Back".html_safe, projects_path, class: 'btn btn-sm btn-warning' %></p>
+<p>
+  <%= link_to "<i class='fas fa-fw fa-chevron-left'></i> Back".html_safe, projects_path, class: 'btn btn-sm btn-warning' %>
+  <%= link_to "Workspaces <i class='fas fa-briefcase'></i>".html_safe, workspaces_project_path(@project), class: 'btn btn-sm btn-secondary workspaces-btn' %>
+</p>

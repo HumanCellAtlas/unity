@@ -17,6 +17,7 @@ window.$ = $;
 window.jQuery = jQuery;
 window.Spinner = Spinner;
 window.enableDefaultActions = helpers.enableDefaultActions;
+window.elementVisible = helpers.elementVisible;
 window.launchModalSpinner = helpers.launchModalSpinner;
 window.closeModalSpinner = helpers.closeModalSpinner;
 window.opts = helpers.opts;

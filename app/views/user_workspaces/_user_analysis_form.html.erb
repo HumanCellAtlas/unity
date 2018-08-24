@@ -52,7 +52,7 @@
                       id: 'populate-reference-wdl', data: {toggle: 'tooltip'}, title: 'Load the reference analysis WDL payload into the text area below.' %>
         </div>
       </div>
-      <%= form.text_area :wdl_contents, rows: 10, class: 'form-control wdl-contents' %>
+      <%= form.text_area :wdl_contents, rows: 10, class: 'form-control wdl-contents', data: {has_wdl: user_analysis.wdl_contents.present?} %>
     </div>
   </div>
   <div class="form-group row">

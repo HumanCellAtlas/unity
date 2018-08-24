@@ -14,7 +14,7 @@
       </thead>
       <tbody>
       <% @submissions.each do |submission| %>
-        <tr id="<%= submission['submissionId'] %>">
+        <tr id="<%= submission['submissionId'] %>" class="benchmark-submission-entry">
           <td id="submission-<%= submission['submissionId'] %>-date" class="submission-date">
             <%= local_timestamp(submission['submissionDate']) %>
           </td>

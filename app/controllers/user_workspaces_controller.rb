@@ -6,7 +6,7 @@ class UserWorkspacesController < ApplicationController
   before_action :set_user_analysis, only: [:update_user_analysis, :create_benchmark_analysis, :submit_benchmark_analysis]
   before_action :check_firecloud_registration, except: [:index]
   before_action :check_firecloud_availability, except: [:index]
-  before_action :load_valid_submissions, only: [:show, :get_workspace_submissions]
+  before_action :load_valid_submissions, only: [:show, :get_workspace_submissions, :create_user_analysis, :update_user_analysis]
 
   # GET /user_workspaces
   # GET /user_workspaces.json
@@ -83,7 +83,6 @@ class UserWorkspacesController < ApplicationController
         format.html { redirect_to user_workspace_path(project: @user_workspace.namespace, name: @user_workspace.name), notice: "'#{@user_analysis.full_name}' was successfully created." }
         format.json { render :show, status: :created, location: @user_workspace }
       else
-        @submissions = user_fire_cloud_client(current_user).get_workspace_submissions(@user_workspace.namespace, @user_workspace.name)
         format.html { render :show }
         format.json { render json: @user_analysis.errors, status: :unprocessable_entity }
       end
@@ -99,7 +98,6 @@ class UserWorkspacesController < ApplicationController
         format.html { redirect_to user_workspace_path(project: @user_workspace.namespace, name: @user_workspace.name), notice: "'#{@user_analysis.full_name}' was successfully updated." }
         format.json { render :show, status: :created, location: @user_workspace }
       else
-        @submissions = user_fire_cloud_client(current_user).get_workspace_submissions(@user_workspace.namespace, @user_workspace.name)
         format.html { render :show }
         format.json { render json: @user_analysis.errors, status: :unprocessable_entity }
       end

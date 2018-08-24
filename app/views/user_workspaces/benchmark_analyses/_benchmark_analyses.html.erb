@@ -15,7 +15,7 @@
         <td>
           <%= link_to 'Run Benchmark', submit_benchmark_analysis_path(project: @user_workspace.namespace, name: @user_workspace.name,
                                                                       user_analysis_id: @user_analysis.id, benchmark_analysis_id: benchmark_analysis.id),
-                      method: :post, class: 'btn btn-sm btn-outline-primary benchmark-analysis-btn', id: 'submit-benchmark-analysis' %>
+                      method: :post, class: 'btn btn-sm btn-outline-primary benchmark-analysis-btn', id: "submit-benchmark-analysis-#{benchmark_analysis.name_as_id}" %>
         </td>
       </tr>
     <% end %>

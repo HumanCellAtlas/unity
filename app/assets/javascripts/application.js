@@ -16,3 +16,13 @@
 //= require bootstrap-sprockets
 //= require jquery_nested_form
 //= require_tree .
+
+$(document).on('shown.bs.modal', function(e) {
+    console.log("modal " + $(e.target).attr('id') + ' opened');
+    OPEN_MODAL = $(e.target).attr('id');
+});
+
+$(document).on('hidden.bs.modal', function(e) {
+    console.log("modal " + $(e.target).attr('id') + ' closed');
+    OPEN_MODAL = '';
+});

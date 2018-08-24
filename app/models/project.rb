@@ -37,7 +37,7 @@ class Project < ApplicationRecord
           Rails.logger.info "setting user role: #{self.user_role} from #{fc_project['role']}"
           true
         else
-          Rails.logger.info "No "
+          Rails.logger.error "#{self.user.email} is not a member of project #{self.namespace}"
           errors.add(:namespace, " - You must be a member of '#{self.namespace}' to use it with Unity.  Please select another project.")
         end
       rescue => e

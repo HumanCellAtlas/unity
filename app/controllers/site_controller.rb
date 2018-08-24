@@ -99,9 +99,13 @@ class SiteController < ApplicationController
   def check_firecloud_registration
     if user_signed_in?
       if current_user.registered_for_firecloud?
-        true # do nothing as we're ok
+         # make sure user is part of user group
+         if !current_user.added_to_unity_group?
+           current_user.add_to_unity_user_group
+         end
       else
         if user_fire_cloud_client(current_user).registered?
+          current_user.add_to_unity_user_group
           current_user.update(registered_for_firecloud: true)
           true
         else

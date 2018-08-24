@@ -3,6 +3,7 @@ class User < ApplicationRecord
   attribute :admin, :boolean
   attribute :full_name, :string
   attribute :registered_for_firecloud, :boolean, default: false
+  attribute :added_to_unity_group, :boolean, default: false
   attr_encrypted :refresh_token, key: ENV['ENCRYPTION_KEY']
 
   # Include default devise modules. Others available are:
@@ -84,6 +85,7 @@ class User < ApplicationRecord
       group_name = user_group_config.value
       Rails.logger.info "Adding #{self.email} to #{group_name} user group"
       ApplicationController.fire_cloud_client.add_user_to_group(group_name, 'member', self.email)
+      self.update(added_to_unity_group: true)
       Rails.logger.info "User group registration complete"
     end
   end

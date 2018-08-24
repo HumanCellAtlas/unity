@@ -4,7 +4,7 @@
   <dd class="col-sm-9">
     <%= @user_workspace.namespace %>
     <%= link_to "View Workspace <i class='fas fa-search'></i>".html_safe, firecloud_link_for(@user_workspace.full_name),
-                class: 'btn btn-primary btn-sm float-right' %>
+                class: 'btn btn-primary btn-sm float-right', id: 'view-user-workspace-remote' %>
   </dd>
   <dt class="col-sm-3">Reference Analysis</dt>
   <dd class="col-sm-9">
@@ -28,11 +28,11 @@
 
 <ul class="nav nav-tabs" role="tablist">
   <li class="nav-item">
-    <a class="nav-link user-analysis-nav <%= @user_analysis.new_record? ? 'active' : nil %>" href="#user-analysis" role="tab" data-toggle="tab">My Analysis <i class="fas fa-fw fa-flask"></i></a>
+    <a class="nav-link user-analysis-nav <%= @user_analysis.new_record? ? 'active' : nil %>" href="#user-analysis" id="user-analysis-nav" role="tab" data-toggle="tab">My Analysis <i class="fas fa-fw fa-flask"></i></a>
   </li>
   <% unless @user_analysis.new_record? %>
     <li class="nav-item">
-      <a class="nav-link user-analysis-nav <%= @user_analysis.new_record? ? nil : 'active' %>" href="#benchmark-submissions" role="tab" data-toggle="tab">Benchmark Submissions <i class="fas fa-fw fa-project-diagram"></i></a>
+      <a class="nav-link user-analysis-nav <%= @user_analysis.new_record? ? nil : 'active' %>" href="#benchmark-submissions" id="benchmark-submissions-nav" role="tab" data-toggle="tab">Benchmark Submissions <i class="fas fa-fw fa-project-diagram"></i></a>
     </li>
   <% end %>
 </ul>

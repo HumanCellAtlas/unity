@@ -145,7 +145,6 @@ class UserAnalysis < ApplicationRecord
       else
         remote_method = user_client.create_method(self.namespace, self.name, synopsis, self.wdl_contents)
       end
-      remote_method = user_client.create_method(self.namespace, self.name, synopsis, self.wdl_contents)
       if remote_method.present?
         self.snapshot = remote_method['snapshotId']
       else

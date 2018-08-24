@@ -15,9 +15,9 @@
           <tr>
             <td><%= project.namespace %></td>
             <td>
-              <%= link_to 'Details', project, class: 'btn btn-sm btn-primary' %>
-              <%= link_to 'Workspaces', workspaces_project_path(project), class: 'btn btn-sm btn-secondary' %>
-              <%= link_to 'Remove', project, method: :delete, data: { confirm: "Are you sure you want to remove '#{project.namespace}'?  You will not be able to use it with Unity unless you re-register it." }, class: 'btn btn-sm btn-danger' %>
+              <%= link_to 'Details', project, class: 'btn btn-sm btn-primary details-btn' %>
+              <%= link_to 'Workspaces', workspaces_project_path(project), class: 'btn btn-sm btn-secondary workspaces-btn' %>
+              <%= link_to 'Remove', project, method: :delete, data: { confirm: "Are you sure you want to remove '#{project.namespace}'?  You will not be able to use it with Unity unless you re-register it." }, class: 'btn btn-sm btn-danger delete-project-btn' %>
             </td>
           </tr>
         <% end %>
@@ -25,8 +25,8 @@
     </table>
     </div>
     <p>
-      <%= link_to 'Register an Existing Project', new_project_path, class: 'btn btn-lg btn-success' %>
-      <%= link_to 'Create a New Project', new_project_from_scratch_path, class: 'btn btn-lg btn-primary' %>
+      <%= link_to 'Register an Existing Project', new_project_path, class: 'btn btn-lg btn-success', id: 'register-existing-project' %>
+      <%= link_to 'Create a New Project', new_project_from_scratch_path, class: 'btn btn-lg btn-primary', id: 'create-new-project' %>
     </p>
   </div>
 </div>

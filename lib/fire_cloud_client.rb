@@ -584,11 +584,12 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   #   - +snapshot_id+ (Integer) => snapshot ID of method
   #   - +synopsis+ (String) => synopsis of method (80 characters max)
   #   - +wdl_contents+ (String) => plain text WDL payload
+  #   - +redact+ (Boolean) => Boolean value for redacting previous snapshot (defaults to false)
   #
   # * *return*
   #   - +Hash+ method object
-  def update_method(namespace, method_name, snapshot_id, synopsis, wdl_contents)
-    path = self.api_root + "/api/methods/#{namespace}/#{method_name}/#{snapshot_id}"
+  def update_method(namespace, method_name, snapshot_id, synopsis, wdl_contents, redact=false)
+    path = self.api_root + "/api/methods/#{namespace}/#{method_name}/#{snapshot_id}#{merge_query_options({redact: redact})}"
     wdl_payload = {
         synopsis: synopsis,
         snapshotComment: "updating to snapshot #{snapshot_id + 1}",

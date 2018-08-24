@@ -17,6 +17,16 @@ class UserWorkspace < ApplicationRecord
     [self.namespace, self.name].join('/')
   end
 
+  # name as DOM element ID
+  def name_as_id
+    self.name.gsub(/\//, '-')
+  end
+
+  # full name as DOM element ID
+  def full_name_as_id
+    self.full_name.gsub(/\//, '-')
+  end
+
   def namespace
     self.project.namespace
   end
@@ -49,7 +59,7 @@ class UserWorkspace < ApplicationRecord
   # create a new benchmark workspace by cloning the reference workspace
   def create_benchmark_workspace
     begin
-      user_client = FireCloudClient.new(self.user, self.namespace)
+      user_client = FireCloudClient.new(self.user)
       Rails.logger.info "Creating user_workspace: #{self.full_name} from #{self.reference_analysis.display_name}"
       # clone reference space into new workspace
       workspace = user_client.clone_workspace(self.reference_analysis.firecloud_project, self.reference_analysis.firecloud_workspace,
@@ -71,12 +81,16 @@ class UserWorkspace < ApplicationRecord
         return false
       end
     rescue => e
-      Rails.logger.info "Error creating user workspace #{self.full_name}: #{e.message}"
+      Rails.logger.error "Error creating user workspace #{self.full_name}: #{e.message}"
       if e.message.include?("Workspace #{self.full_name} already exists")
         errors.add(:name, ' - there is already an existing benchmarking workspace using this name.  Please choose another name.')
       else
-        user_client.delete_workspace(self.namespace, self.name)
-        errors.add(:name, " creation failed: #{e.message}; Please try again.")
+        begin
+          user_client.delete_workspace(self.namespace, self.name)
+        rescue => e
+          Rails.logger.error "Cannot remove workspace #{self.full_name} due to error: #{e.message}"
+        end
+          errors.add(:name, " creation failed: #{e.message}; Please try again.")
       end
     end
   end

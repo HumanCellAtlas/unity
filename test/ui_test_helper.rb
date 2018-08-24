@@ -87,11 +87,13 @@ class Test::Unit::TestCase
   def wait_for_modal_open(id)
     # sanity check in case modal has already opened and closed - if no modal opens in 10 seconds then exit and continue
     i = 0
+    $verbose ? puts("waiting for open of requested modal #{id}") : nil
     while @driver.execute_script("return OPEN_MODAL") == ''
       if i == 30
         $verbose ? puts("Exiting wait_for_modal_open(#{id}) after 30 seconds - no modal open") : nil
         return true
       else
+        $verbose ? puts("waiting; OPEN_MODAL: #{@driver.execute_script("return OPEN_MODAL")}") : nil
         sleep(1)
         i += 1
       end
@@ -168,8 +170,9 @@ class Test::Unit::TestCase
       end
     end
     @wait.until {@driver.execute_script("return PAGE_RENDERED;")}
-    if element_present?(:id, 'message_modal') && element_visible?(:id, 'message_modal')
-      close_modal('message_modal')
+    if element_present?(:id, 'notices-modal') && element_visible?(:id, 'notices-modal')
+      $verbose ? puts('attempting to close notices-modal') : nil
+      close_modal('notices-modal')
     end
     $verbose ? puts('login successful') : nil
   end
@@ -213,8 +216,8 @@ class Test::Unit::TestCase
         sleep(1)
       end
     end
-    if element_present?(:id, 'message_modal') && element_visible?(:id, 'message_modal')
-      close_modal('message_modal')
+    if element_present?(:id, 'notices-modal') && element_visible?(:id, 'notices-modal')
+      close_modal('notices-modal')
     end
     $verbose ? puts('login successful') : nil
   end
@@ -290,6 +293,11 @@ class Test::Unit::TestCase
       # delete matching files
       Dir.glob("#{$download_dir}/*").select {|f| /#{basename}/.match(f)}.map {|f| File.delete(f)}
     end
+  end
+
+  # check if a datatable is empty
+  def datatable_empty?(id)
+    element_present?(:class, 'dataTables_empty')
   end
 
   private

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_08_20_181149) do
+ActiveRecord::Schema.define(version: 2018_08_24_220457) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "hstore"
@@ -125,6 +125,7 @@ ActiveRecord::Schema.define(version: 2018_08_20_181149) do
     t.string "encrypted_refresh_token_iv"
     t.boolean "admin", default: false
     t.boolean "registered_for_firecloud", default: false
+    t.boolean "added_to_unity_group", default: false
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 

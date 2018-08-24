@@ -10,6 +10,7 @@ class ReferenceAnalysis < ApplicationRecord
   validates_format_of :firecloud_project, :firecloud_workspace, :analysis_wdl, :benchmark_wdl, :orchestration_wdl,
                       with: ALPHANUMERIC_EXTENDED, message: ALPHANUMERIC_EXTENDED_MESSAGE
 
+  validate :grant_read_access_to_user_group, on: :create
   validate :validate_wdl_accessibility, if: proc {|attributes| attributes.analysis_wdl.present? && attributes.benchmark_wdl.present? && attributes.orchestration_wdl.present?}
   validate :validate_wdl_configurations, if: proc {|attributes| attributes.analysis_wdl.present? && attributes.benchmark_wdl.present? && attributes.orchestration_wdl.present?}
 
@@ -124,6 +125,24 @@ class ReferenceAnalysis < ApplicationRecord
   end
 
   private
+
+  def grant_read_access_to_user_group
+    begin
+      user_group = AdminConfiguration.find_by_config_type('Unity FireCloud User Group')
+      unless user_group.present?
+        errors.add(:base, "You must first create a user group with which to grant access to reference workspaces.  Please create and register one now.")
+      end
+      user_group_email = user_group.value + '@firecloud.org'
+      user_group_acl = ApplicationController.fire_cloud_client.create_workspace_acl(user_group_email, 'READER', false, false)
+      add_share = ApplicationController.fire_cloud_client.update_workspace_acl(self.firecloud_project, self.firecloud_workspace, user_group_acl)
+      added = add_share["usersUpdated"].first
+      unless added['email'] == user_group_email && added['accessLevel'] == 'READER'
+        errors.add(:base, "Adding read access to Unity User Group: #{user_group_email} failed; please try again.")
+      end
+    rescue => e
+      errors.add(:base, "Adding read access to Unity User Group: #{user_group_email} failed due to: #{e.message}.")
+    end
+  end
 
   # validate that a requested WDL is both accessible and readable
   def validate_wdl_accessibility

@@ -15,11 +15,11 @@
   <div class="form-group row">
     <div class="col-sm-4">
       <%= form.label :namespace, 'Namespace' %>
-      <%= form.select :namespace, options_for_select(@available_projects), {include_blank: 'Please select from the list of your available projects'}, class: 'form-control' %>
+      <%= form.select :namespace, options_for_select(@available_projects), {prompt: 'Please select from the list of your available projects'}, class: 'form-control' %>
     </div>
   </div>
 
   <div class="form-group">
-    <%= form.submit 'Register Project', class: 'btn btn-lg btn-success' %>
+    <%= form.submit 'Register Project', class: 'btn btn-lg btn-success', id: 'save-project' %>
   </div>
 <% end %>

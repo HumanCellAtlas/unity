@@ -123,4 +123,298 @@ class UiRegressionSuite < Test::Unit::TestCase
     puts "#{File.basename(__FILE__)}: '#{self.method_name}' successful!"
   end
 
+  test 'register a billing project' do
+    puts "#{File.basename(__FILE__)}: '#{self.method_name}'"
+    @driver.get @base_url
+    login($test_email, $test_email_password)
+
+    # go to my billing projects page
+    profile_menu = @driver.find_element(:id, 'profile-nav')
+    profile_menu.click
+    billing_projects_nav = @driver.find_element(:id, 'billing-projects-nav')
+    billing_projects_nav.click
+    wait_until_page_loads(@base_url + '/projects')
+    omit_if !datatable_empty?('projects'), "#{$test_email} already has a registered project" do
+      # register an existing billing project
+      register_existing = @driver.find_element(:id, 'register-existing-project')
+      register_existing.click
+      wait_until_page_loads(@base_url + '/projects/new')
+      namespace_dropdown = @driver.find_element(:id, 'project_namespace')
+      opts = namespace_dropdown.find_elements(:tag_name, 'option')
+      namespace = opts.find {|opt| !opt.text.start_with?('Please select')}
+      # skip if no projects are available
+      omit_if namespace.nil?, "#{$test_email} has no available projects to use, skipping" do
+        # select first available project and save
+        namespace_dropdown.send_key namespace.text
+        save_btn = @driver.find_element(:id, 'save-project')
+        save_btn.click
+        close_modal('notices-modal')
+        # validate project saved, and look at workspaces detail
+        assert element_present?(:id, 'project-users'), "Project record did not save correctly, did not find users table"
+        workspaces_btn = @driver.find_element(:class, 'workspaces-btn')
+        workspaces_btn.click
+        assert element_present?(:id, 'workspaces'), "Project workspaces did not load correctly, did not find workspaces table"
+      end
+    end
+
+    puts "#{File.basename(__FILE__)}: '#{self.method_name}' successful!"
+  end
+
+  test 'create a user benchmarking workspace' do
+    puts "#{File.basename(__FILE__)}: '#{self.method_name}'"
+    @driver.get @base_url
+    login($test_email, $test_email_password)
+
+    # benchmark first available analysis
+    benchmark_analysis_link = @driver.find_element(:class, 'benchmark-reference-analysis')
+    benchmark_analysis_link.click
+    wait_for_render(:id, 'user_workspace_project_id')
+    project_dropdown = @driver.find_element(:id, 'user_workspace_project_id')
+    selected_project = project_dropdown.text
+    omit_if selected_project.empty?, "#{$test_email} has no available projects" do
+      name_field = @driver.find_element(:id, 'user_workspace_name')
+      name_field.clear
+      workspace_name = "test-benchmark-#{$random_seed}"
+      name_field.send_keys(workspace_name)
+      save_btn = @driver.find_element(:id, 'save-user-workspace')
+      save_btn.click
+      wait_until_page_loads(@base_url + 'my-benchmarks/' + selected_project + '/' + workspace_name)
+      assert element_present?(:id, 'user_analysis_name'), "Did not successfully create workspace, did not find user analysis form"
+      # open FC workspace
+      remote_workspace_btn = @driver.find_element(:id, 'view-user-workspace-remote')
+      remote_workspace_btn.click
+      @wait.until {@driver.current_url.starts_with?('https://portal.firecloud.org')}
+      assert element_present?(:class, 'fa-check-circle'), "FireCloud workspace did not provision correctly"
+    end
+
+    puts "#{File.basename(__FILE__)}: '#{self.method_name}' successful!"
+  end
+
+  test 'create a user analysis inside a benchmarking workspace' do
+    puts "#{File.basename(__FILE__)}: '#{self.method_name}'"
+    @driver.get @base_url
+    login($test_email, $test_email_password)
+
+    # load my-benchmarks
+    profile_menu = @driver.find_element(:id, 'profile-nav')
+    profile_menu.click
+    benchmarks_nav = @driver.find_element(:id, 'user-workspaces-nav')
+    benchmarks_nav.click
+    wait_until_page_loads(@base_url + '/my-benchmarks')
+    omit_if datatable_empty?('my-benchmarks'), "#{$test_email} has no available benchmarks" do
+      workspace_name = "test-benchmark-#{$random_seed}"
+      workspace_url = @driver.find_element(:class, "view-#{workspace_name}")['href']
+      benchmark_btn = @driver.find_element(:class, "benchmark-#{workspace_name}")
+      benchmark_btn.click
+      wait_until_page_loads(workspace_url)
+      analysis_name = "user-analysis-#{$random_seed}"
+      name_field = @driver.find_element(:id, 'user_analysis_name')
+      name_field.send_keys(analysis_name)
+      # load reference analysis first
+      load_ref_analysis_btn = @driver.find_element(:id, 'populate-reference-wdl')
+      load_ref_analysis_btn.click
+      @wait.until { @driver.execute_script("$('#user_analysis_wdl_payload').data('hasWdl')" == true) }
+      user_analysis_wdl_contents = @driver.find_element(:id, 'user_analysis_wdl_contents')
+      assert user_analysis_wdl_contents['value'].present?, "Did not populate wdl_contents with reference analysis"
+      # supply user analysis
+      wdl_payload = File.open(File.join(@test_data_path, 'wdl', 'test_analysis_good.wdl')).read
+      user_analysis_wdl_contents.clear
+      user_analysis_wdl_contents.send_keys(wdl_payload)
+      updated_contents = @driver.find_element(:id, 'user_analysis_wdl_contents')['value']
+      assert updated_contents == wdl_payload, "Updated WDL payload does not match supplied user WDL"
+      save_analysis_btn = @driver.find_element(:id, 'save-user-analysis')
+      save_analysis_btn.click
+      close_modal('notice-modal')
+      assert element_present?(:id, 'create-benchmark-analysis'), "User analysis did not save - benchmark submit button not present"
+      # click back to user analysis tab and validate method saved by checking snapshot
+      open_ui_tab('user-analysis')
+      user_analysis_snapshot = @driver.find_element(:id, 'user_analysis_snapshot')['value']
+      assert user_analysis_snapshot.to_i == 1, "Snapshot is incorrect; execpted 1 but found #{user_analysis_snapshot}"
+    end
+
+    puts "#{File.basename(__FILE__)}: '#{self.method_name}' successful!"
+  end
+
+  test 'submit a benchmarking analysis from a benchmarking workspace' do
+    puts "#{File.basename(__FILE__)}: '#{self.method_name}'"
+    @driver.get @base_url
+    login($test_email, $test_email_password)
+
+    # load my-benchmarks
+    profile_menu = @driver.find_element(:id, 'profile-nav')
+    profile_menu.click
+    benchmarks_nav = @driver.find_element(:id, 'user-workspaces-nav')
+    benchmarks_nav.click
+    wait_until_page_loads(@base_url + '/my-benchmarks')
+    omit_if datatable_empty?('my-benchmarks'), "#{$test_email} has no available benchmarks" do
+      workspace_name = "test-benchmark-#{$random_seed}"
+      workspace_url = @driver.find_element(:class, "view-#{workspace_name}")['href']
+      benchmark_btn = @driver.find_element(:class, "benchmark-#{workspace_name}")
+      benchmark_btn.click
+      wait_until_page_loads(workspace_url)
+      submit_benchmark_btn = @driver.find_element(:id, 'create-benchmark-analysis')
+      submit_benchmark_btn.click
+      close_modal('notices-modal')
+      refresh_submissions_btn = @driver.find_element(:id, 'refresh-submissions-table')
+      abort_btns = @driver.find_elements(:class, 'abort-submission')
+      while abort_btns.empty?
+        refresh_submissions_btn.click
+        sleep(5)
+        abort_btns = @driver.find_elements(:class, 'abort-submission')
+      end
+      # abort workflow=
+      abort_btn = abort_btns.first
+      abort_btn.click
+      accept_alert
+      close_modal('generic-update-modal')
+      # submit again
+      resubmit_btn = @driver.find_element(:class, 'benchmark-analysis-btn')
+      resubmit_btn.click
+      close_modal('notices-modal')
+      # there should be two submissions in the table now
+      submissions = @driver.find_elements(:class, 'benchmark-submission-entry')
+      assert submissions.size == 2, "Did not find correct number of entries.  Expected 2 and found #{submissions.size}"
+    end
+
+    puts "#{File.basename(__FILE__)}: '#{self.method_name}' successful!"
+  end
+
+  test 'load benchmark submission outputs' do
+    puts "#{File.basename(__FILE__)}: '#{self.method_name}'"
+
+    # load benchmarking workspace
+    profile_menu = @driver.find_element(:id, 'profile-nav')
+    profile_menu.click
+    benchmarks_nav = @driver.find_element(:id, 'user-workspaces-nav')
+    benchmarks_nav.click
+    wait_until_page_loads(@base_url + '/my-benchmarks')
+    omit_if datatable_empty?('my-benchmarks'), "#{$test_email} has no available benchmarks" do
+      workspace_name = "test-benchmark-#{$random_seed}"
+      workspace_url = @driver.find_element(:class, "view-#{workspace_name}")['href']
+      benchmark_btn = @driver.find_element(:class, "benchmark-#{workspace_name}")
+      benchmark_btn.click
+      wait_until_page_loads(workspace_url)
+
+      # wait for submission to complete
+      submissions_table = @driver.find_element(:id, 'submissions-table')
+      submissions = submissions_table.find_element(:tag_name, 'tbody').find_elements(:tag_name, 'tr')
+      completed_submission = submissions.find {|sub|
+        sub.find_element(:class, "submission-state").text == 'Done' &&
+            sub.find_element(:class, "submission-status").text == 'Succeeded'
+      }
+      i = 1
+      while completed_submission.nil?
+        omit_if i >= 60, 'Skipping test; waited 5 minutes but no submissions complete yet.'
+
+        $verbose ? puts("no completed submissions, refresh try ##{i}") : nil
+        refresh_btn = @driver.find_element(:id, 'refresh-submissions-table-top')
+        refresh_btn.click
+        sleep 5
+        submissions_table = @driver.find_element(:id, 'submissions-table')
+        submissions = submissions_table.find_element(:tag_name, 'tbody').find_elements(:tag_name, 'tr')
+        completed_submission = submissions.find {|sub|
+          sub.find_element(:class, "submission-state").text == 'Done' &&
+              sub.find_element(:class, "submission-status").text == 'Succeeded'
+        }
+        i += 1
+      end
+      output_btn = @driver.find_element(:class, 'get-submission-outputs')
+      output_btn.click
+      wait_for_modal_open('generic-update-modal')
+      submission_outputs = @driver.find_elements(:class, 'submission-output')
+      assert submission_outputs.any?, "Did not find any submission outputs"
+      output_file = submission_outputs.sample
+      output_file.click
+      @wait.until { !@driver.current_url.include?(@base_url) }
+      assert @driver.current_url.include?('apidata.googleusercontent.com'), "Did not load submission output file"
+      assert @driver.find_element(:tag_name, 'body').text.include?('Wrote qc matrix'), "Did not find expected string in file contents"
+    end
+
+    puts "#{File.basename(__FILE__)}: '#{self.method_name}' successful!"
+  end
+
+  test 'delete benchmarking workspace submissions' do
+    puts "#{File.basename(__FILE__)}: '#{self.method_name}'"
+
+    profile_menu = @driver.find_element(:id, 'profile-nav')
+    profile_menu.click
+    benchmarks_nav = @driver.find_element(:id, 'user-workspaces-nav')
+    benchmarks_nav.click
+    wait_until_page_loads(@base_url + '/my-benchmarks')
+    omit_if datatable_empty?('my-benchmarks'), "#{$test_email} has no available benchmarks" do
+      workspace_name = "test-benchmark-#{$random_seed}"
+      workspace_url = @driver.find_element(:class, "view-#{workspace_name}")['href']
+      benchmark_btn = @driver.find_element(:class, "benchmark-#{workspace_name}")
+      benchmark_btn.click
+      wait_until_page_loads(workspace_url)
+
+      submissions_table = @driver.find_element(:id, 'submissions-table')
+      submissions = submissions_table.find_element(:tag_name, 'tbody').find_elements(:tag_name, 'tr')
+
+      # delete a submission
+      delete_btns = @driver.find_elements(:class, 'delete-submission-files')
+      btn = delete_btns.sample
+      btn.click
+      accept_alert
+      close_modal('generic-update-modal')
+      updated_submissions = submissions_table.find_element(:tag_name, 'tbody').find_elements(:tag_name, 'tr')
+      assert updated_submissions.size == submissions.size - 1, "Did not delete workspace submission, expected #{submissions.size - 1} remaining submission but found #{updated_submissions.size}"
+    end
+
+    puts "#{File.basename(__FILE__)}: '#{self.method_name}' successful!"
+  end
+
+  test 'delete benchmarking workspace' do
+    puts "#{File.basename(__FILE__)}: '#{self.method_name}'"
+
+    profile_menu = @driver.find_element(:id, 'profile-nav')
+    profile_menu.click
+    benchmarks_nav = @driver.find_element(:id, 'user-workspaces-nav')
+    benchmarks_nav.click
+    wait_until_page_loads(@base_url + '/my-benchmarks')
+    omit_if datatable_empty?('my-benchmarks'), "#{$test_email} has no available benchmarks" do
+      workspace_name = "test-benchmark-#{$random_seed}"
+      workspace_url = @driver.find_element(:class, "view-#{workspace_name}")['href']
+      benchmark_btn = @driver.find_element(:class, "benchmark-#{workspace_name}")
+      benchmark_btn.click
+      wait_until_page_loads(workspace_url)
+
+      # open FC workspace
+      remote_workspace_btn = @driver.find_element(:id, 'view-user-workspace-remote')
+      remote_workspace_btn.click
+      @wait.until {@driver.current_url.starts_with?('https://portal.firecloud.org')}
+      fc_workspace_url = @driver.current_url
+      @driver.get @base_url + '/my-benchmarks'
+      delete_btn = @driver.find_element(:class, "delete-user-workspace-#{workspace_name}")
+      delete_btn.click
+      accept_alert
+      close_modal('notices-modal')
+      assert datatable_empty?('my-benchmarks'), "Did not successfully delete benchmarking workspace: table is not empty"
+      @driver.get fc_workspace_url
+      assert @driver.find_element(:xpath, "//div[@data-test-id='no-bucket-access']").displayed?, "Did not find bucket deletion message"
+    end
+
+    puts "#{File.basename(__FILE__)}: '#{self.method_name}' successful!"
+  end
+
+  test 'remove registered projects' do
+    puts "#{File.basename(__FILE__)}: '#{self.method_name}'"
+    @driver.get @base_url
+    login($test_email, $test_email_password)
+
+    # go to my billing projects page
+    profile_menu = @driver.find_element(:id, 'profile-nav')
+    profile_menu.click
+    billing_projects_nav = @driver.find_element(:id, 'billing-projects-nav')
+    billing_projects_nav.click
+    wait_until_page_loads(@base_url + '/projects')
+    omit_if datatable_empty?('projects') do
+      delete_btn = @driver.find_element(:class, 'delete-project-btn')
+      delete_btn.click
+      accept_alert
+      close_modal('notices-modal')
+    end
+    assert datatable_empty?('projects'), "Did not remove project, table is not empty: #{datatable_empty?('projects')}"
+  end
+
 end

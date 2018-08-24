@@ -22,6 +22,11 @@ class BenchmarkAnalysis < ApplicationRecord
     "#{self.namespace}/#{self.name}/#{self.snapshot}"
   end
 
+  # name as DOM element ID
+  def name_as_id
+    self.name.gsub(/\//, '-')
+  end
+
   private
 
   # redact all versions of this analysis from the methods repo
