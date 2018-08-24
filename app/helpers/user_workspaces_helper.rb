@@ -28,7 +28,7 @@ module UserWorkspacesHelper
                          class: 'btn btn-sm btn-block btn-danger get-submission-errors', title: 'View errors for this run',
                          data: {
                              toggle: 'tooltip', id: submission['submissionId'],
-                             url: get_submission_errors_path(project: user_workspace.namespace, name: user_workspace.name,
+                             url: get_submission_workflow_path(project: user_workspace.namespace, name: user_workspace.name,
                                                               submission_id: submission['submissionId'])
                          })
     end

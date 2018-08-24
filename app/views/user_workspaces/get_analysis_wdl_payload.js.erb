@@ -7,6 +7,6 @@
 <% else %>
   closeModalSpinner('#generic-modal-spinner', '#generic-modal', function() {
       $('#<%= params[:target] %>').val("<%= escape_javascript(@pipeline_wdl.html_safe) %>");
-      $('#<%= params[:target] %>').data({hasWdl: true})
+      $('#<%= params[:target] %>').data('has-wdl', true)
   });
 <% end %>

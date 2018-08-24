@@ -1,0 +1,6 @@
+closeModalSpinner('#generic-modal-spinner', '#generic-modal', function () {
+    $('#generic-update-target').html("<%= escape_javascript(render partial: '/layouts/generic_update_modal') %>");
+    $('#generic-update-modal-title').html("Submission <%= params[:submission_id] %> has failed with the following errors:");
+    $('#generic-update-modal-body').html("<p class='text-danger'><%= escape_javascript(@error_message).html_safe %></p>");
+    $("#generic-update-modal").modal("show");
+});

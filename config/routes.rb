@@ -40,10 +40,10 @@ Rails.application.routes.draw do
   # user_workspace submission methods
   get 'my-benchmarks/:project/:name/submissions', to: 'user_workspaces#get_workspace_submissions', as: :get_workspace_submissions
   get 'my-benchmarks/:project/:name/submissions/:submission_id', to: 'user_workspaces#get_submission_workflow', as: :get_submission_workflow
-  delete 'my-benchmarks/:project/:name/submissions/submissions/:submission_id', to: 'user_workspaces#abort_submission_workflow', as: :abort_submission_workflow
-  delete 'my-benchmarks/:project/:name/submissions/submissions/:submission_id/outputs', to: 'user_workspaces#delete_submission_files', as: :delete_submission_files
-  get 'my-benchmarks/:project/:name/submissions/submissions/:submission_id/outputs', to: 'user_workspaces#get_submission_outputs', as: :get_submission_outputs
-  get 'my-benchmarks/:project/:name/submissions/submissions/:submission_id/errors', to: 'user_workspaces#get_submission_errors', as: :get_submission_errors
+  delete 'my-benchmarks/:project/:name/submissions/:submission_id', to: 'user_workspaces#abort_submission_workflow', as: :abort_submission_workflow
+  delete 'my-benchmarks/:project/:name/submissions/:submission_id/outputs', to: 'user_workspaces#delete_submission_files', as: :delete_submission_files
+  get 'my-benchmarks/:project/:name/submissions/:submission_id/outputs', to: 'user_workspaces#get_submission_outputs', as: :get_submission_outputs
+  get 'my-benchmarks/:project/:name/submissions/:submission_id/errors', to: 'user_workspaces#get_submission_errors', as: :get_submission_errors
 
   # profile routes
   get 'profile', to: 'site#profile', as: :profile

@@ -248,6 +248,7 @@ class UserWorkspacesController < ApplicationController
         end
       end
       @error_message = errors.join("<br />")
+      render '/user_workspaces/submissions/get_submission_errors'
     rescue => e
       @alert = "Unable to retrieve submission #{@submission_id} error messages due to: #{e.message}"
       render '/user_workspaces/submissions/display_modal'
@@ -281,7 +282,9 @@ class UserWorkspacesController < ApplicationController
   # delete all files from a submission
   def delete_submission_files
     begin
-      user_client = user_fire_cloud_client(current_user)
+      user_client = user_fire_cloud_client(current_user, @user_workspace.namespace)
+      logger.info "issuer: #{user_client.issuer}"
+      logger.info "storage issuer: #{user_client.storage_issuer}"
       # first, add submission to list of 'deleted_submissions' in workspace attributes (will hide submission in list)
       workspace = user_client.get_workspace(@user_workspace.namespace, @user_workspace.name)
       ws_attributes = workspace['workspace']['attributes']
@@ -292,7 +295,7 @@ class UserWorkspacesController < ApplicationController
       end
       logger.info "Adding #{params[:submission_id]} to workspace delete_submissions attribute in #{@user_workspace.name}"
       user_client.set_workspace_attributes(@user_workspace.namespace, @user_workspace.name, ws_attributes)
-      logger.info "Starting submission #{params[:submission]} deletion in #{@user_workspace.name}"
+      logger.info "Starting submission #{params[:submission_id]} deletion in #{@user_workspace.name}"
       submission_files = user_client.execute_gcloud_method(:get_workspace_files, @user_workspace.namespace,
                                                            @user_workspace.name, prefix: params[:submission_id])
       submission_files.each do |file|
