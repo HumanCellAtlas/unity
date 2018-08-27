@@ -69,7 +69,7 @@ portal is configured and ready to use:
   * Select 'JSON' and export and save the key locally
   * Next, create two new service accounts with the following roles and export the keys:
     * Storage Admin
-    * Cloud SQL Database Admin (this key is only needed for Kubernetes-based deployments)
+    * Cloud SQL Client (this key is only needed for Kubernetes-based deployments)
 * <b>Enable GCP APIs</b>: The following Google Cloud Platform APIs must be enabled:
   * Google Compute Engine API
   * Google Cloud APIs
@@ -159,7 +159,18 @@ To deploy Unity in Kubernetes, you will need the following prerequisites:
 * Set your local kubernetes config to [point at your remote cluster](https://cloud.google.com/sdk/gcloud/reference/container/clusters/get-credentials):
   * <code>gcloud container clusters get-credentials NAME -z ZONE</code>
 
-Before created your deployment (but after your cluster is created), you will need to create the necessary secrets in Kubernetes to load 
+Unity is also pre-configured to leverage Cloud SQL when deployed to a Kubernetes cluster.  To configure this:
+1. Log into your GCP Project and select 'SQL' from the left-hand hamburger menu
+1. Select 'Create an instance'
+1. Select 'PostgreSQL' and click 'Next'
+1. Give the instance a name, a default user password, select a region, and click 'Create'
+1. Once your instance has created, click on its name to load the instance details
+1. Copy the instance connection name, and paste it into the line beginning with <code>"-instances="</code> under the cloudsql-proxy container 
+details in <code>config/unity-benchmark-deployment.yaml</code>
+
+You will then need to create a service account with the <code>Cloud SQL Client</code> role to be used to connect to the instance.
+
+Before creating your deployment (but after your cluster is created), you will need to create the necessary secrets in Kubernetes to load 
 into your deployment.  These secrets must be created with the following key/value pairs:
 
 1. cloudsql-db-credentials
@@ -175,7 +186,7 @@ into your deployment.  These secrets must be created with the following key/valu
 1. unity-gcs-admin-service-account
     1. unity-benchmark-gcs-admin.json: JSON contents of Unity GCS Admin service account credentials (must be have Google Cloud Storage Admin role)
 1. cloudsql-instance-credentials
-    1. credentials.json: JSON contents of CloudSQL service account credentials (must have CloudSQL access)
+    1. credentials.json: JSON contents of CloudSQL service account credentials (must have Cloud SQL Client role)
 1. google-site-verification
     1. verification-code: google-site-verification meta header value (for verifying site ownership in Google search console, 
        required for OAuth verification)
@@ -185,6 +196,8 @@ into your deployment.  These secrets must be created with the following key/valu
     1. localhost.key: keyfile for your SSL certificate (filename of localhost does not affect certificate)
 1. prod-secret-key-base
     1. secret-key-base: value for SECRET_KEY_BASE, which is used to encrypt secure cookies.  This can be set/updated by using <code>bin/set_prod_secret_key_base</code>
+
+See [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) for more information on how to import and save secrets.
 
 Once your secrets are loaded and <code>kubectl</code> is pointing at your remote cluster:
 1. Navigate to the project directory
