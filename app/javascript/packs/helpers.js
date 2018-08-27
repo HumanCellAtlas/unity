@@ -62,6 +62,17 @@ function elementVisible(element) {
     return $(element).is(":visible");
 }
 
+// set error state on blank text boxes or selects
+function setErrorOnBlank(selector) {
+    selector.map(function() {
+        if ( $(this).val() === "" ) {
+            $(this).parent().addClass('has-error has-feedback');
+        } else {
+            $(this).parent().removeClass('has-error has-feedback');
+        }
+    });
+}
+
 export {
-    opts, OPEN_MODAL, PAGE_RENDERED, enableDefaultActions, launchModalSpinner, closeModalSpinner, elementVisible
+    opts, OPEN_MODAL, PAGE_RENDERED, enableDefaultActions, launchModalSpinner, closeModalSpinner, elementVisible, setErrorOnBlank
 }

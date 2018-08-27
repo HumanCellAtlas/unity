@@ -44,3 +44,12 @@
     </div>
   </div>
 </div>
+
+<h4>Other Actions</h4>
+<div class="row">
+  <div class="col-sm">
+    <label>Update service account FireCloud profiles</label>
+    <%= link_to 'Unity Project Owner', get_service_account_profile_path, class: 'btn btn-primary' %>
+    <%= link_to 'Unity GCS Admin', get_service_account_profile_path(account: 'gcs_admin'), class: 'btn btn-secondary' %>
+  </div>
+</div>
