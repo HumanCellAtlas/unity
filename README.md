@@ -195,8 +195,6 @@ Once your secrets are loaded and <code>kubectl</code> is pointing at your remote
 
 Unity will now be available publicly on the above IP address.
 
-TODO: Update Kubernetes deployment instructions on how to configure CloudSQL
-
 TODO: Update deployment to load CloudSQL instance connection details from environment variables
 
 #### PATCHING DEPLOYMENTS
