@@ -1,7 +1,8 @@
 class ApplicationController < ActionController::Base
 
-  # instantiate singleton FireCloudClient to reuse OAuth token as much as possible
+  # instantiate singleton FireCloudClients to reuse OAuth token as much as possible
   @@fire_cloud_client = FireCloudClient.new
+  @@gcs_client = FireCloudClient.new(nil, AdminConfiguration.project_namespace, File.absolute_path(ENV['GCS_ADMIN_SERVICE_ACCOUNT_KEY']))
 
   # getters for FireCloudClient
   def self.fire_cloud_client
@@ -10,6 +11,15 @@ class ApplicationController < ActionController::Base
 
   def fire_cloud_client
     @@fire_cloud_client
+  end
+
+  # getters for FireCloudClient GCS admin client
+  def self.gcs_client
+    @@gcs_client
+  end
+
+  def gcs_client
+    @@gcs_client
   end
 
   # instantiate a user-scoped firecloud client

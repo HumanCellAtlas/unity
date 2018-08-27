@@ -7,7 +7,6 @@ class AdminConfigurationsController < ApplicationController
   # GET /admin_configurations.json
   def index
     @admin_configurations = AdminConfiguration.where.not(config_type: AdminConfiguration::FIRECLOUD_ACCESS_NAME)
-    @firecloud_access = AdminConfiguration.current_firecloud_access
   end
 
   # GET /admin_configurations/1
@@ -65,6 +64,47 @@ class AdminConfigurationsController < ApplicationController
     end
   end
 
+  # retrieve the firecloud registration for any of the Unity service accounts
+  def get_service_account_profile
+    @client = params[:account] == 'gcs_admin' ? ApplicationController.gcs_client : ApplicationController.fire_cloud_client
+    @service_account_email = @client.issuer
+
+    @fire_cloud_profile = FireCloudProfile.new
+    begin
+      profile = @client.get_profile
+      profile['keyValuePairs'].each do |attribute|
+        if @fire_cloud_profile.respond_to?("#{attribute['key']}=")
+          @fire_cloud_profile.send("#{attribute['key']}=", attribute['value'])
+        end
+      end
+    rescue => e
+      logger.info "Unable to retrieve FireCloud profile for #{@client.issuer}: #{e.message}"
+    end
+  end
+
+  # register or update the FireCloud profile of the portal service account
+  def update_service_account_profile
+    @client = params[:account] == 'gcs_admin' ? ApplicationController.gcs_client : ApplicationController.fire_cloud_client
+    @fire_cloud_profile = FireCloudProfile.new(profile_params)
+
+    begin
+      if @fire_cloud_profile.valid?
+        @client.set_profile(profile_params)
+        @notice = "Your FireCloud profile has been successfully updated."
+        redirect_to admin_configurations_path, notice: "The Unity service account for #{@client.issuer} FireCloud profile has been successfully updated."
+      else
+        logger.info "Error in updating FireCloud profile for #{@client.issuer}: #{@fire_cloud_profile.errors.full_messages}"
+        respond_to do |format|
+          format.html { render :get_service_account_profile, status: :unprocessable_entity}
+          format.json { render @fire_cloud_profile.errors, status: :unprocessable_entity}
+        end
+      end
+    rescue => e
+      logger.error "#{Time.now}: unable to update Unity service account for #{@client.issuer} FireCloud registration: #{e.message}"
+      @alert = "Unable to update The Unity service account for #{@client.issuer} FireCloud profile: #{e.message}"
+    end
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_admin_configuration
@@ -74,5 +114,12 @@ class AdminConfigurationsController < ApplicationController
     # Never trust parameters from the scary internet, only allow the white list through.
     def admin_configuration_params
       params.require(:admin_configuration).permit(:config_type, :value_type, :value, configuration_options_attributes: [:id, :name, :value, :_destroy])
+    end
+
+    # parameters for service account profile
+    def profile_params
+      params.require(:fire_cloud_profile).permit(:contactEmail, :email, :firstName, :lastName, :institute, :institutionalProgram,
+                                              :nonProfitStatus, :pi, :programLocationCity, :programLocationState,
+                                              :programLocationCountry, :title)
     end
 end

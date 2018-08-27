@@ -29,6 +29,8 @@ spec:
             name: ssl-cert
           - mountPath: /etc/pki/tls/private
             name: ssl-key
+          - mountPath: /etc/gcs-admin-service-account
+            name: gcs-admin-service-account
           env:
             - name: DATABASE_HOST
               value: 127.0.0.1
@@ -79,6 +81,8 @@ spec:
                   key: secret-key-base
             - name: SERVICE_ACCOUNT_KEY
               value: /etc/service-account/unity-benchmark-service-account.json
+            - name: GCS_ADMIN_SERVICE_ACCOUNT_KEY
+              value: /etc/gcs-admin-service-account/unity-benchmark-gcs-admin.json
             - name: PROD_HOSTNAME
               value: 'unity.broadinstitute.org'
             # [END cloudsql_secrets]
@@ -111,6 +115,9 @@ spec:
         - name: google-project-service-account
           secret:
             secretName: unity-service-account
+        - name: gcs-admin-service-account
+          secret:
+            secretName: unity-gcs-admin-service-account
         - name: ssl-cert
           secret:
             secretName: ssl-certificate

@@ -20,6 +20,11 @@ then
     sudo -E -u app -H bundle exec rake RAILS_ENV=$PASSENGER_APP_ENV yarn:install
     sudo -E -u app -H bundle exec rake RAILS_ENV=$PASSENGER_APP_ENV webpacker:compile
     echo "*** COMPLETED ***"
+elif [[ $PASSENGER_APP_ENV = "development" ]];
+then
+    echo "*** COMPILING WEBPACK ASSETS ***"
+    sudo -E -u app -H bin/webpack
+    echo "*** COMPLETED ***"
 fi
 echo "*** INITIALIZING & MIGRATING DATABASE ***"
 sudo -E -u app -H bundle exec rake RAILS_ENV=$PASSENGER_APP_ENV db:exists && rake RAILS_ENV=$PASSENGER_APP_ENV db:migrate || rake RAILS_ENV=$PASSENGER_APP_ENV db:setup
@@ -31,6 +36,9 @@ if [[ -f /home/app/webapp/.cron_env ]]; then
 fi
 if [[ -f /home/app/webapp/.google_service_account.json ]]; then
 		sudo -E -u app -H rm -f /home/app/webapp/.google_service_account.json
+fi
+if [[ -f /home/app/webapp/.gcs_admin_service_account.json ]]; then
+		sudo -E -u app -H rm -f /home/app/webapp/.gcs_admin_service_account.json
 fi
 echo "export SENDGRID_USERNAME=$SENDGRID_USERNAME" >> /home/app/webapp/.cron_env
 echo "export SENDGRID_PASSWORD=$SENDGRID_PASSWORD" >> /home/app/webapp/.cron_env
@@ -45,6 +53,19 @@ if [[ -z $SERVICE_ACCOUNT_KEY ]]; then
 	echo "export SERVICE_ACCOUNT_KEY=/home/app/webapp/.google_service_account.json" >> /home/app/webapp/.cron_env
 else
 	echo "export SERVICE_ACCOUNT_KEY=$SERVICE_ACCOUNT_KEY" >> /home/app/webapp.cron_env
+fi
+
+if [[ -n $GCS_ADMIN_GOOGLE_CLOUD_KEYFILE_JSON ]]; then
+	echo "*** WRITING GCS ADMIN SERVICE ACCOUNT CREDENTIALS ***"
+	echo $GCS_ADMIN_GOOGLE_CLOUD_KEYFILE_JSON >| /home/app/webapp/.gcs_admin_service_account.json
+	echo "export GCS_ADMIN_SERVICE_ACCOUNT_KEY=/home/app/webapp/.gcs_admin_service_account.json" >> /home/app/.cron_env
+	chmod 400 /home/app/webapp/.gcs_admin_service_account.json
+	chown app:app /home/app/webapp/.gcs_admin_service_account.json
+elif [[ -n $GCS_ADMIN_SERVICE_ACCOUNT_KEY ]]; then
+  echo "*** USING GCS_ADMIN_SERVICE_ACCOUNT CREDENTIALS ***"
+	echo "export GCS_ADMIN_SERVICE_ACCOUNT_KEY=$GCS_ADMIN_SERVICE_ACCOUNT_KEY" >> /home/app/.cron_env
+else
+  echo "*** NO GCS ADMIN SERVICE ACCOUNT DETECTED - DOWNLOADS WILL NOT FUNCTION ***"
 fi
 
 chmod 400 /home/app/webapp/.cron_env

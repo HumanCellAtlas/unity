@@ -40,30 +40,12 @@ class AdminConfiguration < ApplicationRecord
     end
   end
 
-  def self.current_firecloud_access
-    status = AdminConfiguration.find_by(config_type: AdminConfiguration::FIRECLOUD_ACCESS_NAME)
-    if status.nil?
-      'on'
-    else
-      status.value
-    end
-  end
-
-  def self.firecloud_access_enabled?
-    status = AdminConfiguration.find_by(config_type: AdminConfiguration::FIRECLOUD_ACCESS_NAME)
-    if status.nil?
-      true
-    else
-      status.value == 'on'
-    end
-  end
-
   # method to be called from cron to check the health status of the FireCloud API and set access if an outage is detected
   def self.check_api_health
     api_ok = ApplicationController.fire_cloud_client.api_available?
 
     if !api_ok
-      current_status = ApplicationController.fire_cloud_client.api_available?
+      current_status = ApplicationController.fire_cloud_client.api_status
       Rails.logger.error "ALERT: FIRECLOUD API SERVICE INTERRUPTION -- current status: #{current_status}"
       UnityMailer.firecloud_api_notification(current_status).deliver_now
     end

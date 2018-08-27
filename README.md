@@ -61,11 +61,15 @@ portal is configured and ready to use:
 	* Once you have exported your OAuth credentials, you will need to have your client id whitelisted to allow it to make
 	  authenticated requests into the FireCloud API as per [OpenID Connect 1.0](http://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation)
 	* Send an email to <b>dsp-devops@broadinstitute.org</b> with your OAuth2 client ID so it can be added to the whitelist
-* <b>GCP Service Account keys</b>: Regardless of where the portal is deployed, it requires a Google Cloud Platform Service Account in order to make authenticated calls into FireCloud and Google Cloud Storage.  Therefore, you must export the default service account key.  See https://developers.google.com/identity/protocols/OAuth2ServiceAccount for more information about service accounts.  To export the credentials:
+* <b>GCP Service Account keys</b>: Regardless of where the portal is deployed, it requires three Google Cloud Platform Service Accounts in order to make authenticated calls into FireCloud, Google Cloud Storage, and Cloud SQL (if deploying in Kubernetes).  Therefore, you must create these service account keys:
+.  See https://developers.google.com/identity/protocols/OAuth2ServiceAccount for more information about service accounts.  To export the credentials:
   * Log into your new GCP project
   * Click the navigation menu in the top left and select 'IAM & Admin	' > 'Service Accounts'
   * On entry 'Compute Engine default service account', click the 'Options' menu (far right) and select 'Create key'
   * Select 'JSON' and export and save the key locally
+  * Next, create two new service accounts with the following roles and export the keys:
+    * Storage Admin
+    * Cloud SQL Database Admin (this key is only needed for Kubernetes-based deployments)
 * <b>Enable GCP APIs</b>: The following Google Cloud Platform APIs must be enabled:
   * Google Compute Engine API
   * Google Cloud APIs
@@ -84,7 +88,7 @@ portal is configured and ready to use:
 ## RUNNING THE CONTAINER
 
 Once the image has successfully built and the database container is running, use the following command to start the container:
-<pre>bin/boot_docker -u (sendgrid username) -P (sendgrid password) -E (encryption key) -k (service account key path) -o (oauth client id) -S (oauth client secret) -l</pre>
+<pre>bin/boot_docker -u (sendgrid username) -P (sendgrid password) -E (encryption key) -k (service account key path) -K (gcs admin service account key path) -o (oauth client id) -S (oauth client secret) -l</pre>
 
 This sets up several environment variables in your shell and then runs the following command:
 <pre>docker run --rm -it --name $CONTAINER_NAME --link $DATABASE_HOST:$DATABASE_HOST -p 80:80 -p 443:443 -h localhost -v $PROJECT_DIR:/home/app/webapp:rw -e PASSENGER_APP_ENV=$PASSENGER_APP_ENV -e DATABASE_HOST=$DATABASE_HOST -e DATABASE_USER=$DATABASE_USER -e ENCRYPTION_KEY=$ENCRYPTION_KEY -e PROD_DATABASE_PASSWORD=$DATABASE_PASSWORD -e SERVICE_ACCOUNT_KEY=$SERVICE_ACCOUNT_KEY -e SENDGRID_USERNAME=$SENDGRID_USERNAME -e SENDGRID_PASSWORD=$SENDGRID_PASSWORD -e SECRET_KEY_BASE=$SECRET_KEY_BASE -e OAUTH_CLIENT_ID=$OAUTH_CLIENT_ID -e OAUTH_CLIENT_SECRET=$OAUTH_CLIENT_SECRET -e GOOGLE_CLOUD_KEYFILE_JSON="$GOOGLE_CLOUD_KEYFILE_JSON" -e GOOGLE_PRIVATE_KEY="$GOOGLE_PRIVATE_KEY" -e GOOGLE_CLIENT_EMAIL="$GOOGLE_CLIENT_EMAIL" -e GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" -e GOOGLE_CLOUD_PROJECT="$GOOGLE_CLOUD_PROJECT" unity_benchmark_docker:$DOCKER_IMAGE_VERSION</pre>
@@ -110,6 +114,7 @@ There are several variables that need to be passed to the Docker container in or
 1. *SENDGRID_PASSWORD* (passed with -e): The password associated with a Sendgrid account (for sending emails).
 1. *SECRET_KEY_BASE* (passed with -e): Sets the Rails SECRET_KEY_BASE environment variable, used mostly by Devise in authentication for cookies.
 1. *SERVICE_ACCOUNT_KEY* (passed with -e): Sets the SERVICE_ACCOUNT_KEY environment variable, used for making authenticated API calls to FireCloud & GCP.
+1. *GCS_ADMIN_GOOGLE_CLOUD_KEYFILE_JSON* (passed with -e): Sets the GCS_ADMIN_GOOGLE_CLOUD_KEYFILE_JSON environment variable, used for accessing user-controlled GCS assets.
 1. *OAUTH_CLIENT_ID* (passed with -e): Sets the OAUTH_CLIENT_ID environment variable, used for Google OAuth2 integration.
 1. *OAUTH_CLIENT_SECRET* (passed with -e): Sets the OAUTH_CLIENT_SECRET environment variable, used for Google OAuth2 integration.
 1. *GOOGLE_[VARIOUS]* (passed with -e): If no SERVICE_ACCOUNT_KEY is present, the application will default to using the standard OAuth2 enviroment variables for authentication.  See [here](https://googlecloudplatform.github.io/google-cloud-ruby/#/docs/google-cloud-storage/v0.23.2/guides/authentication) for more information.
@@ -132,6 +137,7 @@ The run command explained in its entirety:
 * <b>-e SENDGRID_USERNAME= [SENDGRID_USERNAME] -e SENDGRID_PASSWORD= [SENDGRID_PASSWORD]:</b> The credentials for Sendgrid to send emails.  Alternatively, you could decide to not use Sendgrid and configure the application to use a different SMTP server (would be done inside your environment's config file).
 * <b>-e SECRET_KEY_BASE= [SECRET_KEY_BASE]:</b> Setting the SECRET_KEY_BASE variable is necessary for creating secure cookies for authentication.  This variable automatically resets every time we restart the container.
 * <b>-e SERVICE_ACCOUNT_KEY= [SERVICE_ACCOUNT_KEY]:</b> Setting the SERVICE_ACCOUNT_KEY variable is necessary for making authenticated API calls to FireCloud and GCP.  This should be a file path <b>relative to the app root</b> that points to the JSON service account key file you exported from GCP.
+* <b>-e GCS_ADMIN_SERVICE_ACCOUNT_KEY= [GCS_ADMIN_SERVICE_ACCOUNT_KEY]:</b> Setting the GCS_ADMIN_SERVICE_ACCOUNT_KEY variable is necessary for accessing resources in GCP in user-controlled workspaces.  This service account is added with WRITER permissions to all Unity-associated workspaces.
 * <b>-e OAUTH_CLIENT_ID= [OAUTH_CLIENT_ID] -e OAUTH_CLIENT_SECRET= [OAUTH_CLIENT_SECRET]:</b> Setting the OAUTH_CLIENT_ID and OAUTH_CLIENT_SECRET variables are necessary for allowing Google user authentication.  For instructions on creating OAuth 2.0 Client IDs, refer to the [Google OAuth 2.0 documentation](https://support.google.com/cloud/answer/6158849).
 * *unity_benchmark_docker*: This is the name of the image we created earlier.  If you chose a different name, please use that here.
 * *$DOCKER_IMAGE_VERSION*: Version number of the above Docker image.
@@ -140,7 +146,7 @@ The run command explained in its entirety:
 
 ### UNIT & INTEGRATION
 To run all available rake tests (unit & integration), simply boot the container in test mode:
-<pre>bin/boot_docker -e test -E (encryption key) -u (sendgrid username) -P (sendgrid password) -k (service account key path) -o (oauth client id) -S (oauth client secret) -l</pre>
+<pre>bin/boot_docker -e test -E (encryption key) -u (sendgrid username) -P (sendgrid password) -k (service account key path) -K (gcs admin service account key path) -o (oauth client id) -S (oauth client secret) -l</pre>
 
 ## PRODUCTION DEPLOYMENT
 
@@ -166,6 +172,8 @@ into your deployment.  These secrets must be created with the following key/valu
     1. encryption-key: 32-byte encryption key string
 1. unity-service-account
     1. unity-benchmark-service-account.json: JSON contents of Unity project service account credentials (must be project owner/editor)
+1. unity-gcs-admin-service-account
+    1. unity-benchmark-gcs-admin.json: JSON contents of Unity GCS Admin service account credentials (must be have Google Cloud Storage Admin role)
 1. cloudsql-instance-credentials
     1. credentials.json: JSON contents of CloudSQL service account credentials (must have CloudSQL access)
 1. google-site-verification

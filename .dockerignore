@@ -7,6 +7,7 @@ public/unity/assets
 config/*.json
 .cron_env
 .google_service_account.json
+.gcs_admin_service_account.json
 config/master.key
 /config/credentials.yml.enc
 public/packs

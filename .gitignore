@@ -30,6 +30,7 @@ config/*.json
 public/unity/assets
 .cron_env
 .google_service_account.json
+.gcs_admin_service_account.json
 /node_modules
 yarn-debug.log*
 .yarn-integrity/public/packs
