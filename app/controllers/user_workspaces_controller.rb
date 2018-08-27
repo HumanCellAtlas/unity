@@ -282,9 +282,8 @@ class UserWorkspacesController < ApplicationController
   # delete all files from a submission
   def delete_submission_files
     begin
+      # instantiate user client for updating workspace attributes
       user_client = user_fire_cloud_client(current_user, @user_workspace.namespace)
-      logger.info "issuer: #{user_client.issuer}"
-      logger.info "storage issuer: #{user_client.storage_issuer}"
       # first, add submission to list of 'deleted_submissions' in workspace attributes (will hide submission in list)
       workspace = user_client.get_workspace(@user_workspace.namespace, @user_workspace.name)
       ws_attributes = workspace['workspace']['attributes']
@@ -296,11 +295,11 @@ class UserWorkspacesController < ApplicationController
       logger.info "Adding #{params[:submission_id]} to workspace delete_submissions attribute in #{@user_workspace.name}"
       user_client.set_workspace_attributes(@user_workspace.namespace, @user_workspace.name, ws_attributes)
       logger.info "Starting submission #{params[:submission_id]} deletion in #{@user_workspace.name}"
-      submission_files = user_client.execute_gcloud_method(:get_workspace_files, @user_workspace.namespace,
+      # use GCS Admin client to get/delete files
+      submission_files = ApplicationController.gcs_client.execute_gcloud_method(:get_workspace_files, @user_workspace.namespace,
                                                            @user_workspace.name, prefix: params[:submission_id])
       submission_files.each do |file|
-        logger.info "Deleting #{file.name} in #{@user_workspace.name}"
-        user_client.execute_gcloud_method(:delete_workspace_file, @user_workspace.namespace,
+        ApplicationController.gcs_client.execute_gcloud_method(:delete_workspace_file, @user_workspace.namespace,
                                           @user_workspace.name, file.name)
       end
       render '/user_workspaces/submissions/delete_submission_files'
@@ -317,11 +316,10 @@ class UserWorkspacesController < ApplicationController
       head 503 and return
     end
 
-    user_client = user_fire_cloud_client(current_user)
-    requested_file = user_client.execute_gcloud_method(:get_workspace_file, @user_workspace.namespace,
+    requested_file = ApplicationController.gcs_client.execute_gcloud_method(:get_workspace_file, @user_workspace.namespace,
                                                        @user_workspace.name, params[:filename])
     if requested_file.present?
-      @signed_url = user_client.execute_gcloud_method(:generate_signed_url, @user_workspace.namespace,
+      @signed_url = ApplicationController.gcs_client.execute_gcloud_method(:generate_signed_url, @user_workspace.namespace,
                                                       @user_workspace.name, params[:filename], expires: 15)
       redirect_to @signed_url
     else

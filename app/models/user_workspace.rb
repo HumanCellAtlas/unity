@@ -80,13 +80,16 @@ class UserWorkspace < ApplicationRecord
         errors.add(:name, ' was not created properly (storage bucket was not set).  Please try again later.')
         return false
       end
+      Rails.logger.info "Adding GCS Admin ACL to #{self.full_name}"
+      gcs_admin_acl = user_client.create_workspace_acl(ApplicationController.gcs_client.issuer, 'WRITER', true, false)
+      user_client.update_workspace_acl(self.namespace, self.name, gcs_admin_acl)
     rescue => e
       Rails.logger.error "Error creating user workspace #{self.full_name}: #{e.message}"
       if e.message.include?("Workspace #{self.full_name} already exists")
         errors.add(:name, ' - there is already an existing benchmarking workspace using this name.  Please choose another name.')
       else
         begin
-          user_client.delete_workspace(self.namespace, self.name)
+          FireCloudClient.new(self.user).delete_workspace(self.namespace, self.name)
         rescue => e
           Rails.logger.error "Cannot remove workspace #{self.full_name} due to error: #{e.message}"
         end
