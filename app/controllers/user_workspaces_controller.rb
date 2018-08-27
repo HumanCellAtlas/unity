@@ -312,7 +312,7 @@ class UserWorkspacesController < ApplicationController
 
   # download an output file
   def download_benchmark_output
-    if !AdminConfiguration.firecloud_access_enabled? || !ApplicationController.fire_cloud_client.services_available?('GoogleBuckets')
+    if !ApplicationController.fire_cloud_client.services_available?('GoogleBuckets')
       head 503 and return
     end
 

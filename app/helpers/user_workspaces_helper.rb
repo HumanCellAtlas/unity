@@ -15,7 +15,7 @@ module UserWorkspacesHelper
     # submission has completed successfully
     if submission['status'] == 'Done' && submission['workflowStatuses'].keys.include?('Succeeded')
       actions << link_to("<i class='fas fa-fw fa-cloud-download-alt'></i> Outputs".html_safe, 'javascript:;',
-                         class: 'btn btn-sm btn-block btn-info get-submission-outputs', title: 'Get benchmarking outputs',
+                         class: 'btn btn-sm btn-block btn-primary get-submission-outputs', title: 'Get benchmarking outputs',
                          data: {
                              toggle: 'tooltip', id: submission['submissionId'],
                              url: get_submission_outputs_path(project: user_workspace.namespace, name: user_workspace.name,
@@ -25,7 +25,7 @@ module UserWorkspacesHelper
     # submission has failed
     if %w(Done Aborted).include?(submission['status']) && submission['workflowStatuses'].keys.include?('Failed')
       actions << link_to("<i class='fas fa-fw fa-exclamation-triangle'></i> Show Errors".html_safe, 'javascript:;',
-                         class: 'btn btn-sm btn-block btn-danger get-submission-errors', title: 'View errors for this run',
+                         class: 'btn btn-sm btn-block btn-warning get-submission-errors', title: 'View errors for this run',
                          data: {
                              toggle: 'tooltip', id: submission['submissionId'],
                              url: get_submission_workflow_path(project: user_workspace.namespace, name: user_workspace.name,
