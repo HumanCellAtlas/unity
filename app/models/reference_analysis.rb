@@ -143,11 +143,16 @@ class ReferenceAnalysis < ApplicationRecord
         errors.add(:base, "You must first create a user group with which to grant access to reference workspaces.  Please create and register one now.")
       end
       user_group_email = user_group.value + '@firecloud.org'
-      user_group_acl = ApplicationController.fire_cloud_client.create_workspace_acl(user_group_email, 'READER', false, false)
-      add_share = ApplicationController.fire_cloud_client.update_workspace_acl(self.firecloud_project, self.firecloud_workspace, user_group_acl)
-      added = add_share["usersUpdated"].first
-      unless added['email'] == user_group_email && added['accessLevel'] == 'READER'
-        errors.add(:base, "Adding read access to Unity User Group: #{user_group_email} failed; please try again.")
+      # first check to see if share already exists
+      current_acl = ApplicationController.fire_cloud_client.get_workspace_acl(self.firecloud_project, self.firecloud_workspace)
+      current_group_share = current_acl['acl'][user_group_email]
+      if current_group_share.nil? || current_group_share['accessLevel'] != 'READER'
+        user_group_acl = ApplicationController.fire_cloud_client.create_workspace_acl(user_group_email, 'READER', false, false)
+        add_share = ApplicationController.fire_cloud_client.update_workspace_acl(self.firecloud_project, self.firecloud_workspace, user_group_acl)
+        added = add_share["usersUpdated"].first
+        unless added['email'] == user_group_email && added['accessLevel'] == 'READER'
+          errors.add(:base, "Adding read access to Unity User Group: #{user_group_email} failed; please try again.")
+        end
       end
     rescue => e
       errors.add(:base, "Adding read access to Unity User Group: #{user_group_email} failed due to: #{e.message}.")
