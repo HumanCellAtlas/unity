@@ -14,4 +14,9 @@ module ValidationTools
   ALPHANUMERIC_SPACE_MESSAGE = 'contains invalid characters. Please use only alphanumeric or whitespace'
   FILENAME_CHARS_MESSAGE = 'contains invalid characters. Please use only alphanumeric, spaces, or the following: - _ . / ( )'
   OBJECT_LABELS_MESSAGE = 'contains invalid characters. Please use only alphanumeric, spaces, or the following: - _ . / ( ) + , :'
+
+  # generate a random n-character alphanumeric string
+  def self.random_alphanumeric(length=8)
+    [*('a'..'z'),*('0'..'9')].shuffle[0,length].join
+  end
 end

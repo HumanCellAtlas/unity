@@ -7,8 +7,8 @@ class User < ApplicationRecord
   attr_encrypted :refresh_token, key: ENV['ENCRYPTION_KEY']
 
   # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable and :omniauthable
-  devise :registerable, :rememberable, :trackable,
+  # :confirmable, :lockable, :timeoutable and :omniauthable, :registerable,
+  devise :rememberable, :trackable,
          :omniauthable, :omniauth_providers => [:google_oauth2]
 
   # Associations
