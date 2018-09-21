@@ -741,8 +741,8 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   #
   # * *return*
   #   - +Array+ of users & permission levels
-  def get_method_namespace_permissions(config_namespace)
-    path = self.api_root + "/api/methods/#{config_namespace}/permissions"
+  def get_method_namespace_permissions(method_namespace)
+    path = self.api_root + "/api/methods/#{method_namespace}/permissions"
     process_firecloud_request(:get, path)
   end
 
