@@ -14,8 +14,8 @@
 
   <div class="form-group row">
     <div class="col-sm">
-      <%= form.label :name %>
-      <%= form.text_field :name, class: 'form-control' %>
+      <%= form.label :name %> <%= link_to "<i class='fas fa-edit'></i>".html_safe, "javascript:;", class: 'badge badge-light', id: 'edit-workspace-name' %>
+      <%= form.text_field :name, class: 'form-control', readonly: 'true' %>
     </div>
     <div class="col-sm">
       <%= form.label :project_id %>
@@ -39,6 +39,13 @@
     $('#save-user-workspace').on('click', function() {
         $('#generic-modal-title').html('Provisioning Workspace... Please Wait');
         launchModalSpinner('#generic-modal-spinner', '#generic-modal', function() { return true;})
+    });
+
+    $('#edit-workspace-name').on('click', function() {
+        $(this).toggleClass('badge-light badge-dark');
+        $(this).blur();
+        var readOnly = $('#user_workspace_name').prop('readonly')
+        $('#user_workspace_name').prop('readonly', !readOnly);
     });
 
 </script>

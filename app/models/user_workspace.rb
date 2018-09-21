@@ -11,6 +11,7 @@ class UserWorkspace < ApplicationRecord
   validates_format_of :name, with: ALPHANUMERIC_EXTENDED, message: ALPHANUMERIC_EXTENDED_MESSAGE
   validates_uniqueness_of :name, scope: :project
   validates_presence_of :name, :user, :project, :reference_analysis
+  validate :check_analysis_namespace, on: :create
   validate :create_benchmark_workspace
 
   def full_name
@@ -41,7 +42,7 @@ class UserWorkspace < ApplicationRecord
 
   # generate a default name based off of reference analysis name on initialization
   def default_name
-    self.reference_analysis.extract_wdl_keys(:analysis_wdl).join('-')
+    self.reference_analysis.extract_wdl_keys(:analysis_wdl).join('-') + "-#{SecureRandom.hex(4)}"
   end
 
   # helper to generate a URL to a workspace's GCP bucket
@@ -55,6 +56,11 @@ class UserWorkspace < ApplicationRecord
   end
 
   private
+
+  # check that the proposed name will allow for an analysis namespace that is available to the user
+  def check_analysis_namespace
+    analysis_namespace = self.name + '-analysis'
+  end
 
   # create a new benchmark workspace by cloning the reference workspace
   def create_benchmark_workspace
