@@ -11,7 +11,6 @@ class UserWorkspace < ApplicationRecord
   validates_format_of :name, with: ALPHANUMERIC_EXTENDED, message: ALPHANUMERIC_EXTENDED_MESSAGE
   validates_uniqueness_of :name, scope: :project
   validates_presence_of :name, :user, :project, :reference_analysis
-  validate :check_analysis_namespace, on: :create
   validate :create_benchmark_workspace
 
   def full_name
@@ -56,11 +55,6 @@ class UserWorkspace < ApplicationRecord
   end
 
   private
-
-  # check that the proposed name will allow for an analysis namespace that is available to the user
-  def check_analysis_namespace
-    analysis_namespace = self.name + '-analysis'
-  end
 
   # create a new benchmark workspace by cloning the reference workspace
   def create_benchmark_workspace
