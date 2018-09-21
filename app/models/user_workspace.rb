@@ -42,7 +42,7 @@ class UserWorkspace < ApplicationRecord
 
   # generate a default name based off of reference analysis name on initialization
   def default_name
-    self.reference_analysis.extract_wdl_keys(:analysis_wdl).join('-') + "-#{SecureRandom.hex(4)}"
+    self.reference_analysis.extract_wdl_keys(:analysis_wdl).join('-') + "-#{ValidationTools.random_alphanumeric}"
   end
 
   # helper to generate a URL to a workspace's GCP bucket
