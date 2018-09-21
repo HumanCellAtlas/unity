@@ -938,15 +938,16 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   #   - +config_name+ (String) => name of requested configuration
   #   - +entity_type+ (String) => type of workspace entity (e.g. sample, participant, etc), optional
   #   - +entity_name+ (String) => name of workspace entity, optional
+  #   - +call_cache+ (Boolean) => enable Call Caching, defaults to true
   #
   # * *return*
   #   - +Hash+ of workflow submission details
-  def create_workspace_submission(workspace_namespace, workspace_name, config_namespace, config_name, entity_type=nil, entity_name=nil)
+  def create_workspace_submission(workspace_namespace, workspace_name, config_namespace, config_name, entity_type=nil, entity_name=nil, call_cache=true)
     path = self.api_root + "/api/workspaces/#{workspace_namespace}/#{workspace_name}/submissions"
     submission = {
         methodConfigurationNamespace: config_namespace,
         methodConfigurationName: config_name,
-        useCallCache: true,
+        useCallCache: call_cache,
         workflowFailureMode: 'NoNewCalls'
     }
     if entity_name.present? && entity_type.present?

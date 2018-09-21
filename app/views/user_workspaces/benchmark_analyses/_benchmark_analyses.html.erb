@@ -13,9 +13,7 @@
         <td><%= benchmark_analysis.name %>/<%= benchmark_analysis.snapshot %></td>
         <td><%= benchmark_analysis.user_analysis.name %>/<%= benchmark_analysis.user_analysis.snapshot %></td>
         <td>
-          <%= link_to 'Run Benchmark', submit_benchmark_analysis_path(project: @user_workspace.namespace, name: @user_workspace.name,
-                                                                      user_analysis_id: @user_analysis.id, benchmark_analysis_id: benchmark_analysis.id),
-                      method: :post, class: 'btn btn-sm btn-outline-primary benchmark-analysis-btn', id: "submit-benchmark-analysis-#{benchmark_analysis.name_as_id}" %>
+          <%= render partial: 'user_workspaces/benchmark_analyses/submit_benchmark', locals: {benchmark_analysis: benchmark_analysis} %>
         </td>
       </tr>
     <% end %>

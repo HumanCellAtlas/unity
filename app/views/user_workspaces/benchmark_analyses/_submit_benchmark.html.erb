@@ -1,0 +1,11 @@
+<%= form_tag(submit_benchmark_analysis_path(project: @user_workspace.namespace, name: @user_workspace.name,
+                                            user_analysis_id: @user_analysis.id, benchmark_analysis_id: benchmark_analysis.id),
+             class: 'form-inline') do %>
+  <div class="row">
+    <div class="col-sm">
+      <%= submit_tag 'Run Benchmark', class: 'btn btn-sm btn-outline-primary benchmark-analysis-btn', id: "submit-benchmark-analysis-#{benchmark_analysis.name_as_id}" %>
+      <%= select_tag :call_cache, options_for_select([['Caching: On', 1],['Caching: Off', 0]]), class: 'custom-select' %>&nbsp;
+      <i class="fas fa-question-circle" data-toggle="tooltip" title="Enable/Disable call caching for this submission.  Call caching will reuse outputs from previous matching submissions if available."></i>
+    </div>
+  </div>
+<% end %>

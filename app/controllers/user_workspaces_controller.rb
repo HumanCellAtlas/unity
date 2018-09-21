@@ -172,9 +172,11 @@ class UserWorkspacesController < ApplicationController
     begin
       @benchmark_analysis = BenchmarkAnalysis.find_by(id: params[:benchmark_analysis_id], user_id: current_user.id)
       if @benchmark_analysis.present?
+        call_cache = params[:call_cache].to_i == 1
         submission = user_fire_cloud_client(current_user).create_workspace_submission(@user_workspace.namespace, @user_workspace.name,
                                                                                       @benchmark_analysis.configuration_namespace,
-                                                                                      @benchmark_analysis.configuration_name)
+                                                                                      @benchmark_analysis.configuration_name,
+                                                                                      nil, nil, call_cache)
         redirect_to user_workspace_path(project: @user_workspace.namespace, name: @user_workspace.name),
                     notice: "'#{@benchmark_analysis.full_name}' was successfully submitted (submission: #{submission['submissionId']})" and return
       else
