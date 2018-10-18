@@ -113,6 +113,7 @@ class UserWorkspacesController < ApplicationController
       @pipeline_name = pipeline_attr.join('/')
       @pipeline_id = pipeline_attr.join('-')
     rescue RuntimeError => e
+      logger.error "Error loading reference analysis wdl payload in #{@user_workspace.full_name} due to #{e.class.name}:#{e.message}"
       @pipeline_wdl = "We're sorry, but we could not load the requested workflow object.  Please try again later.\n\nError: #{e.message}"
       logger.error "Unable to load WDL for #{params[:namespace]}:#{params[:name]}:#{params[:snapshot]}; #{e.message}"
     end
@@ -214,6 +215,7 @@ class UserWorkspacesController < ApplicationController
       @notice = "Submission #{@submission_id} was successfully aborted."
       render '/user_workspaces/submissions/abort_submission_workflow'
     rescue => e
+      logger.error "Error aborting #{@submission_id} due to #{e.class.name}:#{e.message}"
       @alert = "Unable to abort submission #{@submission_id} due to an error: #{e.message}"
       render '/user_workspaces/submissions/display_modal'
     end
@@ -252,6 +254,7 @@ class UserWorkspacesController < ApplicationController
       @error_message = errors.join("<br />")
       render '/user_workspaces/submissions/get_submission_errors'
     rescue => e
+      logger.error "Error retrieving submission #{@submission_id} due to #{e.class.name}:#{e.message}"
       @alert = "Unable to retrieve submission #{@submission_id} error messages due to: #{e.message}"
       render '/user_workspaces/submissions/display_modal'
     end
@@ -276,6 +279,7 @@ class UserWorkspacesController < ApplicationController
       end
       render '/user_workspaces/submissions/get_submission_outputs'
     rescue => e
+      logger.error "Error retrieving submission #{@submission_id} outputs due to #{e.class.name}:#{e.message}"
       @alert = "Unable to retrieve submission #{@submission_id} outputs due to: #{e.message}"
       render '/user_workspaces/submissions/display_modal'
     end
@@ -306,7 +310,7 @@ class UserWorkspacesController < ApplicationController
       end
       render '/user_workspaces/submissions/delete_submission_files'
     rescue => e
-      logger.error "Unable to remove submission #{params[:submission_id]} files from #{@user_workspace.name} due to: #{e.message}"
+      logger.error "Unable to remove submission #{params[:submission_id]} files from #{@user_workspace.name} due to #{e.class.name}:#{e.message}"
       @alert = "Unable to delete the outputs for #{params[:submission_id]} due to the following error: #{e.message}"
       render '/user_workspaces/submissions/display_modal'
     end

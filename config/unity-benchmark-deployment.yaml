@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: unitybenchmark/unity_benchmark_docker:latest
+          image: unitybenchmark/unity_benchmark_docker:0.1
           ports:
             - containerPort: 443
           # The following environment variables will contain the database host,
@@ -79,6 +79,16 @@ spec:
                 secretKeyRef:
                   name: prod-secret-key-base
                   key: secret-key-base
+            - name: SENDGRID_USERNAME
+                valueFrom:
+                  secretKeyRef:
+                    name: sendgrid-credentials
+                    key: username
+            - name: SENDGRID_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: sendgrid-credentials
+                    key: password
             - name: SERVICE_ACCOUNT_KEY
               value: /etc/service-account/unity-benchmark-service-account.json
             - name: GCS_ADMIN_SERVICE_ACCOUNT_KEY

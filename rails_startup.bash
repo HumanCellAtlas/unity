@@ -52,7 +52,7 @@ if [[ -z $SERVICE_ACCOUNT_KEY ]]; then
 	chown app:app /home/app/webapp/.google_service_account.json
 	echo "export SERVICE_ACCOUNT_KEY=/home/app/webapp/.google_service_account.json" >> /home/app/webapp/.cron_env
 else
-	echo "export SERVICE_ACCOUNT_KEY=$SERVICE_ACCOUNT_KEY" >> /home/app/webapp.cron_env
+	echo "export SERVICE_ACCOUNT_KEY=$SERVICE_ACCOUNT_KEY" >> /home/app/webapp/.cron_env
 fi
 
 if [[ -n $GCS_ADMIN_GOOGLE_CLOUD_KEYFILE_JSON ]]; then
