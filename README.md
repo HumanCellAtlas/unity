@@ -174,28 +174,30 @@ Before creating your deployment (but after your cluster is created), you will ne
 into your deployment.  These secrets must be created with the following key/value pairs:
 
 1. cloudsql-db-credentials
-    1. username: database username
-    1. password: database password
+   1. username: database username
+   1. password: database password
 1. oauth-client-credentials
-    1. client_id: OAuth client ID
-    1. client_secret: OAuth client secret
+   1. client_id: OAuth client ID
+   1. client_secret: OAuth client secret
 1. encryption-key
-    1. encryption-key: 32-byte encryption key string
+   1. encryption-key: 32-byte encryption key string
 1. unity-service-account
-    1. unity-benchmark-service-account.json: JSON contents of Unity project service account credentials (must be project owner/editor)
+   1. unity-benchmark-service-account.json: JSON contents of Unity project service account credentials (must be project owner/editor)
 1. unity-gcs-admin-service-account
-    1. unity-benchmark-gcs-admin.json: JSON contents of Unity GCS Admin service account credentials (must be have Google Cloud Storage Admin role)
+   1. unity-benchmark-gcs-admin.json: JSON contents of Unity GCS Admin service account credentials (must be have Google Cloud Storage Admin role)
 1. cloudsql-instance-credentials
-    1. credentials.json: JSON contents of CloudSQL service account credentials (must have Cloud SQL Client role)
+   1. credentials.json: JSON contents of CloudSQL service account credentials (must have Cloud SQL Client role)
 1. google-site-verification
-    1. verification-code: google-site-verification meta header value (for verifying site ownership in Google search console, 
-       required for OAuth verification)
+   1. verification-code: google-site-verification meta header value (for verifying site ownership in Google search console, required for OAuth verification)
 1. ssl-certificate
-    1. localhost.crt: a valid SSL certificate for your domain (filename of localhost does not affect certificate)
+   1. localhost.crt: a valid SSL certificate for your domain (filename of localhost does not affect certificate)
 1. ssl-keyfile
-    1. localhost.key: keyfile for your SSL certificate (filename of localhost does not affect certificate)
+   1. localhost.key: keyfile for your SSL certificate (filename of localhost does not affect certificate)
 1. prod-secret-key-base
-    1. secret-key-base: value for SECRET_KEY_BASE, which is used to encrypt secure cookies.  This can be set/updated by using <code>bin/set_prod_secret_key_base</code>
+   1. secret-key-base: value for SECRET_KEY_BASE, which is used to encrypt secure cookies.  This can be set/updated by using <code>bin/set_prod_secret_key_base</code>
+1. sendgrid-credentials
+	 1. username: Username for your Sendgrid account
+	 1. password: Password for your Sendgrid account
 
 See [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) for more information on how to import and save secrets.
 

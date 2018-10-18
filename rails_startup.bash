@@ -52,18 +52,18 @@ if [[ -z $SERVICE_ACCOUNT_KEY ]]; then
 	chown app:app /home/app/webapp/.google_service_account.json
 	echo "export SERVICE_ACCOUNT_KEY=/home/app/webapp/.google_service_account.json" >> /home/app/webapp/.cron_env
 else
-	echo "export SERVICE_ACCOUNT_KEY=$SERVICE_ACCOUNT_KEY" >> /home/app/webapp.cron_env
+	echo "export SERVICE_ACCOUNT_KEY=$SERVICE_ACCOUNT_KEY" >> /home/app/webapp/.cron_env
 fi
 
 if [[ -n $GCS_ADMIN_GOOGLE_CLOUD_KEYFILE_JSON ]]; then
 	echo "*** WRITING GCS ADMIN SERVICE ACCOUNT CREDENTIALS ***"
 	echo $GCS_ADMIN_GOOGLE_CLOUD_KEYFILE_JSON >| /home/app/webapp/.gcs_admin_service_account.json
-	echo "export GCS_ADMIN_SERVICE_ACCOUNT_KEY=/home/app/webapp/.gcs_admin_service_account.json" >> /home/app/.cron_env
+	echo "export GCS_ADMIN_SERVICE_ACCOUNT_KEY=/home/app/webapp/.gcs_admin_service_account.json" >> /home/app/webapp/.cron_env
 	chmod 400 /home/app/webapp/.gcs_admin_service_account.json
 	chown app:app /home/app/webapp/.gcs_admin_service_account.json
 elif [[ -n $GCS_ADMIN_SERVICE_ACCOUNT_KEY ]]; then
   echo "*** USING GCS_ADMIN_SERVICE_ACCOUNT CREDENTIALS ***"
-	echo "export GCS_ADMIN_SERVICE_ACCOUNT_KEY=$GCS_ADMIN_SERVICE_ACCOUNT_KEY" >> /home/app/.cron_env
+	echo "export GCS_ADMIN_SERVICE_ACCOUNT_KEY=$GCS_ADMIN_SERVICE_ACCOUNT_KEY" >> /home/app/webapp/.cron_env
 else
   echo "*** NO GCS ADMIN SERVICE ACCOUNT DETECTED - DOWNLOADS WILL NOT FUNCTION ***"
 fi
