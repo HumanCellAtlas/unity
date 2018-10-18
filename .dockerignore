@@ -1,9 +1,8 @@
 cloud_sql_proxy
-public/unity/assets
+public/assets
 .git
 .idea
 log/*.log
-public/unity/assets
 config/*.json
 .cron_env
 .google_service_account.json
@@ -13,3 +12,4 @@ config/master.key
 public/packs
 .babelrc
 .postcssrc.yml
+tmp/cache/*
