@@ -80,15 +80,15 @@ spec:
                   name: prod-secret-key-base
                   key: secret-key-base
             - name: SENDGRID_USERNAME
-                valueFrom:
-                  secretKeyRef:
-                    name: sendgrid-credentials
-                    key: username
+              valueFrom:
+                secretKeyRef:
+                  name: sendgrid-credentials
+                  key: username
             - name: SENDGRID_PASSWORD
-                valueFrom:
-                  secretKeyRef:
-                    name: sendgrid-credentials
-                    key: password
+              valueFrom:
+                secretKeyRef:
+                  name: sendgrid-credentials
+                  key: password
             - name: SERVICE_ACCOUNT_KEY
               value: /etc/service-account/unity-benchmark-service-account.json
             - name: GCS_ADMIN_SERVICE_ACCOUNT_KEY
