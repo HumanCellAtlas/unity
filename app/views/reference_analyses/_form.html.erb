@@ -13,18 +13,7 @@
 
   <div class="form-group row">
     <div class="col-sm">
-      <%= form.label :firecloud_project %>
-      <%= form.text_field :firecloud_project, class: 'form-control' %>
-    </div>
-
-    <div class="col-sm">
-      <%= form.label :firecloud_workspace %>
-      <%= form.text_field :firecloud_workspace, class: 'form-control' %>
-    </div>
-  </div>
-  <div class="form-group row">
-    <div class="col-sm">
-      <%= form.label :analysis_wdl, 'Analysis WDL' %>
+      <%= form.label :analysis_wdl, 'Scientific Analysis WDL' %>
       <%= form.text_field :analysis_wdl, class: 'form-control' %>
     </div>
 
@@ -36,6 +25,17 @@
     <div class="col-sm">
       <%= form.label :orchestration_wdl, 'Orchestration WDL' %>
       <%= form.text_field :orchestration_wdl, class: 'form-control' %>
+    </div>
+  </div>
+  <div class="form-group row">
+    <div class="col-sm">
+      <%= form.label :firecloud_project, 'FireCloud Project' %>
+      <%= form.text_field :firecloud_project, class: 'form-control' %>
+    </div>
+
+    <div class="col-sm">
+      <%= form.label :firecloud_workspace, 'FireCloud Workspace' %>
+      <%= form.text_field :firecloud_workspace, class: 'form-control' %>
     </div>
   </div>
   <div class="form-group row">

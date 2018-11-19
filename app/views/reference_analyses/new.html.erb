@@ -4,15 +4,15 @@
   <h4>Prerequisites</h4>
   <p>In order to add a new reference analysis to Unity, you will need to have the following items already created:</p>
   <ul>
-    <li>A <%= link_to 'reference analysis', 'https://github.com/HumanCellAtlas/unity/wiki/Adding-a-new-Reference-Analysis#reference-analysis', target: :_blank %>
+    <li>A <%= link_to 'scientific analysis', 'https://github.com/HumanCellAtlas/unity/wiki/Adding-a-New-Reference-Analysis#scientific-analysis', target: :_blank %>
       in WDL form, publicly visible in FireCloud Methods Repository</li>
-    <li>A <%= link_to 'benchmarking analysis', 'https://github.com/HumanCellAtlas/unity/wiki/Adding-a-new-Reference-Analysis#benchmark-analysis', target: :_blank %>
+    <li>A <%= link_to 'benchmarking analysis', 'https://github.com/HumanCellAtlas/unity/wiki/Adding-a-New-Reference-Analysis#benchmark-analysis', target: :_blank %>
       in WDL form that can compare outputs from two different analysis submissions, publicly visible in FireCloud Methods Repository</li>
-    <li>An <%= link_to 'orchestration WDL', 'https://github.com/HumanCellAtlas/unity/wiki/Adding-a-new-Reference-Analysis#orchestration-wdl', target: :_blank %>
-      that can call both the reference analysis and benchmarking WDL, publicly visible in FireCloud Methods Repository</li>
-    <li>A valid <%= link_to 'WDL configuration', 'https://github.com/HumanCellAtlas/unity/wiki/Adding-a-new-Reference-Analysis#orchestration-configuration', target: :_blank %>
-      for the above orchestration WDL</li>
-    <li>A <%= link_to 'FireCloud workspace', 'https://github.com/HumanCellAtlas/unity/wiki/Adding-a-new-Reference-Analysis#firecloud-workspace', target: :_blank %>
+    <li>An <%= link_to 'orchestration WDL', 'https://github.com/HumanCellAtlas/unity/wiki/Adding-a-New-Reference-Analysis#orchestration-wdl', target: :_blank %>
+      that can call both the scientific analysis and benchmarking analysis, publicly visible in FireCloud Methods Repository</li>
+    <li>A valid <%= link_to 'method configuration', 'https://github.com/HumanCellAtlas/unity/wiki/Adding-a-New-Reference-Analysis#method-configuration-for-orchestration-wdl', target: :_blank %>
+      for the above orchestration WDL.  This configuration is used as the template for any user-supplied analyses when benchmarking.</li>
+    <li>A <%= link_to 'FireCloud workspace', 'https://github.com/HumanCellAtlas/unity/wiki/Adding-a-New-Reference-Analysis#firecloud-workspace', target: :_blank %>
       that contains the orchestration configuration, and any necessary input/output files for all 3 WDLs</li>
   </ul>
   <p>For more information, please refer to the <%= link_to 'Unity wiki', 'https://github.com/HumanCellAtlas/unity/wiki/Adding-a-new-Reference-Analysis', target: :_blank %>
