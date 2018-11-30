@@ -21,15 +21,24 @@
 </table>
 <p class="text-center">
   <% unless @user_analysis.has_valid_benchmark? %>
+
     <%= link_to 'Create New Benchmark', create_benchmark_analysis_path(project: @user_workspace.namespace,
-                                                                     name: @user_workspace.name, user_analysis_id: @user_analysis.id),
+                                                                       name: @user_workspace.name, user_analysis_id: @user_analysis.id),
                 class: 'btn btn-primary benchmark-analysis-btn', data: {toggle: 'tooltip'}, title: "Create a new Benchmark Submission based off of #{@user_analysis.name}/#{@user_analysis.snapshot}",
                 id: 'create-benchmark-analysis', method: :post %></p>
+
   <% else %>
-    <span class="btn btn-primary disabled"
-          data-toggle="tooltip" title="You already have a valid benchmark to run.  Please use one of the 'Run Benchmark' buttons above.">
-      Create New Benchmark
-    </span>
+    <% if @user_analysis.reference_analysis.nil? %>
+      <span class="btn btn-danger disabled"
+              data-toggle="tooltip" title="Benchmarking has been disabled as the associated reference analysis has been redacted by an administrator.">
+        Benchmarking Disabled
+      </span>
+    <% else %>
+      <span class="btn btn-primary disabled"
+            data-toggle="tooltip" title="You already have a valid benchmark to run.  Please use one of the 'Run Benchmark' buttons above.">
+        Create New Benchmark
+      </span>
+    <% end %>
   <% end %>
 
 <script type="text/javascript">

@@ -14,6 +14,7 @@ $0 [OPTION]
 -d VALUE	set the data directory to mount inside the postgres Docker container (defaults to $HOME/Documents/Data/docker-postgres)
 -u VALUE	set the USERNAME variable (defaults to 'postgres')
 -p VALUE	set the PASSWORD variable (no default value)
+-v VALUE	set the version of the postgres Docker image to use (defaults to latest)
 -H COMMAND	print this text
 EOF
 )
@@ -22,8 +23,9 @@ EOF
 CONTAINER_NAME="pg"
 USERNAME="postgres"
 DATA_DIR="$HOME/Documents/Data/docker-postgres"
+VERSION="latest"
 
-while getopts "n:d:u:p:H" OPTION; do
+while getopts "n:d:u:p:v:H" OPTION; do
 case $OPTION in
 	n)
 		CONTAINER_NAME="$OPTARG"
@@ -37,6 +39,9 @@ case $OPTION in
 	p)
 		PASSWORD="$OPTARG"
 		;;
+	v)
+		VERSION="$OPTARG"
+		;;
 	H)
 		echo "$usage"
 		exit 0
@@ -48,4 +53,4 @@ case $OPTION in
 	esac
 done
 
-docker run --name $CONTAINER_NAME -p 5432:5432 -v $DATA_DIR:/var/lib/postgresql/data:rw -e POSTGRES_PASSWORD=$PASSWORD -e POSTGRES_USER=$USERNAME -d postgres
+docker run --name $CONTAINER_NAME -p 5432:5432 -v $DATA_DIR:/var/lib/postgresql/data:rw -e POSTGRES_PASSWORD=$PASSWORD -e POSTGRES_USER=$USERNAME -d postgres:$VERSION

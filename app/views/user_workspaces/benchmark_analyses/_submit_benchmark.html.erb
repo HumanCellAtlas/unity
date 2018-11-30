@@ -3,9 +3,15 @@
              class: 'form-inline') do %>
   <div class="row">
     <div class="col-sm">
-      <%= submit_tag 'Run Benchmark', class: 'btn btn-sm btn-outline-primary benchmark-analysis-btn', id: "submit-benchmark-analysis-#{benchmark_analysis.name_as_id}" %>
-      <%= select_tag :call_cache, options_for_select([['Caching: On', 1],['Caching: Off', 0]]), class: 'custom-select' %>&nbsp;
-      <i class="fas fa-question-circle" data-toggle="tooltip" title="Enable/Disable call caching for this submission.  Call caching will reuse outputs from previous matching submissions if available."></i>
+      <% unless @user_workspace.reference_analysis.nil? %>
+        <%= submit_tag 'Run Benchmark', class: 'btn btn-sm btn-outline-primary benchmark-analysis-btn', id: "submit-benchmark-analysis-#{benchmark_analysis.name_as_id}" %>
+        <%= select_tag :call_cache, options_for_select([['Caching: On', 1],['Caching: Off', 0]]), class: 'custom-select' %>&nbsp;
+        <i class="fas fa-question-circle" data-toggle="tooltip" title="Enable/Disable call caching for this submission.  Call caching will reuse outputs from previous matching submissions if available."></i>
+      <% else %>
+        <span class="btn btn-danger disabled" data-toggle="tooltip" title="Benchmarking has been disabled as the associated reference analysis has been redacted by an administrator.">
+          Disabled
+        </span>
+      <% end %>
     </div>
   </div>
 <% end %>
