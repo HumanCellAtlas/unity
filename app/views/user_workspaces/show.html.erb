@@ -8,10 +8,14 @@
   </dd>
   <dt class="col-sm-3">Reference Analysis</dt>
   <dd class="col-sm-9">
-    <%= @user_workspace.reference_analysis.analysis_wdl %>
-    <%= link_to "View Reference Analysis WDL <i class='fas fa-code'></i>".html_safe,
-                get_analysis_wdl_path(project: @user_workspace.namespace, name: @user_workspace.name),
-                class: 'btn btn-secondary btn-sm float-right', id: 'get-reference-wdl', data: { remote: true } %>
+    <% if @user_workspace.reference_analysis.present? %>
+      <%= @user_workspace.reference_analysis.analysis_wdl %>
+      <%= link_to "View Reference Analysis WDL <i class='fas fa-code'></i>".html_safe,
+                  get_analysis_wdl_path(project: @user_workspace.namespace, name: @user_workspace.name),
+                  class: 'btn btn-secondary btn-sm float-right', id: 'get-reference-wdl', data: { remote: true } %>
+    <% else %>
+      <span class="text-danger">The associated reference analysis has been redacted</span>
+    <% end %>
   </dd>
 </dl>
 
@@ -39,7 +43,15 @@
 
 <div class="tab-content top-pad-small">
   <div role="tabpanel" class="tab-pane fade <%= @user_analysis.new_record? ? 'show active' : nil %>" id="user-analysis">
-    <%= render partial: 'user_analysis_form', locals: {user_analysis: @user_analysis} %>
+    <% if @user_analysis.reference_analysis.present? %>
+      <%= render partial: 'user_analysis_form', locals: {user_analysis: @user_analysis} %>
+    <% else %>
+      <div class="bs-callout bs-callout-danger">
+        <h4>The reference analysis you are benchmarking against has been redacted</h4>
+        <p>You may no longer benchmark your analysis against the reference analysis as it has been redacted by an administrator.
+          We apologize for any inconvenience this may have caused.</p>
+      </div>
+    <% end %>
   </div>
   <% unless @user_analysis.new_record? %>
     <div role="tabpanel" class="tab-pane fade <%= @user_analysis.new_record? ? nil : 'show active' %>" id="benchmark-submissions">
