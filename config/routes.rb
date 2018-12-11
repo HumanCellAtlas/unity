@@ -10,6 +10,9 @@ Rails.application.routes.draw do
   resources :admin_configurations, path: 'admin'
   get 'admin/service_account/profile', to: 'admin_configurations#get_service_account_profile', as: :get_service_account_profile
   post 'admin/service_account/profile', to: 'admin_configurations#update_service_account_profile', as: :update_service_account_profile
+  get 'admin/users/:id/edit', to: 'admin_configurations#edit_user', as: :edit_user
+  match 'admin/users/:id', to: 'admin_configurations#update_user', via: [:post, :patch], as: :update_user
+
   resources :reference_analyses do
     member do
       put 'reset_wdl_params', to: 'reference_analyses#reset_wdl_params', as: :reset_wdl_params

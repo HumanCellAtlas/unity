@@ -1,46 +1,95 @@
 <h1>Admin Control Panel</h1>
+<div id="tab-root">
+  <ul class="nav nav-tabs" role="tablist" id="admin-tabs">
+    <li role="presentation" class="nav-item" id="admin-config-nav"><a href="#admin-config-panel" class="nav-link active" data-toggle="tab">Configuration Options<i class="fas fa-fw fa-cog"></i></a></li>
+    <li role="presentation" class="nav-item" id="users-nav"><a href="#users-panel" class="nav-link" data-toggle="tab">User Roles<i class="fas fa-fw fa-user"></i></a></li>
+  </ul>
+  <div class="tab-content top-pad-small">
+    <div class="tab-pane active" id="admin-config-panel">
+      <div class="row">
+        <div class="col-md">
+          <div class="table-responsive">
+            <table class="table table-striped table-active" id="admin-config">
+              <thead>
+              <tr>
+                <th>Config Type</th>
+                <th>Value</th>
+                <th>Options</th>
+                <th>Actions</th>
+              </tr>
+              </thead>
 
-<div class="row">
-  <div class="col-md">
-    <div class="table-responsive">
-      <table class="table table-striped table-active" id="admin-config">
-        <thead>
-        <tr>
-          <th>Config Type</th>
-          <th>Value</th>
-          <th>Options</th>
-          <th>Actions</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        <% @admin_configurations.each do |admin_configuration| %>
-          <tr>
-            <td><%= admin_configuration.config_type %></td>
-            <td><%= admin_configuration.convert_value_by_type %></td>
-            <td>
-              <% admin_configuration.options.each do |name, val| %>
-                <span class="badge badge-dark"><%= name %></span>&nbsp;<span class="badge badge-secondary"><%= val %></span><br />
+              <tbody>
+              <% @admin_configurations.each do |admin_configuration| %>
+                <tr>
+                  <td><%= admin_configuration.config_type %></td>
+                  <td><%= admin_configuration.convert_value_by_type %></td>
+                  <td>
+                    <% admin_configuration.options.each do |name, val| %>
+                      <span class="badge badge-dark"><%= name %></span>&nbsp;<span class="badge badge-secondary"><%= val %></span><br />
+                    <% end %>
+                  </td>
+                  <td class="actions">
+                    <%= link_to 'Edit', edit_admin_configuration_path(admin_configuration), class: 'btn btn-sm btn-primary' %>&nbsp;
+                    <%= link_to 'Destroy', admin_configuration, method: :delete, data: { confirm: 'Are you sure you want to delete this configuration?' }, class: 'btn btn-sm btn-danger' %>
+                  </td>
+                </tr>
               <% end %>
-            </td>
-            <td class="actions">
-              <%= link_to 'Edit', edit_admin_configuration_path(admin_configuration), class: 'btn btn-sm btn-primary' %>&nbsp;
-              <%= link_to 'Destroy', admin_configuration, method: :delete, data: { confirm: 'Are you sure you want to delete this configuration?' }, class: 'btn btn-sm btn-danger' %>
-            </td>
-          </tr>
-        <% end %>
-        </tbody>
-      </table>
+              </tbody>
+            </table>
 
-      <p><%= link_to 'New Admin Configuration', new_admin_configuration_path, class: 'btn btn-lg btn-success' %></p>
+            <p><%= link_to 'New Admin Configuration', new_admin_configuration_path, class: 'btn btn-lg btn-success' %></p>
 
-      <script type="text/javascript">
+            <script type="text/javascript">
 
-          $('#admin-config').DataTable({
-              pagingType: 'full_numbers'
-          });
+                $('#admin-config').DataTable({
+                    pagingType: 'full_numbers'
+                });
 
-      </script>
+            </script>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tab-pane" id="users-panel">
+      <div class="row">
+        <div class="col-md">
+          <div class="table-responsive">
+            <table class="table table-striped table-active" id="user-table">
+              <thead>
+              <tr>
+                <th>Email</th>
+                <th>Special Roles</th>
+                <th>Edit</th>
+              </tr>
+              </thead>
+              <tbody>
+              <% @users.each do |user| %>
+                <tr>
+                  <td><%= user.email %></td>
+                  <td>
+                    <%= user.admin ? "<span class='badge badge-danger'><i class='fas fa-lock'></i> Admin</span>".html_safe : nil %>
+                    <%= user.curator ? "<span class='badge badge-warning'><i class='fas fa-flask'></i> Curator</span>".html_safe : nil %>
+                  </td>
+                  <td class="actions">
+                    <%= link_to "<span class='fas fa-edit'></span> Edit".html_safe, edit_user_path(user), class: "btn btn-sm btn-primary" %>
+                  </td>
+                </tr>
+              <% end %>
+              </tbody>
+            </table>
+          </div>
+          <script type="text/javascript">
+              $('#user-table').dataTable({
+                  pagingType: "full_numbers",
+                  order: [[0, 'asc']],
+                  language: {
+                      search: "Filter Results By: "
+                  }
+              });
+          </script>
+        </div>
+      </div>
     </div>
   </div>
 </div>

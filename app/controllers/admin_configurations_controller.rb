@@ -7,6 +7,7 @@ class AdminConfigurationsController < ApplicationController
   # GET /admin_configurations.json
   def index
     @admin_configurations = AdminConfiguration.where.not(config_type: AdminConfiguration::FIRECLOUD_ACCESS_NAME)
+    @users = User.all
   end
 
   # GET /admin_configurations/1
@@ -105,6 +106,24 @@ class AdminConfigurationsController < ApplicationController
     end
   end
 
+  # edit user roles
+  def edit_user
+    @user = User.find(params[:id])
+  end
+
+  # update a user account
+  def update_user
+    @user = User.find(params[:id])
+    respond_to do |format|
+      if @user.update(user_params)
+        format.html { redirect_to admin_configurations_path, notice: "User: '#{@user.email}' was successfully updated." }
+      else
+        format.html { render :edit_user }
+        format.json { render json: @user.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_admin_configuration
@@ -121,5 +140,9 @@ class AdminConfigurationsController < ApplicationController
       params.require(:fire_cloud_profile).permit(:contactEmail, :email, :firstName, :lastName, :institute, :institutionalProgram,
                                               :nonProfitStatus, :pi, :programLocationCity, :programLocationState,
                                               :programLocationCountry, :title)
+    end
+
+    def user_params
+      params.require(:user).permit(:id, :admin, :curator)
     end
 end

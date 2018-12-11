@@ -27,9 +27,11 @@
             <div class="dropdown-menu dropdown-menu-right">
             <% if current_user.admin? %>
               <%= link_to "<i class='fas fa-fw fa-lock'></i> Admin Control Panel".html_safe, admin_configurations_path, class: 'dropdown-item', id: 'admin-panel-nav' %>
-              <%= link_to "<i class='fas fa-fw fa-flask'></i> Reference Analyses".html_safe, reference_analyses_path, class: 'dropdown-item', id: 'reference-analyses-nav' %>
-              <div class="dropdown-divider"></div>
             <% end %>
+            <% if current_user.acts_as_curator? %>
+              <%= link_to "<i class='fas fa-fw fa-flask'></i> Reference Analyses".html_safe, reference_analyses_path, class: 'dropdown-item', id: 'reference-analyses-nav' %>
+            <% end %>
+              <div class="dropdown-divider"></div>
               <%= link_to "<i class='fas fa-fw fa-user'></i> My Profile".html_safe, profile_path, class: 'dropdown-item', id: 'firecloud-profile-nav' %>
               <%= link_to "<i class='fas fa-fw fa-folder'></i> My Billing Projects".html_safe, projects_path, class: 'dropdown-item', id: 'billing-projects-nav' %>
               <%= link_to "<i class='fas fa-fw fa-project-diagram'></i> My Benchmarks".html_safe, user_workspaces_path, class: 'dropdown-item', id: 'user-workspaces-nav' %>

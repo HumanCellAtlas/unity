@@ -302,10 +302,10 @@ class UserWorkspacesController < ApplicationController
       user_client.set_workspace_attributes(@user_workspace.namespace, @user_workspace.name, ws_attributes)
       logger.info "Starting submission #{params[:submission_id]} deletion in #{@user_workspace.name}"
       # use GCS Admin client to get/delete files
-      submission_files = ApplicationController.gcs_client.execute_gcloud_method(:get_workspace_files, @user_workspace.namespace,
+      submission_files = ApplicationController.gcs_client.execute_gcloud_method(:get_workspace_files, 0, @user_workspace.namespace,
                                                            @user_workspace.name, prefix: params[:submission_id])
       submission_files.each do |file|
-        ApplicationController.gcs_client.execute_gcloud_method(:delete_workspace_file, @user_workspace.namespace,
+        ApplicationController.gcs_client.execute_gcloud_method(:delete_workspace_file, 0, @user_workspace.namespace,
                                           @user_workspace.name, file.name)
       end
       render '/user_workspaces/submissions/delete_submission_files'
@@ -322,10 +322,10 @@ class UserWorkspacesController < ApplicationController
       head 503 and return
     end
 
-    requested_file = ApplicationController.gcs_client.execute_gcloud_method(:get_workspace_file, @user_workspace.namespace,
+    requested_file = ApplicationController.gcs_client.execute_gcloud_method(:get_workspace_file, 0, @user_workspace.namespace,
                                                        @user_workspace.name, params[:filename])
     if requested_file.present?
-      @signed_url = ApplicationController.gcs_client.execute_gcloud_method(:generate_signed_url, @user_workspace.namespace,
+      @signed_url = ApplicationController.gcs_client.execute_gcloud_method(:generate_signed_url, 0, @user_workspace.namespace,
                                                       @user_workspace.name, params[:filename], expires: 15)
       redirect_to @signed_url
     else
