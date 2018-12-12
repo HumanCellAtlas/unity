@@ -1,6 +1,7 @@
 class User < ApplicationRecord
   attribute :access_token, :hstore
-  attribute :admin, :boolean
+  attribute :admin, :boolean, default: false
+  attribute :curator, :boolean, default: false
   attribute :full_name, :string
   attribute :registered_for_firecloud, :boolean, default: false
   attribute :added_to_unity_group, :boolean, default: false
@@ -88,5 +89,10 @@ class User < ApplicationRecord
       self.update(added_to_unity_group: true)
       Rails.logger.info "User group registration complete"
     end
+  end
+
+  # determine if user has curator permissions (is either curator or admin)
+  def acts_as_curator?
+    self.admin || self.curator
   end
 end

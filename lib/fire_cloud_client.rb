@@ -19,7 +19,11 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   # default auth scopes
   GOOGLE_SCOPES = %w(https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/cloud-billing.readonly https://www.googleapis.com/auth/cloud-platform.read-only)
   # constant used for retry loops in process_firecloud_request and execute_gcloud_method
-  MAX_RETRY_COUNT = 3
+  MAX_RETRY_COUNT = 5
+  # constant used for incremental backoffs on retries (in seconds); ignored when running unit/integration test suite
+  RETRY_INTERVAL = Rails.env == 'test' ? 0 : 15
+  # List of URLs/Method names to ignore incremental backoffs on (in cases of UI blocking)
+  RETRY_IGNORE_LIST = ["#{BASE_URL}/register", :generate_signed_url, :generate_api_url]
   # location of Google service account JSON (must be absolute path to file)
   SERVICE_ACCOUNT_KEY = !ENV['SERVICE_ACCOUNT_KEY'].blank? ? File.absolute_path(ENV['SERVICE_ACCOUNT_KEY']) : ''
   # Permission values allowed for FireCloud workspace ACLs
@@ -214,59 +218,62 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   #   - +http_method+ (String, Symbol) => valid http method
   #   - +path+ (String) => FireCloud REST API path
   #   - +payload+ (Hash) => HTTP POST/PATCH/PUT body for creates/updates, defaults to nil
-  #   - +opts+ (Hash) => Hash of extra options (defaults are file_upload=false, max_attemps=MAX_RETRY_COUNT)
+  #		- +opts+ (Hash) => Hash of extra options (defaults are file_upload=false, max_attemps=MAX_RETRY_COUNT)
+  #   - +retry_count+ (Integer) => current count of number of retries.  defaults to 0 and self-increments
   #
   # * *return*
   #   - +Hash+, +Boolean+ depending on response body
   # * *raises*
   #   - +RuntimeError+
-  def process_firecloud_request(http_method, path, payload=nil, opts={})
+  def process_firecloud_request(http_method, path, payload=nil, opts={}, retry_count=0)
     # set up default options
-    request_opts = {file_upload: false, max_attempts: MAX_RETRY_COUNT}.merge(opts)
+    request_opts = {file_upload: false}.merge(opts)
 
-    # set default headers of valid access token
+    # check for token expiry first before executing
+    if self.access_token_expired?
+      Rails.logger.info "FireCloudClient token expired, refreshing access token"
+      self.refresh_access_token
+    end
+    # set default headers
     headers = {
-        'Authorization' => "Bearer #{self.valid_access_token['access_token']}"
+        'Authorization' => "Bearer #{self.access_token['access_token']}"
     }
     # if not uploading a file, set the content_type to application/json
     if !request_opts[:file_upload]
       headers.merge!({'Content-Type' => 'application/json'})
     end
 
-    # initialize counter to prevent endless feedback loop
-    @retry_count ||= 0
-
     # process request
-    if @retry_count < request_opts[:max_attempts]
+    if retry_count < MAX_RETRY_COUNT
       begin
-        @retry_count += 1
         @obj = RestClient::Request.execute(method: http_method, url: path, payload: payload, headers: headers)
         # handle response codes as necessary
         if ok?(@obj.code) && !@obj.body.blank?
-          @retry_count = 0
           begin
             return JSON.parse(@obj.body)
           rescue JSON::ParserError => e
             return @obj.body
           end
         elsif ok?(@obj.code) && @obj.body.blank?
-          @retry_count = 0
           return true
         else
           Rails.logger.info "Unexpected response #{@obj.code}, not sure what to do here..."
           @obj.message
         end
       rescue RestClient::Exception => e
-        context = " encountered when requesting '#{path}'"
-        log_message = "#{Time.now}: " + e.message + context
+        context = " encountered when requesting '#{path}', attempt ##{retry_count + 1}"
+        log_message = e.message + context
         Rails.logger.error log_message
         @error = e
-        process_firecloud_request(http_method, path, payload, opts)
+        unless RETRY_IGNORE_LIST.include?(path)
+          retry_time = retry_count * RETRY_INTERVAL
+          sleep(retry_time)
+        end
+        process_firecloud_request(http_method, path, payload, opts, retry_count + 1)
       end
     else
-      @retry_count = 0
       error_message = parse_error_message(@error)
-      Rails.logger.error "Retry count exceeded - #{error_message}"
+      Rails.logger.error "Retry count exceeded when requesting '#{path}' - #{error_message}"
       raise RuntimeError.new(error_message)
     end
   end
@@ -1456,25 +1463,28 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   #
   # * *params*
   #   - +method_name+ (String, Symbol) => name of FireCloudClient GCS method to execute
+  #   - +retry_count+ (Integer) => current count of number of retries.  defaults to 0 and self-increments
   #   - +params+ (Array) => array of method parameters (passed with splat operator, so does not need to be an actual array)
   #
   # * *return*
   #   - Object depends on method, can be one of the following: +Google::Cloud::Storage::Bucket+, +Google::Cloud::Storage::File+,
   #     +Google::Cloud::Storage::FileList+, +Boolean+, +File+, or +String+
 
-  def execute_gcloud_method(method_name, *params)
-    @retries ||= 0
-    if @retries < MAX_RETRY_COUNT
+  def execute_gcloud_method(method_name, retry_count=0, *params)
+    if retry_count < MAX_RETRY_COUNT
       begin
         self.send(method_name, *params)
       rescue => e
         @error = e.message
-        Rails.logger.info "Error calling #{method_name} with #{params.join(', ')}; #{e.message} -- retry ##{@retries}"
-        @retries += 1
-        execute_gcloud_method(method_name, *params)
+        Rails.logger.info "error calling #{method_name} with #{params.join(', ')}; #{e.message} -- attempt ##{retry_count + 1}"
+        unless RETRY_IGNORE_LIST.include?(method_name)
+          retry_time = retry_count * RETRY_INTERVAL
+          sleep(retry_time)
+        end
+        execute_gcloud_method(method_name, retry_count + 1, *params)
       end
     else
-      Rails.logger.info "Retry count exceeded: #{@error}"
+      Rails.logger.info "Retry count exceeded calling #{method_name} with #{params.join(', ')}: #{@error}"
       raise RuntimeError.new "#{@error}"
     end
   end

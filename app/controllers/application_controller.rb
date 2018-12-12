@@ -34,6 +34,13 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # auth action for portal admins
+  def authenticate_curator
+    unless current_user.acts_as_curator?
+      redirect_to site_path, alert: 'You do not have permission to access that page.' and return
+    end
+  end
+
   # overriding default new_session_path since we aren't using database_authenticatable
   def new_session_path(scope)
     new_user_session_path

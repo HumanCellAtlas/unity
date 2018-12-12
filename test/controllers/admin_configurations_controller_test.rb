@@ -69,4 +69,11 @@ class AdminConfigurationsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to admin_configurations_url
     puts "#{File.basename(__FILE__)}: #{self.method_name} successful!"
   end
+
+  test "should manage curator role" do
+    puts "#{File.basename(__FILE__)}: #{self.method_name}"
+    curator = User.find_by(curator: true)
+    get edit_user_path(curator.id)
+    puts "#{File.basename(__FILE__)}: #{self.method_name} successful!"
+  end
 end

@@ -1,0 +1,41 @@
+<h1>Editing <em><%= @user.email %></em> roles</h1>
+
+<%= form_for(@user, url: update_user_path(@user.id), html: {class: 'form'}) do |f| %>
+  <% if @user.errors.any? %>
+    <div class="bs-callout bs-callout-danger">
+      <h4><%= pluralize(@user.errors.count, "error") %> prohibited this user from being saved:</h4>
+
+      <ul>
+        <% @user.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <%= f.hidden_field :id, value: @user.id %>
+  <div class="form-group row">
+    <div class="col-md-6">
+      <%= f.label :email %><br/>
+      <%= f.text_field :email, class: 'form-control', disabled: true %>
+    </div>
+    <div class="col-md-3">
+      <%= f.label :admin, "Admin Access <i class='fas fa-question-circle'></i>".html_safe, title: 'Grant administrative access.  Admins have access to all site functionality and can view all benchmarks.', data: {toggle: 'tooltip'} %><br/>
+      <%= f.select :admin, options_for_select([['Yes',1],['No',0]], @user.admin ? 1 : 0), {}, class: 'form-control' %>
+    </div>
+    <div class="col-md-3">
+      <%= f.label :curator, "Curator Access <i class='fas fa-question-circle'></i>".html_safe, title: "Grant access curator access (can manage reference analyses).  Curators do not have access to view user's benchmarks, or other admin functionality.", data: {toggle: 'tooltip'} %><br/>
+      <%= f.select :curator, options_for_select([['Yes',1],['No',0]], @user.curator ? 1 : 0), {}, class: 'form-control' %>
+    </div>
+  </div>
+  <div class="form-group row">
+    <div class="col-md-12">
+      <%= f.submit 'Update User', class: 'btn btn-lg btn-success', id: 'save-user' %>
+    </div>
+  </div>
+
+<% end %>
+<div class="row">
+  <div class="col-md-12">
+    <%= link_to "<span class='fas fa-chevron-left'></span> Back".html_safe, admin_configurations_path, class: 'btn btn-warning' %>
+  </div>
+</div>
