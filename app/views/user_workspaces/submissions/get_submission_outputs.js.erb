@@ -2,5 +2,6 @@ closeModalSpinner('#generic-modal-spinner', '#generic-modal', function () {
     $('#generic-update-target').html("<%= j render partial: '/layouts/generic_update_modal' %>");
     $('#generic-update-modal-title').html("Submission <%= params[:submission_id] %> Outputs");
     $('#generic-update-modal-body').html("<%= j render partial: '/user_workspaces/submissions/submission_outputs' %>");
+    $('#generic-update-modal-dialog').addClass('modal-lg');
     $("#generic-update-modal").modal("show");
 });

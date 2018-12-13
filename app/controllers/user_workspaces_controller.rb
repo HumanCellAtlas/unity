@@ -273,15 +273,15 @@ class UserWorkspacesController < ApplicationController
         workflow['outputs'].each do |key, value|
           if value.is_a?(Array)
             value.each do |val|
-              display_name = key + ': ' + val.split('/').last
+              display_name = val.split('/').last
               file_location = val.gsub(/gs\:\/\/#{@user_workspace.bucket_id}\//, '')
-              output = {display_name: display_name, file_location: file_location}
+              output = {display_name: display_name, file_location: file_location, tooltip: key}
               @outputs << output
             end
           else
-            display_name = key + ': ' + value.split('/').last
+            display_name = value.split('/').last
             file_location = value.gsub(/gs\:\/\/#{@user_workspace.bucket_id}\//, '')
-            output = {display_name: display_name, file_location: file_location}
+            output = {display_name: display_name, file_location: file_location, tooltip: key}
             @outputs << output
           end
 
