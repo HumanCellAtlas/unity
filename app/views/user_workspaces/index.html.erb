@@ -17,8 +17,13 @@
           <% @user_workspaces.each do |user_workspace| %>
             <tr>
               <td><%= link_to user_workspace.name, user_workspace_path(project: user_workspace.namespace, name: user_workspace.name), class: "view-#{user_workspace.name_as_id}" %></td>
-              <td><%= link_to "#{user_workspace.reference_analysis.analysis_wdl} <i class='fas fa-external-link-alt'></i>".html_safe,
+              <td>
+                <% if user_workspace.reference_analysis.present? %>
+                  <%= link_to "#{user_workspace.reference_analysis.analysis_wdl} <i class='fas fa-external-link-alt'></i>".html_safe,
                               user_workspace.reference_analysis.wdl_view_url(:analysis_wdl), target: :_blank %></td>
+                <% else %>
+                  <span class="badge badge-danger">Redacted</span>
+                <% end %>
               <td>
                 <% if user_workspace.user_analysis.present? %>
                   <%= link_to "#{user_workspace.user_analysis.full_name} <i class='fas fa-external-link-alt'></i>".html_safe,

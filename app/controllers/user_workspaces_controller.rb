@@ -339,7 +339,7 @@ class UserWorkspacesController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
   def set_user_workspace
     if params[:name].present? && params[:project].present?
-      project = Project.find_by(user_id: current_user.id, namespace: params[:project])
+      project = Project.find_by(namespace: params[:project])
       @user_workspace = UserWorkspace.find_by(name: params[:name], project_id: project.id)
     else
       @user_workspace = UserWorkspace.find(params[:id])
