@@ -11,7 +11,7 @@ class UserWorkspacesController < ApplicationController
   # GET /user_workspaces
   # GET /user_workspaces.json
   def index
-    @user_workspaces = UserWorkspace.viewable_by(current_user)
+    @user_workspaces = UserWorkspace.owned_by(current_user)
   end
 
   # GET /user_workspaces/1
@@ -270,11 +270,21 @@ class UserWorkspacesController < ApplicationController
       submission['workflows'].each do |workflow|
         workflow = user_client.get_workspace_submission_workflow(@user_workspace.namespace, @user_workspace.name,
                                                                  params[:submission_id], workflow['workflowId'])
-        workflow['outputs'].each do |output, file_url|
-          display_name = file_url.split('/').last
-          file_location = file_url.gsub(/gs\:\/\/#{@user_workspace.bucket_id}\//, '')
-          output = {display_name: display_name, file_location: file_location}
-          @outputs << output
+        workflow['outputs'].each do |key, value|
+          if value.is_a?(Array)
+            value.each do |val|
+              display_name = key + ': ' + val.split('/').last
+              file_location = val.gsub(/gs\:\/\/#{@user_workspace.bucket_id}\//, '')
+              output = {display_name: display_name, file_location: file_location}
+              @outputs << output
+            end
+          else
+            display_name = key + ': ' + value.split('/').last
+            file_location = value.gsub(/gs\:\/\/#{@user_workspace.bucket_id}\//, '')
+            output = {display_name: display_name, file_location: file_location}
+            @outputs << output
+          end
+
         end
       end
       render '/user_workspaces/submissions/get_submission_outputs'
