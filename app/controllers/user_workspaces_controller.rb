@@ -340,12 +340,14 @@ class UserWorkspacesController < ApplicationController
   def set_user_workspace
     if params[:name].present? && params[:project].present?
       project = Project.find_by(user_id: current_user.id, namespace: params[:project])
-      @user_workspace = UserWorkspace.find_by(name: params[:name], project_id: project.id, user_id: current_user.id)
+      @user_workspace = UserWorkspace.find_by(name: params[:name], project_id: project.id)
     else
       @user_workspace = UserWorkspace.find(params[:id])
     end
     if @user_workspace.nil?
       redirect_to user_workspaces_path, alert: 'The requested workspace was not found' and return
+    elsif !current_user.admin? && @user_workspace.user_id != current_user.id
+      redirect_to user_workspaces_path, alert: 'You do not have permission to perform that action' and return
     end
   end
 
