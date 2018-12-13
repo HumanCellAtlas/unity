@@ -26,7 +26,7 @@ class SiteController < ApplicationController
       end
     end
 
-    @user_workspaces = UserWorkspace.owned_by(current_user)
+    @user_workspaces = UserWorkspace.viewable_by(current_user)
   end
 
   def profile

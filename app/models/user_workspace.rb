@@ -39,6 +39,14 @@ class UserWorkspace < ApplicationRecord
     end
   end
 
+  def self.viewable_by(user)
+    if user.present?
+      user.admin? ? self.all : self.owned_by(user)
+    else
+      []
+    end
+  end
+
   # generate a default name based off of reference analysis name on initialization
   def default_name
     self.reference_analysis.extract_wdl_keys(:analysis_wdl).join('-') + "-#{ValidationTools.random_alphanumeric}"

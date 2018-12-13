@@ -11,7 +11,7 @@ class UserWorkspacesController < ApplicationController
   # GET /user_workspaces
   # GET /user_workspaces.json
   def index
-    @user_workspaces = UserWorkspace.owned_by(current_user)
+    @user_workspaces = UserWorkspace.viewable_by(current_user)
   end
 
   # GET /user_workspaces/1
