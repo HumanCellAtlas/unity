@@ -19,11 +19,11 @@
       <%= f.text_field :email, class: 'form-control', disabled: true %>
     </div>
     <div class="col-md-3">
-      <%= f.label :admin, "Admin Access <i class='fas fa-question-circle'></i>".html_safe, title: 'Grant administrative access.  Admins have access to all site functionality and can view all benchmarks.', data: {toggle: 'tooltip'} %><br/>
+      <%= f.label :admin, "Admin Access <i class='fas fa-question-circle'></i>".html_safe, title: 'Grant administrative access.  Admins have access to all site functionality and can manage user permissions.', data: {toggle: 'tooltip'} %><br/>
       <%= f.select :admin, options_for_select([['Yes',1],['No',0]], @user.admin ? 1 : 0), {}, class: 'form-control' %>
     </div>
     <div class="col-md-3">
-      <%= f.label :curator, "Curator Access <i class='fas fa-question-circle'></i>".html_safe, title: "Grant access curator access (can manage reference analyses).  Curators do not have access to view user's benchmarks, or other admin functionality.", data: {toggle: 'tooltip'} %><br/>
+      <%= f.label :curator, "Curator Access <i class='fas fa-question-circle'></i>".html_safe, title: "Grant access curator access (can manage reference analyses).  Curators do not have access to admin functionality.", data: {toggle: 'tooltip'} %><br/>
       <%= f.select :curator, options_for_select([['Yes',1],['No',0]], @user.curator ? 1 : 0), {}, class: 'form-control' %>
     </div>
   </div>
