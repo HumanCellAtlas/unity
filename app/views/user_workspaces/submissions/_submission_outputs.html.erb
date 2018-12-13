@@ -3,6 +3,7 @@
       <%= link_to output[:display_name],
                   download_benchmark_output_path(project: @user_workspace.namespace, name: @user_workspace.name,
                                                  filename: output[:file_location]),
-                  class: 'btn btn-outline-primary submission-output' %>
+                  class: 'btn btn-outline-primary submission-output', title: output[:tooltip], data: {toggle: 'tooltip',
+          template: '<div class="tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner submission-output-tooltip-inner"></div></div>'} %><br />
     <% end %>
 </p>
