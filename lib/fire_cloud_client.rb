@@ -236,7 +236,9 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
     end
     # set default headers
     headers = {
-        'Authorization' => "Bearer #{self.access_token['access_token']}"
+        'Authorization' => "Bearer #{self.access_token['access_token']}",
+        'x-app-id' => 'unity',
+        'x-domain-id' => "#{ENV['HOSTNAME']}"
     }
     # if not uploading a file, set the content_type to application/json
     if !request_opts[:file_upload]
