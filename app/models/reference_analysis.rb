@@ -11,9 +11,11 @@ class ReferenceAnalysis < ApplicationRecord
                       with: ALPHANUMERIC_EXTENDED, message: ALPHANUMERIC_EXTENDED_MESSAGE
 
   validate :reference_workspace_exists, on: :create, if: proc {|attributes| attributes.firecloud_project.present? && attributes.firecloud_workspace.present?}
-  validate :grant_read_access_to_user_group, on: :create
+  validate :set_reference_workspace_acls, on: :create
   validate :validate_wdl_accessibility, if: proc {|attributes| attributes.analysis_wdl.present? && attributes.benchmark_wdl.present? && attributes.orchestration_wdl.present?}
   validate :validate_wdl_configurations, if: proc {|attributes| attributes.orchestration_wdl.present?}
+
+  belongs_to :user
 
   has_many :reference_analysis_data, dependent: :delete_all
   has_many :reference_analysis_options, dependent: :delete_all
@@ -136,8 +138,17 @@ class ReferenceAnalysis < ApplicationRecord
     end
   end
 
-  def grant_read_access_to_user_group
+  # set ACLs on reference workspace to allow service account & user group access
+  def set_reference_workspace_acls
     begin
+      # grant write access to service account, using user credentials
+      user_client = FireCloudClient.new(self.user, self.firecloud_project)
+      service_account_acl = user_client.create_workspace_acl(ApplicationController.fire_cloud_client.issuer, 'WRITER', true, false)
+      service_account_share = user_client.update_workspace_acl(self.firecloud_project, self.firecloud_workspace, service_account_acl)
+      added = service_account_share["usersUpdated"].first
+      unless added['email'] == ApplicationController.fire_cloud_client.issuer && added['accessLevel'] == 'WRITER'
+        errors.add(:base, "Adding write access to Unity service account failed; please try again.")
+      end
       user_group = AdminConfiguration.find_by_config_type('Unity FireCloud User Group')
       unless user_group.present?
         errors.add(:base, "You must first create a user group with which to grant access to reference workspaces.  Please create and register one now.")

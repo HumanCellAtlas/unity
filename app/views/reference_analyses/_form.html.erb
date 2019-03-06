@@ -10,6 +10,7 @@
       </ul>
     </div>
   <% end %>
+  <%= form.hidden_tag :user_id, reference_analysis.new_record? ? current_user.id : reference_analysis.user_id %>
 
   <div class="form-group row">
     <div class="col-sm">
