@@ -15,7 +15,7 @@ class ReferenceAnalysis < ApplicationRecord
   validate :validate_wdl_accessibility, if: proc {|attributes| attributes.analysis_wdl.present? && attributes.benchmark_wdl.present? && attributes.orchestration_wdl.present?}
   validate :validate_wdl_configurations, if: proc {|attributes| attributes.orchestration_wdl.present?}
 
-  belongs_to :user
+  belongs_to :user, optional: true
 
   has_many :reference_analysis_data, dependent: :delete_all
   has_many :reference_analysis_options, dependent: :delete_all
@@ -127,6 +127,11 @@ class ReferenceAnalysis < ApplicationRecord
     self.send(wdl_attr.to_sym).split('/')
   end
 
+  # show user email, if present
+  def user_email
+    self.user.present? ? self.user.email : 'N/A'
+  end
+
   private
 
   def reference_workspace_exists
@@ -141,13 +146,15 @@ class ReferenceAnalysis < ApplicationRecord
   # set ACLs on reference workspace to allow service account & user group access
   def set_reference_workspace_acls
     begin
-      # grant write access to service account, using user credentials
-      user_client = FireCloudClient.new(self.user, self.firecloud_project)
-      service_account_acl = user_client.create_workspace_acl(ApplicationController.fire_cloud_client.issuer, 'WRITER', true, false)
-      service_account_share = user_client.update_workspace_acl(self.firecloud_project, self.firecloud_workspace, service_account_acl)
-      added = service_account_share["usersUpdated"].first
-      unless added['email'] == ApplicationController.fire_cloud_client.issuer && added['accessLevel'] == 'WRITER'
-        errors.add(:base, "Adding write access to Unity service account failed; please try again.")
+      # grant write access to service account, using user credentials, if present (only blank in test)
+      if self.user.present?
+        user_client = FireCloudClient.new(self.user, self.firecloud_project)
+        service_account_acl = user_client.create_workspace_acl(ApplicationController.fire_cloud_client.issuer, 'WRITER', true, false)
+        service_account_share = user_client.update_workspace_acl(self.firecloud_project, self.firecloud_workspace, service_account_acl)
+        added = service_account_share["usersUpdated"].first
+        unless added['email'] == ApplicationController.fire_cloud_client.issuer && added['accessLevel'] == 'WRITER'
+          errors.add(:base, "Adding write access to Unity service account failed; please try again.")
+        end
       end
       user_group = AdminConfiguration.find_by_config_type('Unity FireCloud User Group')
       unless user_group.present?
