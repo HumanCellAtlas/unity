@@ -7,6 +7,7 @@
         <thead>
           <tr>
             <th>Firecloud project/workspace</th>
+            <th>Added by</th>
             <th>WDLs</th>
             <th>Actions</th>
           </tr>
@@ -18,6 +19,9 @@
               <td>
                 <%= link_to "#{reference_analysis.display_name} <i class='fas fa-external-link-alt'></i>".html_safe,
                               firecloud_link_for(reference_analysis.display_name) %>
+              </td>
+              <td>
+                <%= reference_analysis.user_email %>
               </td>
               <td>
                 <span class="badge badge-dark">Analysis</span> <span class="badge badge-secondary"><%= reference_analysis.analysis_wdl %></span><br />

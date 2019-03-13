@@ -23,7 +23,7 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   # constant used for incremental backoffs on retries (in seconds); ignored when running unit/integration test suite
   RETRY_INTERVAL = Rails.env == 'test' ? 0 : 15
   # List of URLs/Method names to ignore incremental backoffs on (in cases of UI blocking)
-  RETRY_IGNORE_LIST = ["#{BASE_URL}/register", :generate_signed_url, :generate_api_url]
+  RETRY_BACKOFF_BLACKLIST = ["#{BASE_URL}/register", :generate_signed_url, :generate_api_url]
   # location of Google service account JSON (must be absolute path to file)
   SERVICE_ACCOUNT_KEY = !ENV['SERVICE_ACCOUNT_KEY'].blank? ? File.absolute_path(ENV['SERVICE_ACCOUNT_KEY']) : ''
   # Permission values allowed for FireCloud workspace ACLs
@@ -246,37 +246,28 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
     end
 
     # process request
-    if retry_count < MAX_RETRY_COUNT
-      begin
-        @obj = RestClient::Request.execute(method: http_method, url: path, payload: payload, headers: headers)
-        # handle response codes as necessary
-        if ok?(@obj.code) && !@obj.body.blank?
-          begin
-            return JSON.parse(@obj.body)
-          rescue JSON::ParserError => e
-            return @obj.body
-          end
-        elsif ok?(@obj.code) && @obj.body.blank?
-          return true
-        else
-          Rails.logger.info "Unexpected response #{@obj.code}, not sure what to do here..."
-          @obj.message
-        end
-      rescue RestClient::Exception => e
-        context = " encountered when requesting '#{path}', attempt ##{retry_count + 1}"
-        log_message = e.message + context
-        Rails.logger.error log_message
-        @error = e
-        unless RETRY_IGNORE_LIST.include?(path)
-          retry_time = retry_count * RETRY_INTERVAL
-          sleep(retry_time)
-        end
-        process_firecloud_request(http_method, path, payload, opts, retry_count + 1)
+    # process request
+    begin
+      response = RestClient::Request.execute(method: http_method, url: path, payload: payload, headers: headers)
+      # handle response using helper
+      handle_response(response)
+    rescue RestClient::Exception => e
+      current_retry = retry_count + 1
+      context = " encountered when requesting '#{path}', attempt ##{current_retry}"
+      log_message = e.message + ': ' + e.http_body + '; ' + context
+      Rails.logger.error log_message
+      retry_time = retry_count * RETRY_INTERVAL
+      sleep(retry_time) unless RETRY_BACKOFF_BLACKLIST.include?(path) # only sleep if non-blocking
+      # only retry if status code indicates a possible temporary error, and we are under the retry limit and
+      # not calling a method that is blocked from retries
+      if should_retry?(e.http_code) && retry_count < MAX_RETRY_COUNT && !ERROR_IGNORE_LIST.include?(path)
+        process_firecloud_request(http_method, path, payload, opts, current_retry)
+      else
+        # we have reached our retry limit or the response code indicates we should not retry
+        error_message = parse_error_message(e)
+        Rails.logger.error "Retry count exceeded when requesting '#{path}' - #{error_message}"
+        raise RuntimeError.new(error_message)
       end
-    else
-      error_message = parse_error_message(@error)
-      Rails.logger.error "Retry count exceeded when requesting '#{path}' - #{error_message}"
-      raise RuntimeError.new(error_message)
     end
   end
 
@@ -1473,21 +1464,23 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   #     +Google::Cloud::Storage::FileList+, +Boolean+, +File+, or +String+
 
   def execute_gcloud_method(method_name, retry_count=0, *params)
-    if retry_count < MAX_RETRY_COUNT
-      begin
-        self.send(method_name, *params)
-      rescue => e
-        @error = e.message
-        Rails.logger.info "error calling #{method_name} with #{params.join(', ')}; #{e.message} -- attempt ##{retry_count + 1}"
-        unless RETRY_IGNORE_LIST.include?(method_name)
-          retry_time = retry_count * RETRY_INTERVAL
-          sleep(retry_time)
-        end
-        execute_gcloud_method(method_name, retry_count + 1, *params)
+    begin
+      self.send(method_name, *params)
+    rescue => e
+      current_retry = retry_count + 1
+      Rails.logger.info "error calling #{method_name} with #{params.join(', ')}; #{e.message} -- attempt ##{current_retry}"
+      retry_time = retry_count * RETRY_INTERVAL
+      sleep(retry_time) unless RETRY_BACKOFF_BLACKLIST.include?(method_name)
+      # only retry if status code indicates a possible temporary error, and we are under the retry limit and
+      # not calling a method that is blocked from retries
+      status_code = e.respond_to?(:code) ? e.code : nil
+      if should_retry?(status_code) && retry_count < MAX_RETRY_COUNT && !ERROR_IGNORE_LIST.include?(method_name)
+        execute_gcloud_method(method_name, current_retry, *params)
+      else
+        # we have reached our retry limit or the response code indicates we should not retry
+        Rails.logger.info "Retry count exceeded calling #{method_name} with #{params.join(', ')}: #{e.message}"
+        raise RuntimeError.new "#{e.message}"
       end
-    else
-      Rails.logger.info "Retry count exceeded calling #{method_name} with #{params.join(', ')}: #{@error}"
-      raise RuntimeError.new "#{@error}"
     end
   end
 
@@ -1739,6 +1732,66 @@ class FireCloudClient < Struct.new(:user, :project, :access_token, :api_root, :s
   def merge_query_options(opts)
     # return nil if opts is empty, else concat
     opts.blank? ? nil : '?' + opts.to_a.map {|k,v| "#{k}=#{v}"}.join("&")
+  end
+
+  # determine if request should be retried based on response code
+  #
+  # * *params*
+  #   - +code+ (Integer) => integer HTTP response code
+  #
+  # * *return*
+  #   - +Boolean+ of whether or not response code indicates a retry should be executed
+  def should_retry?(code)
+    # if code is nil, we're not sure so retry anyway
+    code.nil? || [502, 503].include?(code)
+  end
+
+  # handle a RestClient::Response object
+  #
+  # * *params*
+  #   - +response+ (String) => an RestClient response object
+  #
+  # * *return*
+  #   - +Hash+ if response body is JSON, or +String+ of original body
+  def handle_response(response)
+    begin
+      if ok?(response.code)
+        if response.body.present?
+          parse_response_body(response.body)
+        else
+          true # blank body
+        end
+      else
+        Rails.logger.info "Unexpected response #{response.code}, not sure what to do here..."
+        response.message
+      end
+    rescue => e
+      # don't report, just return
+      response.message
+    end
+  end
+
+  # parse a response body based on the content
+  #
+  # * *params*
+  #   - +response_body+ (String) => an RestClient response body
+  #
+  # * *return*
+  #   - +Hash+ if response body is JSON, or +String+ of original body
+  def parse_response_body(response_body)
+    is_json?(response_body) ? JSON.parse(response_body) : response_body
+  end
+
+  # determine if a response body is parseable as JSON
+  #
+  # * *params*
+  #   - +content+ (String) => an RestClient response body
+  #
+  # * *return*
+  #   - +Boolean+ indication if content is JSON
+  def is_json?(content)
+    chars = [content[0], content[content.size - 1]]
+    chars == %w({ }) || chars == %w([ ])
   end
 
   # return a more user-friendly error message

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_12_11_185822) do
+ActiveRecord::Schema.define(version: 2019_03_13_174114) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "hstore"
@@ -64,6 +64,7 @@ ActiveRecord::Schema.define(version: 2018_12_11_185822) do
     t.string "orchestration_wdl"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigserial "user_id", null: false
   end
 
   create_table "reference_analysis_data", force: :cascade do |t|
