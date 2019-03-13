@@ -94,7 +94,6 @@ class UiRegressionSuite < Test::Unit::TestCase
     @driver = Selenium::WebDriver::Driver.for :chrome, driver_path: $chromedriver_dir,
                                               options: options, desired_capabilities: caps,
                                               driver_opts: {log_path: '/tmp/webdriver.log'}
-    @driver.manage.window.maximize
     @base_url = $portal_url
     @accept_next_alert = true
     @driver.manage.timeouts.implicit_wait = 15
@@ -172,6 +171,8 @@ class UiRegressionSuite < Test::Unit::TestCase
     project_dropdown = @driver.find_element(:id, 'user_workspace_project_id')
     selected_project = project_dropdown.text
     omit_if selected_project.empty?, "#{$test_email} has no available projects" do
+      edit_workspace_name = @driver.find_element(:id, 'edit-workspace-name')
+      edit_workspace_name.click
       name_field = @driver.find_element(:id, 'user_workspace_name')
       name_field.clear
       workspace_name = "test-benchmark-#{$random_seed}"
@@ -297,6 +298,7 @@ class UiRegressionSuite < Test::Unit::TestCase
     wait_until_page_loads(workspace_url)
 
     # wait for submission to complete
+    scroll_to(:bottom)
     submissions_table = @driver.find_element(:id, 'submissions-table')
     submissions = submissions_table.find_element(:tag_name, 'tbody').find_elements(:tag_name, 'tr')
     completed_submission = submissions.find {|sub|
@@ -308,7 +310,7 @@ class UiRegressionSuite < Test::Unit::TestCase
       omit_if i >= 60, 'Skipping test; waited 5 minutes but no submissions complete yet.'
 
       $verbose ? puts("no completed submissions, refresh try ##{i}") : nil
-      refresh_btn = @driver.find_element(:id, 'refresh-submissions-table-top')
+      refresh_btn = @driver.find_element(:id, 'refresh-submissions-table')
       refresh_btn.click
       sleep 5
       submissions_table = @driver.find_element(:id, 'submissions-table')
@@ -327,7 +329,7 @@ class UiRegressionSuite < Test::Unit::TestCase
     output_file = submission_outputs.sample
     output_file.click
     @wait.until { !@driver.current_url.include?(@base_url) }
-    assert @driver.current_url.include?('apidata.googleusercontent.com'), "Did not load submission output file"
+    assert @driver.current_url.include?('storage.googleapis.com'), "Did not load submission output file"
     assert @driver.find_element(:tag_name, 'body').text.include?('Wrote qc matrix'), "Did not find expected string in file contents"
 
     puts "#{File.basename(__FILE__)}: '#{self.method_name}' successful!"
@@ -352,7 +354,7 @@ class UiRegressionSuite < Test::Unit::TestCase
     wait_until_page_loads(workspace_url)
 
     submissions_table = @driver.find_element(:id, 'submissions-table')
-    submissions = submissions_table.find_element(:tag_name, 'tbody').find_elements(:tag_name, 'tr')
+    submissions = submissions_table.find_element(:tag_name, 'tbody').find_elements(:class, 'benchmark-submission-entry')
 
     # delete a submission
     delete_btns = @driver.find_elements(:class, 'delete-submission-files')
@@ -360,7 +362,8 @@ class UiRegressionSuite < Test::Unit::TestCase
     btn.click
     accept_alert
     close_modal('generic-update-modal')
-    updated_submissions = submissions_table.find_element(:tag_name, 'tbody').find_elements(:tag_name, 'tr')
+    sleep(3)
+    updated_submissions = submissions_table.find_element(:tag_name, 'tbody').find_elements(:class, 'benchmark-submission-entry')
     assert updated_submissions.size == submissions.size - 1, "Did not delete workspace submission, expected #{submissions.size - 1} remaining submission but found #{updated_submissions.size}"
 
     puts "#{File.basename(__FILE__)}: '#{self.method_name}' successful!"
@@ -387,7 +390,7 @@ class UiRegressionSuite < Test::Unit::TestCase
     # open FC workspace
     remote_workspace_btn = @driver.find_element(:id, 'view-user-workspace-remote')
     remote_workspace_btn.click
-    @wait.until {@driver.current_url.starts_with?('https://portal.firecloud.org')}
+    @wait.until {@driver.current_url.start_with?('https://portal.firecloud.org')}
     fc_workspace_url = @driver.current_url
     @driver.get @base_url + '/my-benchmarks'
     delete_btn = @driver.find_element(:class, "delete-user-workspace-#{workspace_name}")

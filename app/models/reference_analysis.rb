@@ -10,10 +10,10 @@ class ReferenceAnalysis < ApplicationRecord
   validates_format_of :firecloud_project, :firecloud_workspace, :analysis_wdl, :benchmark_wdl, :orchestration_wdl,
                       with: ALPHANUMERIC_EXTENDED, message: ALPHANUMERIC_EXTENDED_MESSAGE
 
-  validate :reference_workspace_exists, on: :create, if: proc {|attributes| attributes.firecloud_project.present? && attributes.firecloud_workspace.present?}
   validate :set_reference_workspace_acls, on: :create
   validate :validate_wdl_accessibility, if: proc {|attributes| attributes.analysis_wdl.present? && attributes.benchmark_wdl.present? && attributes.orchestration_wdl.present?}
   validate :validate_wdl_configurations, if: proc {|attributes| attributes.orchestration_wdl.present?}
+  validate :reference_workspace_exists, on: :create, if: proc {|attributes| attributes.firecloud_project.present? && attributes.firecloud_workspace.present?}
 
   belongs_to :user, optional: true
 
