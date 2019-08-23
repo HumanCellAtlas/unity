@@ -39,7 +39,7 @@
             </div>
           </li>
         <% else %>
-          <li class="nav-item"><%= link_to "<i class='fas fa-sign-in-alt'></i> Sign In".html_safe, user_google_oauth2_omniauth_authorize_path, id: 'login-nav' %></li>
+          <li class="nav-item"><%= link_to "<i class='fas fa-sign-in-alt'></i> Sign In".html_safe, user_google_oauth2_omniauth_authorize_path, method: :post, id: 'login-nav' %></li>
         <% end %>
       </ul>
     </div>
