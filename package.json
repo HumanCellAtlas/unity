@@ -2,7 +2,7 @@
   "name": "unity_benchmark_service",
   "private": true,
   "dependencies": {
-    "@rails/webpacker": "4.0.7",
+    "@rails/webpacker": "4.1.0",
     "core-js": "3",
     "jquery": "^3.4.0",
     "spin.js": "^4.0.0"
