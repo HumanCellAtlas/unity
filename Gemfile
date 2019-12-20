@@ -50,7 +50,7 @@ end
 
 group :test do
   # Adds support for Capybara system testing and selenium driver
-  gem 'capybara', '>= 3.14.0', '< 4.0'
+  gem 'capybara', '>= 3.28.0', '< 4.0'
   gem 'selenium-webdriver', '>= 3.141.0'
   # Easy installation and use of chromedriver to run system tests with Chrome
   gem 'chromedriver-helper', '>= 2.1.0'
@@ -58,9 +58,9 @@ end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
-gem 'devise', '>= 4.6.1'
-gem 'omniauth-google-oauth2'
-gem 'omniauth-rails_csrf_protection'
+gem 'devise', '>= 4.7.1'
+gem 'omniauth-google-oauth2', '>= 0.8.0'
+gem 'omniauth-rails_csrf_protection', '>= 0.1.2'
 gem 'googleauth'
 gem 'google-cloud-storage', require: 'google/cloud/storage'
 gem 'bootstrap', '>= 4.3.1'
@@ -68,6 +68,6 @@ gem 'font-awesome-sass', '~> 5.0.9'
 gem 'delayed_job'
 gem 'rest-client'
 gem 'parallel'
-gem 'webpacker', '~> 4.x'
+gem 'webpacker', '~> 4.0', '>= 4.0.7'
 gem 'attr_encrypted'
 gem 'nested_form'
